@@ -1,0 +1,260 @@
+---
+import { homeSections } from '../i18n/nav';
+
+const sections: readonly string[] = homeSections;
+---
+
+<script is:inline define:vars={{ sections }}>
+  (() => {
+    const root = document.documentElement;
+    const header = document.querySelector('.site-header');
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+    // Theme: dark until the visitor picks light; the choice is saved and the OS setting is not followed.
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    const isDark = () => root.dataset.theme !== 'light';
+    const syncThemeButtons = () => {
+      document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+        button.setAttribute('aria-pressed', String(isDark()));
+      });
+    };
+    // Browser bar colour follows the page background of the theme in use.
+    const syncThemeColor = () => {
+      const bg = getComputedStyle(root).getPropertyValue('--bg').trim();
+      if (themeColor && bg) themeColor.setAttribute('content', bg);
+    };
+    const toggleTheme = () => {
+      const next = isDark() ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem('theme', next);
+      } catch (_) {}
+      syncThemeButtons();
+      syncThemeColor();
+    };
+    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+      button.addEventListener('click', toggleTheme);
+    });
+    syncThemeButtons();
+    syncThemeColor();
+
+    // Language switch keeps a home section anchor from the current address.
+    const langLinks = Array.from(document.querySelectorAll('[data-lang-switch]'));
+    const keptAnchor = (link) => {
+      const hash = location.hash.slice(1);
+      return link.hasAttribute('data-keep-anchor') && sections.includes(hash) ? location.hash : '';
+    };
+    const langTarget = () => {
+      const link = langLinks[0];
+      return link ? link.getAttribute('href') + keptAnchor(link) : '';
+    };
+    langLinks.forEach((link) => {
+      link.addEventListener('click', (event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        const anchor = keptAnchor(link);
+        if (!anchor) return;
+        event.preventDefault();
+        location.assign(link.getAttribute('href') + anchor);
+      });
+    });
+
+    // Mobile menu (details element): scrim, scroll lock, focus loop, auto close.
+    const menu = document.querySelector('[data-mnav]');
+    const summary = menu && menu.querySelector('summary');
+    const panel = menu && menu.querySelector('[data-menu-panel]');
+    const menuScrim = menu && menu.querySelector('[data-menu-scrim]');
+    const isMenuOpen = () => Boolean(menu && menu.open);
+    const applyMenuState = (open) => {
+      root.classList.toggle('menu-lock', open);
+      if (header) header.classList.toggle('menu-open', open);
+      if (menuScrim) menuScrim.hidden = !open;
+    };
+    const closeMenu = (returnFocus) => {
+      if (!isMenuOpen()) return;
+      menu.open = false;
+      applyMenuState(false);
+      if (returnFocus && summary) summary.focus();
+    };
+    if (menu && summary && panel) {
+      const focusables = () =>
+        [summary, ...panel.querySelectorAll('a[href], button')].filter((el) => el.getClientRects().length > 0);
+      menu.addEventListener('toggle', () => {
+        applyMenuState(menu.open);
+        const first = panel.querySelector('.menu-link');
+        if (menu.open && first) first.focus();
+      });
+      if (menuScrim) menuScrim.addEventListener('click', () => closeMenu(true));
+      panel.querySelectorAll('.menu-link').forEach((link) => {
+        link.addEventListener('click', () => closeMenu(false));
+      });
+      document.addEventListener('keydown', (event) => {
+        if (!isMenuOpen()) return;
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          closeMenu(true);
+          return;
+        }
+        if (event.key !== 'Tab') return;
+        const items = focusables();
+        const first = items[0];
+        const last = items[items.length - 1];
+        const current = document.activeElement;
+        const inside = menu.contains(current);
+        if (event.shiftKey && (current === first || !inside)) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && (current === last || !inside)) {
+          event.preventDefault();
+          first.focus();
+        }
+      });
+      // Wide enough for the full nav: close and move focus there if it was in the menu.
+      matchMedia('(min-width: 960px)').addEventListener('change', (event) => {
+        if (!event.matches || !isMenuOpen()) return;
+        const current = document.activeElement;
+        const hadFocus = !current || current === document.body || menu.contains(current);
+        closeMenu(false);
+        const target = document.querySelector('.site-nav .nav-link');
+        if (hadFocus && target) target.focus();
+      });
+    }
+
+    // Section in view on the home page; pages with a fixed current item are skipped.
+    const navLinks = Array.from(document.querySelectorAll('.site-nav [data-nav]'));
+    const blocks = sections.map((id) => document.querySelector(`section#${id}`)).filter(Boolean);
+    if (blocks.length && !document.querySelector('.site-nav [aria-current="page"]')) {
+      const hero = document.getElementById('top');
+      const tracked = hero ? [hero, ...blocks] : blocks;
+      let frame = 0;
+      const markCurrent = () => {
+        frame = 0;
+        const navBottom = header ? header.getBoundingClientRect().bottom : 0;
+        let best = null;
+        let bestSize = 0;
+        tracked.forEach((el) => {
+          const rect = el.getBoundingClientRect();
+          const size = Math.min(rect.bottom, innerHeight) - Math.max(rect.top, navBottom);
+          if (size > bestSize) {
+            bestSize = size;
+            best = el;
+          }
+        });
+        const key = best && best !== hero && best.id !== 'contact' ? best.id : null;
+        navLinks.forEach((link) => {
+          if (link.dataset.nav === key) link.setAttribute('aria-current', 'location');
+          else link.removeAttribute('aria-current');
+        });
+      };
+      const schedule = () => {
+        if (!frame) frame = requestAnimationFrame(markCurrent);
+      };
+      addEventListener('scroll', schedule, { passive: true });
+      addEventListener('resize', schedule);
+      markCurrent();
+    }
+
+    // Reveal on scroll: only elements that start below the fold wait, so content shows if this fails.
+    const reveals = Array.from(document.querySelectorAll('.reveal'));
+    if ('IntersectionObserver' in window && !reduceMotion.matches && reveals.length) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          let order = 0;
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const el = entry.target;
+            el.style.transitionDelay = `${Math.min(order, 5) * 60}ms`;
+            order += 1;
+            el.addEventListener('transitionend', () => el.style.removeProperty('transition-delay'), { once: true });
+            el.classList.remove('reveal-wait');
+            observer.unobserve(el);
+          });
+        },
+        { threshold: 0.15 },
+      );
+      reveals.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < innerHeight && rect.bottom > 0) return;
+        el.classList.add('reveal-wait');
+        observer.observe(el);
+      });
+      reduceMotion.addEventListener('change', (event) => {
+        if (!event.matches) return;
+        document.querySelectorAll('.reveal-wait').forEach((el) => {
+          el.classList.remove('reveal-wait');
+          observer.unobserve(el);
+        });
+      });
+    }
+
+    // Effects ([data-fx]): wait (.fx-wait) until on screen, then run once (.fx-run); .fx-on while on screen with the tab
+    // visible, so the CSS pauses them otherwise. Reduced motion or no observer: no class, the static final state stays.
+    const effects = Array.from(document.querySelectorAll('[data-fx]'));
+    if ('IntersectionObserver' in window && !reduceMotion.matches && effects.length) {
+      const onScreen = new Set();
+      const syncEffect = (el) => el.classList.toggle('fx-on', onScreen.has(el) && !document.hidden);
+      const fxObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const el = entry.target;
+            if (entry.isIntersecting) {
+              onScreen.add(el);
+              el.classList.replace('fx-wait', 'fx-run');
+            } else {
+              onScreen.delete(el);
+            }
+            syncEffect(el);
+          });
+        },
+        { rootMargin: '0px 0px -15% 0px' },
+      );
+      effects.forEach((el) => {
+        el.classList.add('fx-wait');
+        fxObserver.observe(el);
+      });
+      document.addEventListener('visibilitychange', () => effects.forEach(syncEffect));
+      reduceMotion.addEventListener('change', (event) => {
+        if (!event.matches) return;
+        fxObserver.disconnect();
+        effects.forEach((el) => el.classList.remove('fx-wait', 'fx-run', 'fx-on'));
+      });
+    }
+
+    // Spotlight follows the pointer on glass cards.
+    if (matchMedia('(hover: hover) and (pointer: fine)').matches && !reduceMotion.matches) {
+      document.addEventListener(
+        'pointermove',
+        (event) => {
+          const card = event.target instanceof Element ? event.target.closest('.card.spot') : null;
+          if (!card) return;
+          const rect = card.getBoundingClientRect();
+          card.style.setProperty('--mx', `${event.clientX - rect.left}px`);
+          card.style.setProperty('--my', `${event.clientY - rect.top}px`);
+        },
+        { passive: true },
+      );
+    }
+
+    // Page glow of the dark theme follows the pointer: --mx/--my on <html>, at most once per frame.
+    const finePointer = matchMedia('(pointer: fine)');
+    let glowFrame = 0;
+    let glowX = 0;
+    let glowY = 0;
+    const moveGlow = () => {
+      glowFrame = 0;
+      root.style.setProperty('--mx', `${glowX}px`);
+      root.style.setProperty('--my', `${glowY}px`);
+    };
+    document.addEventListener(
+      'pointermove',
+      (event) => {
+        if (!finePointer.matches || reduceMotion.matches || !isDark()) return;
+        glowX = event.clientX;
+        glowY = event.clientY;
+        if (!glowFrame) glowFrame = requestAnimationFrame(moveGlow);
+      },
+      { passive: true },
+    );
+
+    window.__site = { toggleTheme, isDark, langTarget, isMenuOpen, closeMenu };
+  })();
+</script>

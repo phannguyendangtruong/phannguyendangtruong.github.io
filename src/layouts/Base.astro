@@ -1,0 +1,93 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
+import '../styles/global.css';
+import CommandPalette from '../components/CommandPalette.astro';
+import SeoHead from '../components/SeoHead.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteScripts from '../components/SiteScripts.astro';
+import { validateContent } from '../data/validate';
+import { tr, ui, type Lang } from '../i18n/ui';
+
+validateContent();
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  /** Path of this page without the language prefix, e.g. "/resume/". */
+  path: string;
+  /** Nav item marked as the current page (case study: projects, résumé: resume). */
+  current?: 'projects' | 'resume';
+  /** 'minimal' is the reduced frame of the 404 page. */
+  variant?: 'full' | 'minimal';
+  /** Share image under BASE_URL; null or missing uses the default share image from the data. */
+  ogImage?: string | null;
+  ogImageAlt?: string;
+  noindex?: boolean;
+}
+
+const {
+  lang,
+  title,
+  description,
+  path,
+  current,
+  variant = 'full',
+  ogImage,
+  ogImageAlt,
+  noindex = false,
+} = Astro.props;
+const minimal = variant === 'minimal';
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SeoHead
+      lang={lang}
+      title={title}
+      description={description}
+      path={path}
+      ogImage={ogImage}
+      ogImageAlt={ogImageAlt}
+      noindex={noindex}
+    />
+    <meta name="theme-color" content="#070b14" />
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        root.classList.add('js');
+        let saved = null;
+        try {
+          saved = localStorage.getItem('theme');
+        } catch (_) {}
+        // Dark unless the visitor picked light before; the OS setting is not followed.
+        root.dataset.theme = saved === 'light' ? 'light' : 'dark';
+        const platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
+        if (/Mac|iPhone|iPad|iPod/.test(platform)) root.dataset.os = 'mac';
+      })();
+    </script>
+  </head>
+  <body>
+    {
+      minimal ? (
+        <a class="skip-link" href="#main">
+          {ui.skipToContent.en} · <span lang="vi">{ui.skipToContent.vi}</span>
+        </a>
+      ) : (
+        <a class="skip-link" href="#main">{tr('skipToContent', lang)}</a>
+      )
+    }
+    <SiteHeader lang={lang} path={path} current={current} variant={variant} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <SiteFooter lang={lang} variant={variant} />
+    {!minimal && <CommandPalette lang={lang} path={path} />}
+    <SiteScripts />
+  </body>
+</html>

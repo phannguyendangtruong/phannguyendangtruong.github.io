@@ -1,0 +1,43 @@
+---
+import { experienceNewestFirst } from '../data/profile';
+import { formatPeriod, tr, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+---
+
+<ol class="cv-jobs">
+  {
+    experienceNewestFirst().map((job) => (
+      <li class="cv-job">
+        <div class="cv-job-head">
+          <div class="cv-job-title">
+            <h3>{job.company[lang]}</h3>
+            <p class="cv-job-role">{job.role[lang]}</p>
+          </div>
+          <p class="cv-period">{formatPeriod(job.start, job.end, lang)}</p>
+        </div>
+        {job.projects.map((project) => (
+          <div class="cv-proj">
+            <h3>{project.name[lang]}</h3>
+            {project.subsystems && <p class="cv-sub">{project.subsystems[lang]}</p>}
+            <p class="cv-desc">{project.summary[lang]}</p>
+            {project.bullets && project.bullets[lang].length > 0 && (
+              <ul class="dash-list cv-bullets">
+                {project.bullets[lang].map((bullet) => (
+                  <li>{bullet}</li>
+                ))}
+              </ul>
+            )}
+            <p class="cv-tech">
+              <span class="sr-only">{tr('techLabel', lang)}</span> {project.tech.join(' · ')}
+            </p>
+          </div>
+        ))}
+      </li>
+    ))
+  }
+</ol>

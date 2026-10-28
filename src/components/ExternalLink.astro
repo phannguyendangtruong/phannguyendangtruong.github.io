@@ -1,0 +1,31 @@
+---
+import Icon from './Icon.astro';
+import { tr, type Lang } from '../i18n/ui';
+
+interface Props {
+  href: string;
+  lang: Lang;
+  label: string;
+  icon?: 'linkedin' | 'github';
+  /** Show only the icon; the label moves into hidden text and the tooltip. */
+  iconOnly?: boolean;
+  class?: string;
+}
+
+const { href, lang, label, icon, iconOnly = false, class: className } = Astro.props;
+---
+
+<a class={className} href={href} target="_blank" rel="noopener noreferrer" title={iconOnly ? label : undefined}>
+  {icon && <Icon name={icon} />}
+  {
+    iconOnly ? (
+      <span class="sr-only">{`${label} ${tr('newTab', lang)}`}</span>
+    ) : (
+      <>
+        {label}
+        <Icon name="external" size={14} class="ext" />
+        <span class="sr-only">{` ${tr('newTab', lang)}`}</span>
+      </>
+    )
+  }
+</a>

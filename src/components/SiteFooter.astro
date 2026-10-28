@@ -1,0 +1,95 @@
+---
+import ExternalLink from './ExternalLink.astro';
+import { profile } from '../data/profile';
+import { tr, ui, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** 'minimal' shows only the bilingual copyright lines (404 page). */
+  variant?: 'full' | 'minimal';
+}
+
+const { lang, variant = 'full' } = Astro.props;
+const minimal = variant === 'minimal';
+const name = minimal ? profile.name.en : profile.name[lang];
+---
+
+<footer class="site-footer no-print">
+  <div class="container footer-row">
+    {
+      !minimal && (
+        <ul class="footer-links">
+          <li>
+            <ExternalLink
+              class="icon-btn lg"
+              href={profile.links.linkedin}
+              lang={lang}
+              label={profile.linkNames.linkedin}
+              icon="linkedin"
+              iconOnly
+            />
+          </li>
+          <li>
+            <ExternalLink
+              class="icon-btn lg"
+              href={profile.links.github}
+              lang={lang}
+              label={profile.linkNames.github}
+              icon="github"
+              iconOnly
+            />
+          </li>
+        </ul>
+      )
+    }
+    <div>
+      <p class="footer-copy">© {new Date().getFullYear()} {name}</p>
+      {
+        minimal ? (
+          <p class="footer-note">
+            {ui.footer.en} · <span lang="vi">{ui.footer.vi}</span>
+          </p>
+        ) : (
+          <p class="footer-note">{tr('footer', lang)}</p>
+        )
+      }
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--border);
+  }
+
+  .footer-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding-top: 32px;
+    padding-bottom: 32px;
+    text-align: center;
+  }
+
+  .footer-copy {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .footer-note {
+    margin: 4px 0 0;
+    font: 12px/1.5 var(--mono);
+    color: var(--faint);
+  }
+
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+</style>

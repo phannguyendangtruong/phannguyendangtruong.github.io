@@ -1,0 +1,496 @@
+---
+import GlowRing from './GlowRing.astro';
+import Icon from './Icon.astro';
+import { heroDiagram, heroFrame, heroLog, termPrompt, type HeroNode } from '../data/hero';
+import { tr, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const { width, height, nodeHeight, nodes, edges } = heroDiagram;
+const byId = new Map(nodes.map((node) => [node.id, node] as const));
+
+/** Packet timing in seconds: a packet crosses its edge in 15% of the cycle, each level starts 0.16 of it later, the second pass half a cycle later. */
+const cycle = 3.2;
+const travel = cycle * 0.15;
+const levelDelay = cycle * 0.16;
+const passDelay = cycle / 2;
+const passes = [0, 1];
+const seconds = (value: number) => `${Number(Math.max(0, value).toFixed(3))}s`;
+
+// Level 0 for nodes without incoming edges, +1 along each edge; nodes only reachable through a loop stay at 0.
+const levels = new Map<string, number>();
+const targets = new Set(edges.map((edge) => edge.to));
+const queue = nodes.filter((node) => !targets.has(node.id)).map((node) => node.id);
+queue.forEach((id) => levels.set(id, 0));
+for (let index = 0; index < queue.length; index += 1) {
+  const id = queue[index];
+  const level = levels.get(id) ?? 0;
+  edges.forEach((edge) => {
+    if (edge.from !== id || levels.has(edge.to)) return;
+    levels.set(edge.to, level + 1);
+    queue.push(edge.to);
+  });
+}
+
+/** A node lights up when a packet reaches it; nodes without incoming edges when their packet leaves. */
+function hitDelay(id: string): string {
+  const level = levels.get(id) ?? 0;
+  return seconds(level === 0 ? 0 : (level - 1) * levelDelay + travel - 0.08);
+}
+
+const centerX = (node: HeroNode) => node.x + node.w / 2;
+
+function edgePath(from: HeroNode, to: HeroNode): string {
+  if (from.y === to.y) return `M${from.x + from.w} ${from.y + nodeHeight / 2}H${to.x}`;
+  const top = from.y + nodeHeight;
+  const middle = (top + to.y) / 2;
+  return `M${centerX(from)} ${top}C${centerX(from)} ${middle} ${centerX(to)} ${middle} ${centerX(to)} ${to.y}`;
+}
+
+/** Phone layout: one node per row in depth-first order, indented by level like a file tree, drawn 1:1 so labels stay 12px. */
+const tree = { row: 30, gap: 14, indent: 22, elbow: 11, charWidth: 7.4, padX: 11 };
+const order: string[] = [];
+const visit = (id: string) => {
+  if (order.includes(id)) return;
+  order.push(id);
+  edges.forEach((edge) => {
+    if (edge.from === id) visit(edge.to);
+  });
+};
+nodes.filter((node) => !targets.has(node.id)).forEach((node) => visit(node.id));
+nodes.forEach((node) => visit(node.id));
+const treeNodes = order.flatMap((id, row) => {
+  const node = byId.get(id);
+  if (!node) return [];
+  const w = Math.ceil(id.length * tree.charWidth + tree.padX * 2);
+  return [{ ...node, x: (levels.get(id) ?? 0) * tree.indent + 1, y: row * (tree.row + tree.gap) + 1, w }];
+});
+const treeById = new Map(treeNodes.map((node) => [node.id, node] as const));
+const treeWidth = Math.max(0, ...treeNodes.map((node) => node.x + node.w)) + 1;
+const treeHeight = treeNodes.length * (tree.row + tree.gap) - tree.gap + 2;
+
+function treePath(from: HeroNode, to: HeroNode): string {
+  return `M${from.x + tree.elbow} ${from.y + tree.row}V${to.y + tree.row / 2}H${to.x}`;
+}
+
+const links = edges.flatMap((edge) => {
+  const from = byId.get(edge.from);
+  const to = byId.get(edge.to);
+  const treeFrom = treeById.get(edge.from);
+  const treeTo = treeById.get(edge.to);
+  if (!from || !to || !treeFrom || !treeTo) return [];
+  return [{ wide: edgePath(from, to), tree: treePath(treeFrom, treeTo), level: levels.get(from.id) ?? 0 }];
+});
+const packets = passes.flatMap((pass) =>
+  links.map((link) => ({ ...link, delay: seconds(link.level * levelDelay + pass * passDelay) })),
+);
+const lastLine = heroLog.length - 1;
+/** Highlight classes of log parts. A terminal line stays on one line of markup: it keeps white space. */
+const toneClass = { ok: 't-ok', event: 't-ev' } as const;
+---
+
+<div class="hero-frame-wrap">
+  <div
+    class="frame hero-frame"
+    role="group"
+    aria-label={heroFrame.aria[lang]}
+    data-hero-frame
+    style={`--cycle: ${cycle}s; --pass: ${passDelay}s`}
+  >
+    <div class="frame-bar">
+      <span class="frame-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="frame-label" aria-hidden="true">{heroFrame.label[lang]}</span>
+      <button
+        type="button"
+        class="icon-btn frame-pause js-only"
+        aria-pressed="false"
+        aria-label={tr('pauseAnimation', lang)}
+      >
+        <Icon name="pause" size={14} class="ic-pause" />
+        <Icon name="play" size={14} class="ic-play" />
+      </button>
+    </div>
+    <div class="frame-body" aria-hidden="true">
+      <svg class="diagram wide" viewBox={`0 0 ${width} ${height}`} focusable="false">
+        <g class="edges">
+          {links.map((link) => <path class="edge" d={link.wide} />)}
+        </g>
+        <g class="nodes">
+          {
+            nodes.map((node) => (
+              <g class:list={['node', { broker: node.kind === 'broker' }]} style={`--hit: ${hitDelay(node.id)}`}>
+                <rect class="box" x={node.x} y={node.y} width={node.w} height={nodeHeight} rx={node.kind === 'broker' ? 18 : 8} />
+                <rect class="halo" x={node.x} y={node.y} width={node.w} height={nodeHeight} rx={node.kind === 'broker' ? 18 : 8} />
+                <text x={centerX(node)} y={node.y + 22}>{node.id}</text>
+              </g>
+            ))
+          }
+        </g>
+        <g class="packets">
+          {packets.map((packet) => <path class="packet" d={packet.wide} pathLength="100" style={`--delay: ${packet.delay}`} />)}
+        </g>
+      </svg>
+      <svg class="diagram tree" viewBox={`0 0 ${treeWidth} ${treeHeight}`} width={treeWidth} height={treeHeight} focusable="false">
+        <g class="edges">
+          {links.map((link) => <path class="edge" d={link.tree} />)}
+        </g>
+        <g class="nodes">
+          {
+            treeNodes.map((node) => (
+              <g class:list={['node', { broker: node.kind === 'broker' }]} style={`--hit: ${hitDelay(node.id)}`}>
+                <rect class="box" x={node.x} y={node.y} width={node.w} height={tree.row} rx={node.kind === 'broker' ? 15 : 7} />
+                <rect class="halo" x={node.x} y={node.y} width={node.w} height={tree.row} rx={node.kind === 'broker' ? 15 : 7} />
+                <text x={node.x + tree.padX} y={node.y + 19.5}>{node.id}</text>
+              </g>
+            ))
+          }
+        </g>
+        <g class="packets">
+          {packets.map((packet) => <path class="packet" d={packet.tree} pathLength="100" style={`--delay: ${packet.delay}`} />)}
+        </g>
+      </svg>
+      <div class="term" data-term>
+        {
+          heroLog.map((line, index) => (
+            <div class="term-line"><span class="tp">{termPrompt}</span>{' '}<span class="tl">{
+              line.map((part) => (part.tone ? <b class={toneClass[part.tone]}>{part.text}</b> : part.text))
+            }</span>{index === lastLine && <span class="cursor"></span>}</div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+  <GlowRing spin />
+</div>
+
+<style>
+  .hero-frame-wrap {
+    position: relative;
+    border-radius: var(--radius-lg);
+  }
+
+  .hero-frame {
+    transition: box-shadow 0.3s ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .hero-frame-wrap:hover .hero-frame {
+      box-shadow: var(--shadow-frame), 0 0 56px -12px var(--glow);
+    }
+  }
+
+  .frame-body {
+    padding: 12px;
+  }
+
+  .frame-pause {
+    margin-left: auto;
+  }
+
+  .frame-pause :global(svg) {
+    width: 14px;
+    height: 14px;
+  }
+
+  .frame-pause[aria-pressed='false'] :global(.ic-play),
+  .frame-pause[aria-pressed='true'] :global(.ic-pause) {
+    display: none;
+  }
+
+  .diagram {
+    display: block;
+    height: auto;
+  }
+
+  /* Phone: the file-tree layout, never wider than the frame. */
+  .wide {
+    display: none;
+    width: 100%;
+  }
+
+  .tree {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .edge {
+    fill: none;
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+  }
+
+  .box {
+    fill: var(--surface);
+    stroke: var(--border-strong);
+    stroke-width: 1;
+  }
+
+  .broker .box {
+    stroke: var(--accent-2);
+    stroke-width: 1.2;
+  }
+
+  .node text {
+    font: 12px var(--mono);
+    fill: var(--text);
+    text-anchor: middle;
+  }
+
+  .tree .node text {
+    text-anchor: start;
+  }
+
+  /* Glow of a node while a packet reaches it; hidden between packets. */
+  .halo {
+    fill: var(--chip-bg);
+    stroke: var(--accent-2);
+    stroke-width: 2;
+    filter: drop-shadow(0 0 6px var(--accent-2));
+    opacity: 0;
+    animation: hero-hit var(--pass) ease-out var(--hit) infinite;
+    animation-play-state: paused;
+  }
+
+  /* A short round dash runs along each edge; it stays hidden until its delay has passed. */
+  .packet {
+    fill: none;
+    stroke: var(--accent-2);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 0.1 99.9;
+    filter: drop-shadow(0 0 4px var(--accent-2));
+    opacity: 0;
+    animation: hero-packet var(--cycle) linear var(--delay) infinite;
+    animation-play-state: paused;
+  }
+
+  .tree .packet {
+    stroke-width: 6;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) .hero-frame.is-running .packet,
+    :global(html.js) .hero-frame.is-running .halo {
+      animation-play-state: running;
+    }
+  }
+
+  @keyframes hero-packet {
+    0% {
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+
+    15% {
+      stroke-dashoffset: -100;
+      opacity: 1;
+    }
+
+    15.1%,
+    100% {
+      stroke-dashoffset: -100;
+      opacity: 0;
+    }
+  }
+
+  @keyframes hero-hit {
+    0% {
+      opacity: 0;
+    }
+
+    10% {
+      opacity: 1;
+    }
+
+    40%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .term {
+    margin-top: 14px;
+    min-height: calc(3 * 1.7em + 26px);
+    padding: 12px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    background: var(--term-bg);
+    color: var(--term-text);
+    font: 12.5px/1.7 var(--mono);
+  }
+
+  .term-line {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .tp {
+    color: var(--term-muted);
+  }
+
+  .t-ok,
+  .t-ev {
+    font-weight: 500;
+  }
+
+  .t-ok {
+    color: var(--term-ok);
+  }
+
+  .t-ev {
+    color: var(--term-event);
+  }
+
+  /* Steady block cursor, no blinking. */
+  .cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.1em;
+    margin-left: 3px;
+    vertical-align: -0.18em;
+    background: var(--term-event);
+    opacity: 0.85;
+  }
+
+  @media (min-width: 640px) {
+    .frame-body {
+      padding: 18px 16px 16px;
+    }
+
+    .wide {
+      display: block;
+    }
+
+    .tree {
+      display: none;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .frame-body {
+      padding: 20px 18px 18px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .frame-pause {
+      display: none;
+    }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    const frame = document.querySelector('[data-hero-frame]');
+    if (!frame) return;
+    const rm = matchMedia('(prefers-reduced-motion: reduce)');
+    const hasObserver = 'IntersectionObserver' in window;
+    const pauseButton = frame.querySelector('.frame-pause');
+    const diagrams = Array.from(frame.querySelectorAll('.diagram'));
+
+    // Packets and node glows run only while nobody paused them, a diagram is on screen and the tab is visible.
+    let userPaused = false;
+    let inView = true;
+    let tabVisible = !document.hidden;
+    const sync = () => {
+      frame.classList.toggle('is-running', !rm.matches && !userPaused && inView && tabVisible);
+    };
+    if (pauseButton) {
+      pauseButton.addEventListener('click', () => {
+        userPaused = !userPaused;
+        pauseButton.setAttribute('aria-pressed', String(userPaused));
+        sync();
+      });
+    }
+    if (hasObserver && diagrams.length) {
+      // Only one layout is displayed at a time (tree on phones, wide from 640px).
+      const visible = new Set();
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) visible.add(entry.target);
+          else visible.delete(entry.target);
+        });
+        inView = visible.size > 0;
+        sync();
+      });
+      diagrams.forEach((diagram) => observer.observe(diagram));
+    }
+    document.addEventListener('visibilitychange', () => {
+      tabVisible = !document.hidden;
+      sync();
+    });
+    sync();
+
+    // Terminal: types the sample log once, when half of it is on screen.
+    const term = frame.querySelector('[data-term]');
+    let showAllLines = () => {};
+    if (term && hasObserver && !rm.matches) {
+      const cursor = term.querySelector('.cursor');
+      const lines = Array.from(term.querySelectorAll('.term-line')).map((line) => {
+        const text = line.querySelector('.tl');
+        return { line, text, html: text ? text.innerHTML : '', plain: text ? text.textContent || '' : '' };
+      });
+      lines.forEach((item) => {
+        item.line.style.visibility = 'hidden';
+      });
+      const linePause = 260;
+      const total = lines.reduce((sum, item) => sum + item.plain.length, 0);
+      const charDelay = total ? Math.min(26, (4500 - linePause * (lines.length - 1)) / total) : 0;
+      let timer = 0;
+      let finished = false;
+      let observer = null;
+      showAllLines = () => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+        if (observer) observer.disconnect();
+        lines.forEach((item) => {
+          item.line.style.removeProperty('visibility');
+          if (item.text) item.text.innerHTML = item.html;
+        });
+        const last = lines[lines.length - 1];
+        if (cursor && last) last.line.appendChild(cursor);
+      };
+      const typeLine = (index) => {
+        const item = lines[index];
+        if (!item || !item.text) {
+          showAllLines();
+          return;
+        }
+        item.line.style.removeProperty('visibility');
+        item.text.textContent = '';
+        if (cursor) item.line.appendChild(cursor);
+        let count = 0;
+        const step = () => {
+          count += 1;
+          item.text.textContent = item.plain.slice(0, count);
+          if (count < item.plain.length) {
+            timer = setTimeout(step, charDelay);
+            return;
+          }
+          item.text.innerHTML = item.html;
+          if (index === lines.length - 1) showAllLines();
+          else timer = setTimeout(() => typeLine(index + 1), linePause);
+        };
+        timer = setTimeout(step, charDelay);
+      };
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          observer.disconnect();
+          typeLine(0);
+        },
+        { threshold: 0.5 },
+      );
+      observer.observe(term);
+    }
+
+    rm.addEventListener('change', () => {
+      if (rm.matches) showAllLines();
+      sync();
+    });
+  })();
+</script>

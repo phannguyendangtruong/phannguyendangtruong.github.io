@@ -1,0 +1,23 @@
+---
+import type { InferGetStaticParamsType } from 'astro';
+import { caseStudyProjects } from '../../i18n/nav';
+import type { Lang } from '../../i18n/ui';
+
+type CaseStudyPage = (props: { lang: Lang; slug: string }) => unknown;
+
+/** Page component through a glob, so this route still builds (with no page) once the case study files are deleted. */
+const pages = import.meta.glob<{ default: CaseStudyPage }>('../../components/CaseStudy.astro', { eager: true });
+const page: CaseStudyPage | undefined = Object.values(pages)[0]?.default;
+
+export function getStaticPaths() {
+  return caseStudyProjects().map((project) => ({ params: { slug: project.slug! } }));
+}
+
+const { slug } = Astro.params as InferGetStaticParamsType<typeof getStaticPaths>;
+if (!page) {
+  throw new Error(`Dữ liệu nội dung: thiếu src/components/CaseStudy.astro cho case study ${slug}.`);
+}
+const CaseStudy: CaseStudyPage = page;
+---
+
+<CaseStudy lang="en" slug={slug} />

@@ -1,0 +1,35 @@
+---
+import { otherLang } from '../i18n/nav';
+import { localePath, tr, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Path of this page without the language prefix, e.g. "/resume/". */
+  path: string;
+  /** 44px button (mobile menu). */
+  large?: boolean;
+}
+
+const { lang, path, large = false } = Astro.props;
+const target = otherLang(lang);
+---
+
+<a
+  class:list={['chip-btn', { lg: large }]}
+  href={localePath(target, path)}
+  hreflang={target}
+  lang={target}
+  data-lang-switch
+  data-keep-anchor={path === '/' ? '' : undefined}
+>
+  {tr('switchLang', lang)}
+</a>
+
+<style>
+  .lg {
+    height: 44px;
+    padding: 0 18px;
+    font-size: 14px;
+    color: var(--text);
+  }
+</style>

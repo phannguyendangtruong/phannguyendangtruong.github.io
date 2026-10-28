@@ -1,0 +1,469 @@
+---
+import { focusScenes, type FocusScene } from '../data/hero';
+
+interface Props {
+  kind: FocusScene;
+}
+
+type Box = { label: string; x: number; w: number; cx: number };
+
+const { kind } = Astro.props;
+/** viewBox of every scene; the drawing follows the card width, up to 260px. */
+const width = 240;
+const height = 64;
+const margin = 2;
+/** Advance of the monospace font, 0.6 of the size: 10 for boxes, 9 for state chips. */
+const advance = { box: 6, chip: 5.4 };
+
+const round = (value: number) => Number(value.toFixed(2));
+
+/** Boxes for a row of labels across the width: widths follow the label length, the gaps between them are equal. */
+function spread(labels: string[], charWidth: number, padX: number): Box[] {
+  const widths = labels.map((label) => Math.ceil(label.length * charWidth + padX * 2));
+  const used = widths.reduce((sum, w) => sum + w, 0);
+  const gap = Math.max(12, (width - margin * 2 - used) / Math.max(1, labels.length - 1));
+  let x = margin;
+  return labels.map((label, index) => {
+    const w = widths[index];
+    const box = { label, x: round(x), w, cx: round(x + w / 2) };
+    x += w + gap;
+    return box;
+  });
+}
+
+/** Straight link from the right edge of one box to the left edge of the next, at height y. */
+const link = (from: Box, to: Box, y: number) => `M${round(from.x + from.w)} ${y}H${to.x}`;
+/** Start of an element within the cycle, in seconds (CSS --d). */
+const at = (value: number) => `--d: ${value}s`;
+
+// Ingest: an .xlsx file goes through the parser into a table that fills row by row; one cell turns from error to fixed.
+const ingest = focusScenes.ingest;
+const file = { x: margin, y: 12, w: 40, h: 40 };
+const table = { x: width - margin - 68, y: 9, w: 68, header: 10, row: 12, rows: 3, cols: 3 };
+const tableH = table.header + table.row * table.rows;
+const colW = table.w / table.cols;
+const parserW = Math.ceil(ingest.parser.length * advance.box + 18);
+const parserX = round((file.x + file.w + table.x - parserW) / 2);
+const parser: Box = { label: ingest.parser, x: parserX, w: parserW, cx: round(parserX + parserW / 2) };
+const fileBox: Box = { label: ingest.file, x: file.x, w: file.w, cx: file.x + file.w / 2 };
+const tableBox: Box = { label: '', x: table.x, w: table.w, cx: table.x + table.w / 2 };
+const ingestY = 32;
+const filePath = `M${file.x} ${file.y + 2}a2 2 0 0 1 2-2h${file.w - 14}l12 12v${file.h - 14}a2 2 0 0 1-2 2H${file.x + 2}a2 2 0 0 1-2-2z`;
+const foldPath = `M${file.x + file.w - 12} ${file.y}v10a2 2 0 0 0 2 2h10`;
+const tableLines = [
+  ...Array.from({ length: table.rows }, (_, r) => `M${table.x} ${table.y + table.header + r * table.row}H${table.x + table.w}`),
+  ...Array.from({ length: table.cols - 1 }, (_, c) => `M${round(table.x + colW * (c + 1))} ${table.y}V${table.y + tableH}`),
+].join('');
+const bars = (y: number) =>
+  Array.from({ length: table.cols }, (_, c) => ({ x: round(table.x + c * colW + 3), y, w: round(colW - 6) }));
+const headerBars = bars(table.y + 3);
+const tableRows = Array.from({ length: table.rows }, (_, r) => bars(table.y + table.header + r * table.row + 4));
+const cell = {
+  x: round(table.x + colW + 1.5),
+  y: table.y + table.header + table.row + 1.5,
+  w: round(colW - 3),
+  h: table.row - 3,
+};
+
+// Workflow: a token moves DRAFT → SUBMITTED → APPROVED; the reminder clock above SUBMITTED ticks.
+const flow = focusScenes.workflow;
+const chips = spread([flow.draft, flow.submitted, flow.approved], advance.chip, 7);
+const chip = { y: 38, h: 20 };
+const chipY = chip.y + chip.h / 2;
+const clock = { cx: chips[1].cx, cy: 15, r: 10 };
+const clockTicks = `M${clock.cx} ${clock.cy - clock.r + 2}v2M${round(clock.cx + clock.r - 2)} ${clock.cy}h-2M${clock.cx} ${clock.cy + clock.r - 2}v-2M${round(clock.cx - clock.r + 2)} ${clock.cy}h2`;
+const chipHits = [0.1, 0.7, 2];
+const chipTokens = [0.25, 1.55];
+const lastChip = chips.length - 1;
+
+// Security: a token goes client → gateway → service; the lock on the gateway opens while it passes.
+const security = focusScenes.security;
+const hops = spread([security.client, security.gateway, security.service], advance.box, 8);
+const hop = { y: 36, h: 22 };
+const hopY = hop.y + hop.h / 2;
+const lock = { cx: hops[1].cx, top: 14 };
+const hopHits = [0.05, 0.65, 1.55];
+const hopTokens = [0.2, 1.1];
+---
+
+<svg
+  class:list={['scene', `scene-${kind}`, 'no-print']}
+  viewBox={`0 0 ${width} ${height}`}
+  aria-hidden="true"
+  focusable="false"
+  data-fx
+>
+  {
+    kind === 'ingest' && (
+      <>
+        <path class="edge" d={link(fileBox, parser, ingestY)} />
+        <path class="edge" d={link(parser, tableBox, ingestY)} />
+        <path class="box" d={filePath} />
+        <path class="edge" d={foldPath} />
+        <text class="lbl sm file-kind" x={fileBox.cx} y={file.y + 30}>{ingest.file}</text>
+        <rect class="box" x={parser.x} y="20" width={parser.w} height="24" rx="6" />
+        <rect class="halo fx" x={parser.x} y="20" width={parser.w} height="24" rx="6" style={at(0.55)} />
+        <text class="lbl" x={parser.cx} y="35.5">{parser.label}</text>
+        <rect class="box" x={table.x} y={table.y} width={table.w} height={tableH} rx="4" />
+        <path class="rule" d={tableLines} />
+        {headerBars.map((bar) => <rect class="th" x={bar.x} y={bar.y} width={bar.w} height="4" rx="2" />)}
+        {tableRows.map((row, index) => (
+          <g class="row fx" style={at(round(index * 0.18))}>
+            {row.map((bar) => <rect class="bar" x={bar.x} y={bar.y} width={bar.w} height="4" rx="2" />)}
+          </g>
+        ))}
+        <rect class="good final fx" x={cell.x} y={cell.y} width={cell.w} height={cell.h} rx="1.5" />
+        <rect class="bad fx" x={cell.x} y={cell.y} width={cell.w} height={cell.h} rx="1.5" />
+        <path class="packet fx" d={link(fileBox, parser, ingestY)} pathLength="100" style={at(0.1)} />
+        <path class="packet fx" d={link(parser, tableBox, ingestY)} pathLength="100" style={at(0.75)} />
+      </>
+    )
+  }
+  {
+    kind === 'workflow' && (
+      <>
+        {chips.slice(1).map((to, index) => <path class="edge" d={link(chips[index], to, chipY)} />)}
+        <path class="tie" d={`M${clock.cx} ${clock.cy + clock.r}V${chip.y}`} />
+        <circle class="face" cx={clock.cx} cy={clock.cy} r={clock.r} />
+        <circle class="halo fx" cx={clock.cx} cy={clock.cy} r={clock.r} style={at(0.95)} />
+        <path class="rule" d={clockTicks} />
+        <path
+          class="hand fx"
+          d={`M${clock.cx} ${clock.cy}V${clock.cy - 7}`}
+          style={`transform-origin: ${clock.cx}px ${clock.cy}px`}
+        />
+        <circle class="pin" cx={clock.cx} cy={clock.cy} r="1.6" />
+        {chips.map((item, index) => (
+          <>
+            <rect class="box" x={item.x} y={chip.y} width={item.w} height={chip.h} rx="10" />
+            <text class="lbl sm" x={item.cx} y={chip.y + 13.2}>{item.label}</text>
+            {index === lastChip && (
+              <g class="final fx">
+                <rect class="cover" x={item.x} y={chip.y} width={item.w} height={chip.h} rx="10" />
+                <rect class="good" x={item.x} y={chip.y} width={item.w} height={chip.h} rx="10" />
+                <text class="lbl sm ok" x={item.cx} y={chip.y + 13.2}>{item.label}</text>
+              </g>
+            )}
+            <rect class="halo fx" x={item.x} y={chip.y} width={item.w} height={chip.h} rx="10" style={at(chipHits[index])} />
+          </>
+        ))}
+        {chips.slice(1).map((to, index) => (
+          <path class="packet fx" d={link(chips[index], to, chipY)} pathLength="100" style={at(chipTokens[index])} />
+        ))}
+      </>
+    )
+  }
+  {
+    kind === 'security' && (
+      <>
+        {hops.slice(1).map((to, index) => <path class="edge" d={link(hops[index], to, hopY)} />)}
+        <path class="tie" d={`M${lock.cx} ${lock.top + 11}V${hop.y}`} />
+        <rect class="halo fx" x={lock.cx - 9} y={lock.top - 2} width="18" height="15" rx="3" style={at(0.75)} />
+        <path class="shackle fx" d={`M${lock.cx - 4} ${lock.top}v-4a4 4 0 0 1 8 0v4`} />
+        <rect class="lock" x={lock.cx - 7} y={lock.top} width="14" height="11" rx="2" />
+        <circle class="pin" cx={lock.cx} cy={lock.top + 5.5} r="1.5" />
+        {hops.map((item, index) => (
+          <>
+            <rect class="box" x={item.x} y={hop.y} width={item.w} height={hop.h} rx="6" />
+            <rect class="halo fx" x={item.x} y={hop.y} width={item.w} height={hop.h} rx="6" style={at(hopHits[index])} />
+            <text class="lbl" x={item.cx} y={hop.y + 14.5}>{item.label}</text>
+          </>
+        ))}
+        {hops.slice(1).map((to, index) => (
+          <path class="packet fx" d={link(hops[index], to, hopY)} pathLength="100" style={at(hopTokens[index])} />
+        ))}
+      </>
+    )
+  }
+</svg>
+
+<style>
+  /* Same language as the hero illustration: boxes, thin links, cyan packets and glowing boxes. */
+  .scene {
+    --cycle: 3.6s;
+    display: block;
+    width: 100%;
+    max-width: 260px;
+    height: auto;
+    overflow: visible;
+  }
+
+  .edge,
+  .tie,
+  .rule {
+    fill: none;
+    stroke: var(--border-strong);
+    stroke-width: 1.2;
+  }
+
+  .tie {
+    stroke-dasharray: 2 3;
+  }
+
+  .rule {
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+
+  .box,
+  .face,
+  .cover {
+    fill: var(--surface);
+    stroke: var(--border-strong);
+    stroke-width: 1;
+  }
+
+  .lbl {
+    font: 10px var(--mono);
+    fill: var(--text);
+    text-anchor: middle;
+  }
+
+  .lbl.sm {
+    font-size: 9px;
+    letter-spacing: 0.02em;
+  }
+
+  .file-kind {
+    font-weight: 600;
+    fill: var(--ok);
+  }
+
+  .lbl.ok {
+    fill: var(--ok);
+  }
+
+  .th {
+    fill: var(--accent);
+    opacity: 0.55;
+  }
+
+  .bar {
+    fill: var(--muted);
+    opacity: 0.45;
+  }
+
+  .good {
+    fill: var(--ok-soft);
+    stroke: var(--ok);
+    stroke-width: 1;
+  }
+
+  /* Hidden in the final state: the error cell only shows while the scene runs. */
+  .bad {
+    fill: var(--danger-soft);
+    stroke: var(--danger);
+    stroke-width: 1;
+    opacity: 0;
+  }
+
+  .hand,
+  .shackle {
+    fill: none;
+    stroke: var(--accent-2);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  .pin {
+    fill: var(--accent-2);
+  }
+
+  .lock {
+    fill: var(--surface);
+    stroke: var(--accent-2);
+    stroke-width: 1.2;
+  }
+
+  .halo {
+    fill: var(--chip-bg);
+    stroke: var(--accent-2);
+    stroke-width: 1.5;
+    filter: drop-shadow(0 0 4px var(--accent-2));
+    opacity: 0;
+  }
+
+  .packet {
+    fill: none;
+    stroke: var(--accent-2);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 0.1 99.9;
+    filter: drop-shadow(0 0 3px var(--accent-2));
+    opacity: 0;
+  }
+
+  /* Runs once the scene comes on screen (SiteScripts adds .fx-run), pauses off screen or in a hidden tab (.fx-on),
+     and stops after three cycles on its final state, which is also the static state with reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .scene.fx-run .fx {
+      animation-duration: var(--cycle);
+      animation-delay: var(--d, 0s);
+      animation-iteration-count: 3;
+      animation-fill-mode: both;
+      animation-timing-function: linear;
+      animation-play-state: paused;
+    }
+
+    .scene.fx-run.fx-on .fx {
+      animation-play-state: running;
+    }
+
+    .scene.fx-run .packet {
+      animation-name: fs-packet;
+    }
+
+    .scene.fx-run .halo {
+      animation-name: fs-halo;
+      animation-timing-function: ease-out;
+    }
+
+    .scene.fx-run .row {
+      animation-name: fs-row;
+      animation-timing-function: var(--ease);
+    }
+
+    .scene.fx-run .bad {
+      animation-name: fs-bad;
+    }
+
+    .scene.fx-run .final {
+      animation-name: fs-final;
+    }
+
+    .scene.fx-run .hand {
+      animation-name: fs-tick;
+      animation-timing-function: steps(12, end);
+    }
+
+    .scene.fx-run .shackle {
+      animation-name: fs-unlock;
+      animation-timing-function: ease-in-out;
+    }
+  }
+
+  @keyframes fs-packet {
+    0% {
+      stroke-dashoffset: 0;
+      opacity: 0;
+    }
+
+    1% {
+      opacity: 1;
+    }
+
+    14% {
+      stroke-dashoffset: -100;
+      opacity: 1;
+    }
+
+    14.1%,
+    100% {
+      stroke-dashoffset: -100;
+      opacity: 0;
+    }
+  }
+
+  @keyframes fs-halo {
+    0% {
+      opacity: 0;
+    }
+
+    4% {
+      opacity: 1;
+    }
+
+    18%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* Rows empty out at the start of each cycle and come back once the packet reaches the table. */
+  @keyframes fs-row {
+    0% {
+      opacity: 1;
+      transform: none;
+    }
+
+    5%,
+    36% {
+      opacity: 0;
+      transform: translateX(-4px);
+    }
+
+    42%,
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Error cell: shows with its row, pulses twice, then gives way to the fixed cell. */
+  @keyframes fs-bad {
+    0%,
+    38% {
+      opacity: 0;
+    }
+
+    41%,
+    51%,
+    61% {
+      opacity: 1;
+    }
+
+    46%,
+    56% {
+      opacity: 0.25;
+    }
+
+    66%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* Final state (fixed cell, APPROVED): hidden at the start of each cycle, back near its end. */
+  @keyframes fs-final {
+    0% {
+      opacity: 1;
+    }
+
+    5%,
+    64% {
+      opacity: 0;
+    }
+
+    70%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fs-tick {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes fs-unlock {
+    0%,
+    22% {
+      transform: none;
+    }
+
+    28%,
+    70% {
+      transform: translateY(-3px);
+    }
+
+    76%,
+    100% {
+      transform: none;
+    }
+  }
+</style>

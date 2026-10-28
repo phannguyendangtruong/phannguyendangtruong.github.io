@@ -1,0 +1,231 @@
+---
+import ExternalLink from './ExternalLink.astro';
+import Icon from './Icon.astro';
+import LangSwitch from './LangSwitch.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { profile } from '../data/profile';
+import { navItems } from '../i18n/nav';
+import { localePath, tr, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Path of this page without the language prefix, e.g. "/resume/". */
+  path: string;
+}
+
+const { lang, path } = Astro.props;
+---
+
+<details class="mnav" data-mnav>
+  <summary class="menu-btn">
+    <Icon name="menu" size={22} class="ic-bars" />
+    <Icon name="close" size={22} class="ic-x" />
+    <span class="sr-only lbl-open">{tr('openMenu', lang)}</span>
+    <span class="sr-only lbl-close">{tr('closeMenu', lang)}</span>
+  </summary>
+  <div class="menu-scrim js-only" data-menu-scrim hidden></div>
+  <div class="menu-panel" data-menu-panel>
+    <nav aria-label={tr('navMain', lang)}>
+      <ol class="menu-list">
+        {
+          navItems.map((item, index) => (
+            <li>
+              <a class="menu-link" href={localePath(lang, item.target)}>
+                <span class="menu-num" aria-hidden="true">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <span>{tr(item.label, lang)}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+    <div class="menu-prefs">
+      <LangSwitch lang={lang} path={path} large />
+      <ThemeToggle lang={lang} large />
+    </div>
+    <div class="menu-social">
+      <ExternalLink
+        class="social-link"
+        href={profile.links.linkedin}
+        lang={lang}
+        label={profile.linkNames.linkedin}
+        icon="linkedin"
+      />
+      <ExternalLink class="social-link" href={profile.links.github} lang={lang} label={profile.linkNames.github} icon="github" />
+    </div>
+  </div>
+</details>
+
+<style>
+  .mnav {
+    justify-self: end;
+  }
+
+  .menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .menu-btn::-webkit-details-marker {
+    display: none;
+  }
+
+  .menu-btn::marker {
+    content: '';
+  }
+
+  .mnav[open] :global(.ic-bars),
+  .mnav:not([open]) :global(.ic-x),
+  .mnav[open] .lbl-open,
+  .mnav:not([open]) .lbl-close {
+    display: none;
+  }
+
+  /* The header has backdrop-filter, so it is the containing block: position against it, not the viewport. */
+  .menu-scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 100vh;
+    height: 100dvh;
+    background: var(--scrim);
+  }
+
+  .menu-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    max-height: calc(100vh - var(--nav-h));
+    max-height: calc(100dvh - var(--nav-h));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 8px 16px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-strong);
+    box-shadow: var(--shadow);
+    white-space: normal;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .mnav[open] .menu-panel {
+      animation: mnav-in 0.2s var(--ease);
+    }
+  }
+
+  @keyframes mnav-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .menu-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .menu-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 52px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+
+  .menu-num {
+    min-width: 22px;
+    font: 500 12px var(--mono);
+    letter-spacing: 0.04em;
+    color: var(--faint);
+  }
+
+  .menu-link:hover .menu-num {
+    color: var(--accent);
+  }
+
+  .menu-prefs {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 0 16px;
+  }
+
+  .menu-prefs :global(.icon-btn) {
+    color: var(--text);
+  }
+
+  .menu-social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .menu-social :global(.social-link) {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .menu-social :global(.social-link:hover) {
+    border-color: var(--accent);
+  }
+
+  .menu-social :global(.social-link svg) {
+    width: 18px;
+    height: 18px;
+    flex: none;
+  }
+
+  .menu-social :global(.social-link .ext) {
+    width: 14px;
+    height: 14px;
+    color: var(--muted);
+  }
+
+  @media (min-width: 640px) {
+    .menu-panel {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+  }
+
+  @media (min-width: 960px) {
+    .mnav {
+      display: none;
+    }
+  }
+</style>

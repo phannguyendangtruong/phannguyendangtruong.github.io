@@ -1,0 +1,267 @@
+---
+import ExternalLink from './ExternalLink.astro';
+import GlowRing from './GlowRing.astro';
+import Icon from './Icon.astro';
+import { statusLabel, type Project } from '../data/profile';
+import { caseStudyProjects } from '../i18n/nav';
+import { localePath, tr, type Lang } from '../i18n/ui';
+
+interface Props {
+  project: Project;
+  lang: Lang;
+  /** Large card (in-progress and done projects); the small card has no links. */
+  featured?: boolean;
+}
+
+const { project, lang, featured = false } = Astro.props;
+const points = featured && project.points ? project.points[lang].slice(0, 3) : [];
+const arch = featured && project.arch ? project.arch : [];
+const archId = `${(project.slug ?? project.name).toLowerCase().replace(/[^a-z0-9]+/g, '-')}-arch`;
+const hasSide = points.length > 0 || arch.length > 0;
+const hasCaseStudy = featured && caseStudyProjects().some((item) => item.slug === project.slug);
+const caseStudy = hasCaseStudy ? localePath(lang, `/projects/${project.slug}/`) : undefined;
+const demoUrl = featured && project.demoUrl ? project.demoUrl : undefined;
+const repoUrl = featured && project.repoUrl ? project.repoUrl : undefined;
+const repoSoon = featured && project.status === 'in-progress' && !project.repoUrl;
+const linked = Boolean(caseStudy || demoUrl || repoUrl);
+---
+
+<article
+  class:list={['card', 'spot', 'project', { linked, featured, 'with-side': hasSide }]}
+  data-tilt={featured ? '' : undefined}
+>
+  {featured && <GlowRing spin />}
+  <div class="pc-main">
+    <span class:list={['badge', project.status]}>{tr(statusLabel[project.status], lang)}</span>
+    <h3 class="pc-name">{featured ? <span class="grad-text">{project.name}</span> : project.name}</h3>
+    <p class="pc-summary">{project.summary[lang]}</p>
+  </div>
+  {
+    hasSide && (
+      <div class="pc-side">
+        {arch.length > 0 && (
+          <div class="pc-arch">
+            <p class="caps-label" id={archId} aria-hidden="true">
+              {tr('projectArch', lang)}
+            </p>
+            <ol class="pc-arch-list" aria-labelledby={archId}>
+              {arch.map((item, index) => (
+                <li>
+                  {index > 0 && <Icon name="arrow-right" size={12} />}
+                  <span class="chip">{item}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+        {points.length > 0 && (
+          <ul class="points pc-points">
+            {points.map((point) => (
+              <li>{point}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    )
+  }
+  <ul class="tags pc-tech" aria-label={tr('techLabel', lang)}>
+    {project.tech.map((item) => <li>{item}</li>)}
+  </ul>
+  {
+    (linked || repoSoon) && (
+      <div class="pc-actions">
+        {caseStudy && (
+          <a class="button primary pc-case" href={caseStudy}>
+            {tr('readCaseStudy', lang)}
+            <span class="sr-only">{` ${project.name}`}</span>
+            <Icon name="arrow-right" size={16} />
+          </a>
+        )}
+        {demoUrl && <ExternalLink href={demoUrl} lang={lang} label={tr('demo', lang)} class="text-link" />}
+        {repoUrl && <ExternalLink href={repoUrl} lang={lang} label={tr('repository', lang)} class="text-link" />}
+        {repoSoon && <span class="pc-soon faint">{tr('repoSoon', lang)}</span>}
+      </div>
+    )
+  }
+</article>
+
+<style>
+  .project:not(.featured) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  /* Glass with a light in the top right corner; the gradient edge comes from GlowRing. */
+  .featured {
+    display: grid;
+    gap: 20px;
+    padding: 20px;
+    background: radial-gradient(520px 340px at 100% 0%, var(--glow), transparent 70%), var(--glass);
+  }
+
+  .pc-main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pc-name {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+
+  .featured .pc-name {
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+  }
+
+  .pc-summary {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .project:not(.featured) .pc-summary {
+    flex: 1;
+    font-size: 15px;
+  }
+
+  .pc-side {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .pc-arch {
+    display: grid;
+    gap: 8px;
+  }
+
+  .pc-arch .caps-label {
+    margin: 0;
+  }
+
+  .pc-arch-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pc-arch-list li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pc-arch-list :global(svg) {
+    flex: none;
+    width: 12px;
+    height: 12px;
+    color: var(--accent-2);
+  }
+
+  .chip {
+    padding: 6px 10px;
+    border: 1px solid var(--chip-border);
+    border-radius: 6px;
+    background: var(--surface-2);
+    font: 12px/1 var(--mono);
+    color: var(--text);
+  }
+
+  /* Phone: the points sit straight on the card, no inner frame. */
+  .pc-points {
+    gap: 12px;
+    padding: 16px 0 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .pc-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 16px;
+  }
+
+  .pc-case {
+    width: 100%;
+    min-height: 52px;
+    padding: 0 24px;
+    font-size: 16px;
+  }
+
+  .pc-soon {
+    font: 12px/1.5 var(--mono);
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .project.featured:hover {
+      box-shadow: var(--shadow), 0 0 64px -20px var(--glow);
+    }
+
+    /* Tilt towards the pointer (--rx/--ry set by the home page script, at most 4 degrees). */
+    .project.featured.tilting {
+      transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-3px);
+      transition: transform 0.12s linear, box-shadow 0.2s ease;
+    }
+  }
+
+  @media (min-width: 640px) {
+    .featured {
+      padding: 28px;
+    }
+
+    .pc-points {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-2);
+    }
+
+    .pc-case {
+      width: auto;
+      padding: 0 28px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .featured {
+      padding: 40px;
+    }
+
+    .with-side {
+      grid-template-columns: 1.05fr 1fr;
+      grid-template-areas:
+        'main side'
+        'tech side'
+        'act side';
+      gap: 24px 48px;
+    }
+
+    .with-side .pc-main {
+      grid-area: main;
+    }
+
+    .with-side .pc-side {
+      grid-area: side;
+      align-self: start;
+    }
+
+    .with-side .pc-tech {
+      grid-area: tech;
+    }
+
+    .with-side .pc-actions {
+      grid-area: act;
+    }
+  }
+</style>

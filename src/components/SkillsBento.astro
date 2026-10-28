@@ -1,0 +1,314 @@
+---
+import GlowRing from './GlowRing.astro';
+import { education, skills } from '../data/profile';
+import { tr, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const groups = skills.filter((skill) => skill.items.length > 0);
+/** The shaped layout (wide cards, full-width education) is drawn for exactly seven groups. */
+const shaped = groups.length === 7;
+const educationLine = [education.major?.[lang], education.period?.[lang]].filter(Boolean).join(' · ');
+/**
+ * Cards around one gap of the shaped layout (Backend, Data, Messaging), linked by thin lines from 1024px:
+ * the top card (row 1, right) down to the two cards below it, the left card (row 2) across to the right one.
+ */
+const bus = { top: 1, left: 2, right: 3 };
+const onBus = (index: number) => shaped && Object.values(bus).includes(index);
+---
+
+<ul class:list={['bento', 'skills', { shaped }]}>
+  {
+    groups.map((skill, index) => (
+      <li class:list={['card', 'spot', 'sk', 'reveal', { wide: skill.wide, bus: onBus(index) }]} data-fx>
+        {skill.wide && <GlowRing />}
+        <h3 class="caps-label sk-title">{skill.group[lang]}</h3>
+        <ul class="tags sk-tags" aria-label={tr('techLabel', lang)}>
+          {skill.items.map((item, position) => (
+            <li style={`--i: ${position}`}>{item}</li>
+          ))}
+        </ul>
+        {shaped && index === bus.top && (
+          <>
+            <span class="bus-link down-a" aria-hidden="true"></span>
+            <span class="bus-link down-b" aria-hidden="true"></span>
+          </>
+        )}
+        {shaped && index === bus.left && <span class="bus-link side" aria-hidden="true"></span>}
+      </li>
+    ))
+  }
+  <li class="card spot sk edu reveal">
+    <h3 class="caps-label sk-title">{tr('educationTitle', lang)}</h3>
+    <p class="edu-school">{education.school[lang]}</p>
+    {educationLine && <p class="edu-line">{educationLine}</p>}
+  </li>
+</ul>
+
+<style>
+  .skills {
+    --sk-gap: 12px;
+    gap: var(--sk-gap);
+  }
+
+  .sk {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px;
+  }
+
+  .sk h3 {
+    margin: 0;
+  }
+
+  /* Mono group title with a small glowing marker. */
+  .sk-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sk-title::before {
+    content: '';
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 2px;
+    background: var(--accent-2);
+    box-shadow: 0 0 8px var(--accent-2);
+  }
+
+  /* Backend and Data stand out: gradient edge (GlowRing) and a soft light in the corner. */
+  .wide {
+    background: radial-gradient(420px 220px at 0% 0%, var(--chip-bg), transparent 70%), var(--glass);
+  }
+
+  .wide .sk-title {
+    color: var(--text);
+  }
+
+  .sk-tags {
+    gap: 6px;
+  }
+
+  .sk-tags li {
+    position: relative;
+    transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .sk-tags li:hover {
+      border-color: var(--accent-2);
+      background: var(--accent-soft);
+      box-shadow: 0 0 12px var(--glow);
+    }
+  }
+
+  /* Signal scan: each chip lights up briefly in turn, once, when its card comes on screen (SiteScripts adds .fx-run). */
+  .sk-tags li::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid var(--accent-2);
+    background: var(--accent-soft);
+    box-shadow: 0 0 12px var(--glow);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .sk.fx-run .sk-tags li::after {
+      animation: sk-scan 0.8s ease-out calc(var(--i, 0) * 90ms + 0.15s) 1 both;
+      animation-play-state: paused;
+    }
+
+    .sk.fx-run.fx-on .sk-tags li::after {
+      animation-play-state: running;
+    }
+  }
+
+  @keyframes sk-scan {
+    0% {
+      opacity: 0;
+    }
+
+    25% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .edu {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 24px;
+  }
+
+  .edu-school {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .edu-line {
+    margin: 0;
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .bus-link {
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .skills {
+      --sk-gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .sk {
+      padding: 24px;
+    }
+
+    .sk-tags {
+      gap: 8px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .skills {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .wide .sk-tags li {
+      font-size: 13px;
+      padding: 8px 12px;
+    }
+
+    .shaped .wide {
+      grid-column: span 2;
+    }
+
+    .shaped .edu {
+      grid-column: 1 / -1;
+    }
+
+    /* Links in the gaps: the top card spans columns 2–3, so its column centres sit at 1/4 and 3/4 of its width
+       less the gap; they meet the centre of column 2 on the left card and the centre of the right card. */
+    .shaped .bus-link {
+      display: block;
+      position: absolute;
+      z-index: 0;
+      background: var(--border-strong);
+      pointer-events: none;
+    }
+
+    .shaped .down-a,
+    .shaped .down-b {
+      top: calc(100% + 1px);
+      width: 1px;
+      height: var(--sk-gap);
+    }
+
+    .shaped .down-a {
+      left: calc((100% - var(--sk-gap)) / 4);
+    }
+
+    .shaped .down-b {
+      left: calc((100% - var(--sk-gap)) * 0.75 + var(--sk-gap));
+    }
+
+    .shaped .side {
+      top: 50%;
+      left: calc(100% + 1px);
+      width: var(--sk-gap);
+      height: 1px;
+    }
+
+    /* Event packet of a link, hidden until the pointer is on one of the three cards. */
+    .shaped .bus-link::after {
+      content: '';
+      position: absolute;
+      left: -2.5px;
+      top: -3px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      box-shadow: 0 0 8px var(--accent-2);
+      opacity: 0;
+    }
+
+    .shaped .side::after {
+      left: -3px;
+      top: -2.5px;
+    }
+  }
+
+  /* Packets run three times while the pointer stays on Backend, Data or Messaging, then stop. */
+  @media (min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .shaped:has(.bus:hover) .down-a::after,
+    .shaped:has(.bus:hover) .down-b::after {
+      animation: sk-drop 1.2s ease-in-out 3;
+    }
+
+    .shaped:has(.bus:hover) .side::after {
+      animation: sk-across 1.2s ease-in-out 0.45s 3 backwards;
+    }
+  }
+
+  @keyframes sk-drop {
+    0% {
+      opacity: 0;
+      transform: none;
+    }
+
+    15% {
+      opacity: 1;
+    }
+
+    60% {
+      opacity: 1;
+      transform: translateY(var(--sk-gap));
+    }
+
+    70%,
+    100% {
+      opacity: 0;
+      transform: translateY(var(--sk-gap));
+    }
+  }
+
+  @keyframes sk-across {
+    0% {
+      opacity: 0;
+      transform: none;
+    }
+
+    15% {
+      opacity: 1;
+    }
+
+    60% {
+      opacity: 1;
+      transform: translateX(var(--sk-gap));
+    }
+
+    70%,
+    100% {
+      opacity: 0;
+      transform: translateX(var(--sk-gap));
+    }
+  }
+</style>

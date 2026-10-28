@@ -1,0 +1,525 @@
+---
+import ExternalLink from './ExternalLink.astro';
+import HeroIllustration from './HeroIllustration.astro';
+import { experienceNewestFirst, profile } from '../data/profile';
+import { homeSections } from '../i18n/nav';
+import { localePath, tr, type Lang, type UiKey } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const stats: { value: number; label: UiKey }[] = [
+  { value: profile.stats.years, label: 'statYears' },
+  { value: profile.stats.companies, label: 'statCompanies' },
+  { value: profile.stats.companyProjects, label: 'statCompanyProjects' },
+];
+const companies = experienceNewestFirst()
+  .map((job) => job.company[lang])
+  .join(' · ');
+/** Main button: the projects block while it is shown, otherwise the experience block. */
+const primary: { href: string; label: UiKey } = homeSections.includes('projects')
+  ? { href: '#projects', label: 'viewProjects' }
+  : { href: '#experience', label: 'viewExperience' };
+---
+
+<section id="top" class="hero" aria-labelledby="hero-name" data-hero>
+  <div class="hero-bg no-print" aria-hidden="true">
+    <div class="hero-blobs">
+      <span class="blob blob-a"></span>
+      <span class="blob blob-b"></span>
+      <span class="blob blob-c"></span>
+    </div>
+    <div class="hero-grid"></div>
+    <div class="hero-noise"></div>
+  </div>
+  <div class="container hero-in">
+    <div class="hero-text">
+      <p class="hero-eyebrow">{profile.role[lang]} · {profile.location[lang]}</p>
+      <h1 id="hero-name" class="hero-name"><span class="grad-text">{profile.name[lang]}</span></h1>
+      <p class="hero-tagline">{profile.tagline[lang]}</p>
+      <div class="hero-ctas">
+        <a class="button primary" href={primary.href}>{tr(primary.label, lang)}</a>
+        <a class="button secondary" href={localePath(lang, '/resume/')}>{tr('viewResume', lang)}</a>
+      </div>
+      <div class="hero-links">
+        {
+          profile.links.linkedin && (
+            <ExternalLink
+              href={profile.links.linkedin}
+              lang={lang}
+              label={profile.linkNames.linkedin}
+              icon="linkedin"
+              class="text-link"
+            />
+          )
+        }
+        {
+          profile.links.github && (
+            <ExternalLink href={profile.links.github} lang={lang} label={profile.linkNames.github} icon="github" class="text-link" />
+          )
+        }
+      </div>
+      <ul class="stats" data-counter>
+        {
+          stats.map((stat) => (
+            <li class="stat">
+              <span
+                class="stat-num grad-text"
+                aria-hidden="true"
+                data-value={stat.value}
+                style={`--digits: ${String(stat.value).length}`}
+              >
+                {stat.value}
+              </span>
+              <span class="sr-only">{stat.value}</span>
+              <span class="stat-label">{tr(stat.label, lang)}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="hero-companies">{companies}</p>
+      <ul class="tags hero-tech" aria-label={tr('techLabel', lang)}>
+        {profile.coreTech.map((item) => <li>{item}</li>)}
+      </ul>
+    </div>
+    <div class="hero-viz">
+      <HeroIllustration lang={lang} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    padding: 24px 0 36px;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .hero-blobs {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Large soft lights that drift slowly; paused unless the script allows motion. */
+  .blob {
+    position: absolute;
+    display: block;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    filter: blur(80px);
+    will-change: transform;
+  }
+
+  .blob-a {
+    left: -18%;
+    top: -10%;
+    width: clamp(280px, 48vw, 640px);
+    background: var(--accent);
+    opacity: 0.42;
+    animation: hero-drift-a 24s ease-in-out infinite paused;
+  }
+
+  .blob-b {
+    right: -16%;
+    top: 6%;
+    width: clamp(240px, 40vw, 540px);
+    background: var(--accent-2);
+    opacity: 0.3;
+    animation: hero-drift-b 20s ease-in-out infinite paused;
+  }
+
+  .blob-c {
+    left: 22%;
+    bottom: -12%;
+    width: clamp(260px, 44vw, 600px);
+    background: var(--accent-3);
+    opacity: 0.34;
+    animation: hero-drift-c 28s ease-in-out infinite paused;
+  }
+
+  :global(:root[data-theme='light']) .blob {
+    opacity: 0.14;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) .hero.bg-running .blob {
+      animation-play-state: running;
+    }
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 44px 44px;
+    background-position: center top;
+    /* The mask only sets transparency; the colours are not displayed. */
+    -webkit-mask-image: radial-gradient(ellipse 90% 75% at 50% 0%, #000 30%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
+    mask-image: radial-gradient(ellipse 90% 75% at 50% 0%, #000 30%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
+  }
+
+  .hero-noise {
+    position: absolute;
+    inset: 0;
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    background-size: 160px 160px;
+  }
+
+  .hero-in {
+    position: relative;
+    display: grid;
+    gap: 28px;
+    align-items: center;
+  }
+
+  .hero-text,
+  .hero-viz {
+    min-width: 0;
+  }
+
+  /* The name size also follows the text column, so it stays on two lines next to the illustration. */
+  .hero-text {
+    container-type: inline-size;
+  }
+
+  .hero-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font: 13px/1.5 var(--mono);
+    letter-spacing: 0.02em;
+    color: var(--muted);
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    flex: none;
+    width: 24px;
+    height: 1px;
+    background: var(--grad);
+  }
+
+  .hero-name {
+    margin: 14px 0 0;
+    font-size: clamp(44px, 8vw, 96px);
+    font-size: clamp(44px, min(8vw, 15cqi), 96px);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.06;
+    text-wrap: balance;
+  }
+
+  /* A band of light crosses the gradient name once after load. */
+  .hero-name .grad-text {
+    background-image: linear-gradient(100deg, transparent 45%, var(--text) 50%, transparent 55%), var(--grad);
+    background-size: 300% 100%, 100% 100%;
+    background-position: 0 0, 0 0;
+    background-repeat: no-repeat;
+  }
+
+  :global(:root[data-theme='light']) .hero-name .grad-text {
+    background-image: linear-gradient(100deg, transparent 45%, var(--surface) 50%, transparent 55%), var(--grad);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-name .grad-text {
+      animation: hero-sheen 1.6s var(--ease) 0.25s 1 both;
+    }
+  }
+
+  @keyframes hero-sheen {
+    from {
+      background-position: 100% 0, 0 0;
+    }
+
+    to {
+      background-position: 0 0, 0 0;
+    }
+  }
+
+  .hero-tagline {
+    max-width: 58ch;
+    margin: 14px 0 0;
+    font-size: clamp(17px, 1.6vw, 19px);
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  /* Phone: two equal buttons, 48px high. */
+  .hero-ctas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .hero-ctas .button {
+    min-height: 48px;
+    padding: 0 12px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 20px;
+    margin-top: 6px;
+  }
+
+  .hero-links :global(.text-link svg:not(.ext)) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    max-width: 540px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Glass cell with a thin gradient line on top. */
+  .stat {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    padding: 12px 10px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 16px 36px -28px var(--glow);
+    overflow: hidden;
+  }
+
+  .stat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 12px;
+    right: 12px;
+    height: 1px;
+    background: var(--grad);
+    opacity: 0.6;
+  }
+
+  /* Width fixed to the real number of digits, so the cell does not move while counting. */
+  .stat-num {
+    align-self: flex-start;
+    display: inline-block;
+    min-width: calc(var(--digits) * 1ch);
+    font: 700 40px/1 var(--mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-label {
+    font: 11px/1.35 var(--mono);
+    letter-spacing: 0.01em;
+    color: var(--muted);
+  }
+
+  .hero-companies {
+    margin: 14px 0 0;
+    font: 13px/1.5 var(--mono);
+    letter-spacing: 0.02em;
+    color: var(--muted);
+  }
+
+  .hero-tech {
+    margin-top: 10px;
+  }
+
+  @media (min-width: 640px) {
+    .hero {
+      padding: 48px 0 64px;
+    }
+
+    .hero-in {
+      gap: 40px;
+    }
+
+    .hero-name {
+      margin-top: 18px;
+    }
+
+    .hero-tagline {
+      margin-top: 18px;
+    }
+
+    .hero-ctas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .hero-ctas .button {
+      padding: 0 24px;
+      white-space: nowrap;
+    }
+
+    .hero-links {
+      margin-top: 8px;
+    }
+
+    .stats {
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .stat {
+      padding: 16px 16px 14px;
+    }
+
+    .stat-num {
+      font-size: 48px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+    }
+
+    .hero-companies {
+      margin-top: 18px;
+    }
+
+    .hero-tech {
+      margin-top: 12px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero {
+      display: flex;
+      align-items: center;
+      min-height: calc(100vh - var(--nav-h));
+      min-height: calc(100svh - var(--nav-h));
+      padding: 40px 0 48px;
+    }
+
+    .hero-in {
+      grid-template-columns: 54fr 46fr;
+      gap: 48px;
+    }
+
+    .blob {
+      filter: blur(110px);
+    }
+  }
+
+  @media print {
+    .hero-name .grad-text {
+      background: none;
+    }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    // Hero figures count up once when the strip comes into view; the HTML already holds the real numbers.
+    const list = document.querySelector('[data-counter]');
+    const rm = matchMedia('(prefers-reduced-motion: reduce)');
+    if (!list || !('IntersectionObserver' in window) || rm.matches) return;
+    const numbers = Array.from(list.querySelectorAll('.stat-num'));
+    const target = (el) => Number(el.dataset.value) || 0;
+    let frame = 0;
+    const finish = () => {
+      cancelAnimationFrame(frame);
+      numbers.forEach((el) => {
+        el.textContent = String(target(el));
+      });
+    };
+    const run = () => {
+      numbers.forEach((el) => {
+        el.textContent = '0';
+      });
+      const start = performance.now();
+      const tick = (now) => {
+        const p = Math.min(1, (now - start) / 1000);
+        if (p >= 1) {
+          finish();
+          return;
+        }
+        const k = 1 - (1 - p) ** 3;
+        numbers.forEach((el) => {
+          el.textContent = String(Math.round(k * target(el)));
+        });
+        frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        run();
+      },
+      { threshold: 0.5 },
+    );
+    observer.observe(list);
+    rm.addEventListener('change', (event) => {
+      if (!event.matches) return;
+      observer.disconnect();
+      finish();
+    });
+  })();
+</script>
+
+<script is:inline>
+  (() => {
+    // Background lights drift while the hero is on screen, the tab is visible and the illustration is not paused.
+    const hero = document.querySelector('[data-hero]');
+    if (!hero) return;
+    const rm = matchMedia('(prefers-reduced-motion: reduce)');
+    const pauseButton = hero.querySelector('.frame-pause');
+    let paused = false;
+    let inView = true;
+    let tabVisible = !document.hidden;
+    const sync = () => {
+      hero.classList.toggle('bg-running', !rm.matches && !paused && inView && tabVisible);
+    };
+    // The illustration script registers its click handler first and has already updated aria-pressed.
+    if (pauseButton) {
+      pauseButton.addEventListener('click', () => {
+        paused = pauseButton.getAttribute('aria-pressed') === 'true';
+        sync();
+      });
+    }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          inView = entry.isIntersecting;
+        });
+        sync();
+      }).observe(hero);
+    }
+    document.addEventListener('visibilitychange', () => {
+      tabVisible = !document.hidden;
+      sync();
+    });
+    rm.addEventListener('change', sync);
+    sync();
+  })();
+</script>

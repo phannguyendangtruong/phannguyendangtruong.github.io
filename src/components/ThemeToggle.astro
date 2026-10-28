@@ -1,0 +1,35 @@
+---
+import Icon from './Icon.astro';
+import { tr, ui, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Label in both languages, for the 404 page. */
+  bilingual?: boolean;
+  /** 44px button (mobile menu, 404 page). */
+  large?: boolean;
+}
+
+const { lang, bilingual = false, large = false } = Astro.props;
+const label = bilingual ? `${ui.toggleTheme.en} · ${ui.toggleTheme.vi}` : tr('toggleTheme', lang);
+---
+
+<button
+  type="button"
+  class:list={['icon-btn', 'theme-toggle', 'js-only', { lg: large }]}
+  data-theme-toggle
+  aria-pressed="true"
+  aria-label={label}
+  title={label}
+>
+  <Icon name="sun" class="ic-sun" />
+  <Icon name="moon" class="ic-moon" />
+</button>
+
+<style>
+  /* The icon shows the theme the button switches to. */
+  :global(:root[data-theme='dark']) .theme-toggle :global(.ic-moon),
+  :global(:root[data-theme='light']) .theme-toggle :global(.ic-sun) {
+    display: none;
+  }
+</style>

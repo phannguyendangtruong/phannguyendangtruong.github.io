@@ -1,0 +1,923 @@
+---
+import Base from '../layouts/Base.astro';
+import ExperienceList from './ExperienceList.astro';
+import ExternalLink from './ExternalLink.astro';
+import GlowRing from './GlowRing.astro';
+import Icon from './Icon.astro';
+import SkillsList from './SkillsList.astro';
+import { education, profile, projects, statusLabel } from '../data/profile';
+import { caseStudyProjects } from '../i18n/nav';
+import { localePath, tr, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const caseStudySlugs = caseStudyProjects().map((project) => project.slug);
+const shown = projects
+  .filter((project) => project.status !== 'planned')
+  .map((project) => ({
+    project,
+    points: project.points ? project.points[lang].slice(0, 3) : [],
+    caseStudy:
+      project.slug && caseStudySlugs.includes(project.slug) ? localePath(lang, `/projects/${project.slug}/`) : undefined,
+  }));
+const title = `${tr('navResume', lang)} — ${profile.name[lang]}`;
+const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '');
+/** Set to true when the printed résumé runs past two A4 pages: projects then print without their points. */
+const compactProjectsInPrint = false;
+---
+
+<Base lang={lang} title={title} description={tr('resumeDescription', lang)} path="/resume/" current="resume">
+  <div class="cv-page">
+    <div class="cv-bg no-print" aria-hidden="true"></div>
+    <div class="container">
+      <div class="cv-wrap">
+        <div class="cv-toolbar no-print">
+          <p class="eyebrow cv-label" aria-hidden="true">{tr('resumeLabel', lang)}</p>
+          <div class="cv-actions">
+            <a class="back-link" href={localePath(lang, '/')}>
+              <Icon name="arrow-left" size={16} />
+              <span>{tr('backHome', lang)}</span>
+            </a>
+            <button type="button" class="button primary js-only cv-print" data-print>
+              <Icon name="printer" size={16} />
+              <span>{tr('printResume', lang)}</span>
+            </button>
+            <p class="print-hint">{tr('printHint', lang)}</p>
+          </div>
+        </div>
+
+        <article class="sheet" aria-labelledby="cv-name">
+          <GlowRing />
+          <header class="cv-head">
+            <h1 id="cv-name" class="cv-name"><span class="grad-text">{profile.name[lang]}</span></h1>
+            <p class="cv-role">{profile.role[lang]} · {profile.location[lang]}</p>
+            <ul class="cv-links">
+              <li>
+                <ExternalLink
+                  href={profile.links.linkedin}
+                  lang={lang}
+                  label={host(profile.links.linkedin)}
+                  icon="linkedin"
+                  class="cv-link"
+                />
+              </li>
+              <li>
+                <ExternalLink
+                  href={profile.links.github}
+                  lang={lang}
+                  label={host(profile.links.github)}
+                  icon="github"
+                  class="cv-link"
+                />
+              </li>
+            </ul>
+            <p class="cv-note">{tr('resumeNote', lang)}</p>
+          </header>
+
+          <section class="cv-section" aria-labelledby="cv-summary-title">
+            <h2 id="cv-summary-title" class="cv-h2">{tr('summaryTitle', lang)}</h2>
+            <p class="cv-lead">{profile.tagline[lang]}</p>
+            <p class="cv-about">{profile.about[lang][0]}</p>
+          </section>
+
+          <section class="cv-section" aria-labelledby="cv-exp-title">
+            <h2 id="cv-exp-title" class="cv-h2">{tr('experienceTitle', lang)}</h2>
+            <ExperienceList lang={lang} />
+          </section>
+
+          {
+            shown.length > 0 && (
+              <section
+                class:list={['cv-section', { 'print-compact': compactProjectsInPrint }]}
+                aria-labelledby="cv-proj-title"
+              >
+                <h2 id="cv-proj-title" class="cv-h2">{tr('projectsTitle', lang)}</h2>
+                {shown.map(({ project, points, caseStudy }) => (
+                  <div class="cv-pproj">
+                    <div class="cv-pproj-head">
+                      <h3>{project.name}</h3>
+                      <span class:list={['badge', project.status]}>{tr(statusLabel[project.status], lang)}</span>
+                    </div>
+                    <p class="cv-desc">{project.summary[lang]}</p>
+                    {points.length > 0 && (
+                      <ul class="dash-list cv-bullets cv-points">
+                        {points.map((point) => (
+                          <li>{point}</li>
+                        ))}
+                      </ul>
+                    )}
+                    <p class="cv-tech">
+                      <span class="sr-only">{tr('techLabel', lang)}</span> {project.tech.join(' · ')}
+                    </p>
+                    {(project.demoUrl || project.repoUrl) && (
+                      <div class="cv-plinks no-print">
+                        {project.demoUrl && (
+                          <ExternalLink href={project.demoUrl} lang={lang} label={tr('demo', lang)} class="text-link" />
+                        )}
+                        {project.repoUrl && (
+                          <ExternalLink href={project.repoUrl} lang={lang} label={tr('repository', lang)} class="text-link" />
+                        )}
+                      </div>
+                    )}
+                    {caseStudy && (
+                      <a class="text-link accent cv-case no-print" href={caseStudy}>
+                        <span>{tr('readCaseStudy', lang)}</span>
+                        <span class="sr-only">{` ${project.name}`}</span>
+                        <Icon name="arrow-right" size={16} />
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </section>
+            )
+          }
+
+          <section class="cv-section" aria-labelledby="cv-skills-title">
+            <h2 id="cv-skills-title" class="cv-h2">{tr('skillsTitle', lang)}</h2>
+            <SkillsList lang={lang} />
+          </section>
+
+          <section class="cv-section" aria-labelledby="cv-edu-title">
+            <h2 id="cv-edu-title" class="cv-h2">{tr('educationTitle', lang)}</h2>
+            <p class="cv-edu">{education.school[lang]}</p>
+          </section>
+        </article>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  /* A4 for the résumé only: Astro does not scope @page, and this CSS ships with the two résumé pages alone. */
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+
+  .cv-page {
+    position: relative;
+    isolation: isolate;
+  }
+
+  /* Grid and glow behind the top of the page; overflow is cut so the glow never scrolls sideways. */
+  .cv-bg {
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: -1;
+    height: 420px;
+    overflow: hidden;
+    pointer-events: none;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    -webkit-mask-image: linear-gradient(#000, transparent);
+    mask-image: linear-gradient(#000, transparent);
+  }
+
+  .cv-bg::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: -140px;
+    width: 720px;
+    height: 360px;
+    transform: translateX(-50%);
+    background: radial-gradient(closest-side, var(--glow), transparent);
+    filter: blur(10px);
+  }
+
+  .cv-wrap {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  /* Phone: label and back link share the first row; the print button (or the hint) takes the full second row. */
+  .cv-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    padding: 20px 0 16px;
+  }
+
+  .cv-label {
+    margin: 0;
+  }
+
+  .cv-actions {
+    display: contents;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+  }
+
+  .cv-print {
+    flex: 1 1 100%;
+    min-height: 48px;
+  }
+
+  .print-hint {
+    flex: 1 1 100%;
+    margin: 0;
+    padding: 8px 14px;
+    border: 1px dashed var(--border-strong);
+    border-radius: 12px;
+    font: 12.5px/1.5 var(--mono);
+    color: var(--muted);
+  }
+
+  :global(html.js) .print-hint {
+    display: none;
+  }
+
+  /* Glass sheet: soft gradient edge (GlowRing) and a brighter line on top; no spotlight, no lift, no reveal. */
+  .sheet {
+    position: relative;
+    margin-bottom: 40px;
+    padding: 24px 18px 28px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    background: radial-gradient(640px 280px at 50% 0%, var(--chip-bg), transparent 70%), var(--glass);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-sheet);
+  }
+
+  .sheet > :global(.glow-ring) {
+    opacity: 0.5;
+  }
+
+  .sheet::before {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    left: 32px;
+    right: 32px;
+    top: -1px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), var(--accent-3), transparent);
+    opacity: 0.75;
+  }
+
+  .cv-name {
+    margin: 0;
+    font-size: clamp(28px, 4.4vw, 36px);
+    font-weight: 750;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  .cv-role {
+    margin: 8px 0 0;
+    font-size: 16px;
+    color: var(--muted);
+  }
+
+  /* Phone: one link per row, each 44px high; long addresses may break anywhere instead of overflowing. */
+  .cv-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 24px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cv-links li {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .cv-links :global(a) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    min-height: 44px;
+    font: 12.5px/1.4 var(--mono);
+    color: var(--text);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+
+  .cv-links :global(a:hover) {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .cv-links :global(a > svg:not(.ext)) {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    color: var(--muted);
+  }
+
+  .cv-links :global(.ext) {
+    width: 12px;
+    height: 12px;
+    color: var(--faint);
+  }
+
+  .cv-note {
+    margin: 12px 0 0;
+    padding-left: 12px;
+    border-left: 2px solid var(--border-strong);
+    font-size: 13.5px;
+    color: var(--faint);
+  }
+
+  .cv-section {
+    margin-top: 32px;
+  }
+
+  .cv-h2 {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0 0 16px;
+    font: 600 12px/1 var(--mono);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .cv-h2::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-strong);
+  }
+
+  .cv-lead {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .cv-about {
+    margin: 10px 0 0;
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  /* Elements rendered by ExperienceList and SkillsList are styled here, so print sizes live in one place. */
+  .sheet :global(.cv-jobs) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sheet :global(.cv-job) {
+    margin-bottom: 22px;
+    padding-bottom: 22px;
+    border-bottom: 1px dashed var(--border-strong);
+  }
+
+  .sheet :global(.cv-job:last-child) {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  /* Phone: company, role, then period, all left aligned. */
+  .sheet :global(.cv-job-head) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .sheet :global(.cv-job-title) {
+    min-width: 0;
+  }
+
+  .sheet :global(.cv-job-title h3) {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+
+  .sheet :global(.cv-job-role) {
+    margin: 2px 0 0;
+    font-size: 14.5px;
+    color: var(--muted);
+  }
+
+  .sheet :global(.cv-period) {
+    margin: 0;
+    font: 500 13px/1.5 var(--mono);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .sheet :global(.cv-proj) {
+    margin-top: 14px;
+    padding-left: 14px;
+    border-left: 1px solid var(--border-strong);
+  }
+
+  .sheet :global(.cv-proj h3) {
+    margin: 0;
+    font-size: 15.5px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.4;
+  }
+
+  .sheet :global(.cv-sub) {
+    margin: 4px 0 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .sheet :global(.cv-desc) {
+    margin: 6px 0 0;
+    font-size: 14.5px;
+    color: var(--muted);
+  }
+
+  .sheet :global(.cv-bullets) {
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 14.5px;
+    line-height: 1.55;
+  }
+
+  .sheet :global(.cv-tech) {
+    margin: 10px 0 0;
+    font: 12.5px/1.7 var(--mono);
+    color: var(--faint);
+  }
+
+  .cv-pproj + .cv-pproj {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px dashed var(--border-strong);
+  }
+
+  .cv-pproj-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+  }
+
+  .cv-pproj-head h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 650;
+    line-height: 1.3;
+  }
+
+  .cv-pproj .cv-desc {
+    margin-top: 10px;
+    font-size: 15px;
+  }
+
+  .cv-plinks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 20px;
+    margin-top: 8px;
+  }
+
+  .cv-case {
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .cv-case:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .cv-case :global(svg) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .sheet :global(.cv-skills) {
+    margin: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Phone: group name above, skills below. */
+  .sheet :global(.cv-skill) {
+    display: grid;
+    gap: 2px;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .sheet :global(.cv-skill dt) {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .sheet :global(.cv-skill dd) {
+    margin: 0;
+    font: 13px/1.7 var(--mono);
+    color: var(--muted);
+  }
+
+  .cv-edu {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  @media (min-width: 640px) {
+    .cv-toolbar {
+      gap: 12px 16px;
+      padding: 40px 0 20px;
+    }
+
+    .cv-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+    }
+
+    .cv-print {
+      flex: none;
+      min-height: 44px;
+    }
+
+    .print-hint {
+      flex: none;
+      border-radius: var(--radius-pill);
+    }
+
+    .sheet {
+      margin-bottom: 56px;
+      padding: 40px 48px 44px;
+    }
+
+    .cv-links {
+      gap: 8px 24px;
+      margin-top: 18px;
+    }
+
+    .cv-links :global(a) {
+      gap: 8px;
+      min-height: 32px;
+      font-size: 13.5px;
+    }
+
+    .cv-note {
+      margin-top: 14px;
+    }
+
+    .cv-section {
+      margin-top: 44px;
+    }
+
+    .cv-h2 {
+      margin-bottom: 20px;
+    }
+
+    .cv-lead {
+      font-size: 16.5px;
+    }
+
+    .cv-about {
+      margin-top: 12px;
+    }
+
+    .sheet :global(.cv-job) {
+      margin-bottom: 28px;
+      padding-bottom: 28px;
+    }
+
+    .sheet :global(.cv-job-head) {
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 4px 16px;
+    }
+
+    .sheet :global(.cv-job-title h3) {
+      font-size: 19px;
+    }
+
+    .sheet :global(.cv-period) {
+      text-align: right;
+    }
+
+    .sheet :global(.cv-proj) {
+      margin-top: 18px;
+      padding-left: 18px;
+    }
+
+    .cv-pproj + .cv-pproj {
+      margin-top: 28px;
+      padding-top: 28px;
+    }
+
+    .cv-pproj-head h3 {
+      font-size: 19px;
+    }
+
+    .cv-case {
+      margin-top: 14px;
+    }
+
+    .sheet :global(.cv-skill) {
+      grid-template-columns: 200px 1fr;
+      column-gap: 20px;
+      row-gap: 0;
+      align-items: start;
+      padding: 11px 0;
+    }
+  }
+
+  /* A4 print: black on white from the print variables of global.css. Print width (about 680px) still matches
+     min-width: 640px, so the layout is set again here explicitly. */
+  @media print {
+    :global(.skip-link) {
+      display: none !important;
+    }
+
+    .container,
+    .cv-wrap {
+      max-width: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .sheet {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      box-shadow: none;
+      font-size: 10pt;
+      line-height: 1.4;
+    }
+
+    .sheet::before,
+    .cv-h2::after,
+    .badge::before,
+    .cv-links :global(.ext) {
+      display: none;
+    }
+
+    .sheet :global(a) {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .cv-name {
+      font-size: 20pt;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .cv-role {
+      margin-top: 2pt;
+      font-size: 10.5pt;
+    }
+
+    .cv-links {
+      gap: 2pt 14pt;
+      margin-top: 6pt;
+    }
+
+    .cv-links :global(a) {
+      gap: 4pt;
+      min-height: 0;
+      font-size: 9.5pt;
+    }
+
+    .cv-links :global(a > svg:not(.ext)) {
+      width: 9pt;
+      height: 9pt;
+    }
+
+    .cv-note {
+      margin-top: 5pt;
+      padding-left: 0;
+      border-left: 0;
+      font-size: 9.5pt;
+    }
+
+    .cv-section {
+      margin-top: 12pt;
+    }
+
+    .cv-h2 {
+      margin: 0 0 6pt;
+      padding-bottom: 2pt;
+      border-bottom: 0.75pt solid var(--text);
+      font: 700 10.5pt/1.2 var(--font);
+      letter-spacing: 0.08em;
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+
+    .cv-lead,
+    .cv-about,
+    .cv-edu,
+    .sheet :global(.cv-desc),
+    .sheet :global(.cv-bullets) {
+      font-size: 10pt;
+      line-height: 1.4;
+    }
+
+    .cv-about {
+      margin-top: 4pt;
+    }
+
+    .sheet :global(.cv-desc) {
+      margin-top: 1pt;
+    }
+
+    .sheet :global(.cv-job) {
+      margin: 0 0 9pt;
+      padding: 0;
+      border: 0;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .sheet :global(.cv-job:last-child) {
+      margin-bottom: 0;
+    }
+
+    .sheet :global(.cv-job-head) {
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0 8pt;
+    }
+
+    /* Role on the company line: "Viettel — Java Developer". */
+    .sheet :global(.cv-job-title) {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0 4pt;
+    }
+
+    .sheet :global(.cv-job-title h3) {
+      font-size: 11pt;
+      font-weight: 700;
+    }
+
+    .sheet :global(.cv-job-role) {
+      margin: 0;
+      font-size: 10pt;
+    }
+
+    .sheet :global(.cv-job-role::before) {
+      content: '— ';
+    }
+
+    .sheet :global(.cv-period) {
+      font-size: 9.5pt;
+      text-align: right;
+    }
+
+    .sheet :global(.cv-proj) {
+      margin-top: 5pt;
+      padding: 0;
+      border: 0;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .sheet :global(.cv-proj h3) {
+      font-size: 10pt;
+      font-weight: 700;
+    }
+
+    .sheet :global(.cv-sub) {
+      margin-top: 1pt;
+      font-size: 10pt;
+      font-weight: 400;
+      font-style: italic;
+    }
+
+    .sheet :global(.cv-bullets) {
+      gap: 1pt;
+      margin-top: 3pt;
+    }
+
+    .sheet :global(.cv-bullets li) {
+      padding-left: 10pt;
+    }
+
+    /* Dash as text: browsers leave background colours out of print by default. */
+    .sheet :global(.cv-bullets li::before) {
+      content: '–';
+      top: 0;
+      left: 0;
+      width: auto;
+      height: auto;
+      background: none;
+    }
+
+    .sheet :global(.cv-tech) {
+      margin-top: 2pt;
+      font-size: 9.5pt;
+      line-height: 1.4;
+    }
+
+    .cv-pproj {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .cv-pproj + .cv-pproj {
+      margin-top: 8pt;
+      padding-top: 0;
+      border: 0;
+    }
+
+    .cv-pproj-head {
+      gap: 6pt;
+    }
+
+    .cv-pproj-head h3 {
+      font-size: 11pt;
+      font-weight: 700;
+    }
+
+    .cv-pproj .cv-desc {
+      margin-top: 2pt;
+      font-size: 10pt;
+    }
+
+    /* Status in words inside a thin frame, without the coloured dot. */
+    .badge {
+      height: auto;
+      padding: 0 3pt;
+      border: 0.75pt solid var(--text);
+      border-radius: 2pt;
+      background: none;
+      font-size: 9.5pt;
+      line-height: 1.3;
+      letter-spacing: 0;
+    }
+
+    .sheet :global(.cv-skills),
+    .sheet :global(.cv-skill) {
+      border: 0;
+    }
+
+    .sheet :global(.cv-skill) {
+      grid-template-columns: 42mm 1fr;
+      column-gap: 8pt;
+      row-gap: 0;
+      padding: 2pt 0;
+    }
+
+    .sheet :global(.cv-skill dt) {
+      font-size: 10pt;
+      font-weight: 700;
+    }
+
+    .sheet :global(.cv-skill dd) {
+      font-size: 9.5pt;
+      line-height: 1.4;
+    }
+
+    .print-compact .cv-points {
+      display: none;
+    }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    const button = document.querySelector('[data-print]');
+    if (!button) return;
+    button.addEventListener('click', () => {
+      try {
+        window.print();
+      } catch (_) {
+        // In-app browsers may block the print dialog; the button then does nothing.
+      }
+    });
+  })();
+</script>

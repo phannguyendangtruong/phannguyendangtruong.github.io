@@ -1,0 +1,655 @@
+---
+import Base from '../layouts/Base.astro';
+import ExperienceTimeline from './ExperienceTimeline.astro';
+import ExternalLink from './ExternalLink.astro';
+import FocusScene from './FocusScene.astro';
+import GlowRing from './GlowRing.astro';
+import HeroSection from './HeroSection.astro';
+import ProjectCard from './ProjectCard.astro';
+import SectionHead from './SectionHead.astro';
+import SkillsBento from './SkillsBento.astro';
+import { contactCommand } from '../data/hero';
+import { focusAreas, profile, shownProjects } from '../data/profile';
+import { homeSections, type HomeSection } from '../i18n/nav';
+import { tr, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const shown = shownProjects();
+const featured = shown.filter((project) => project.status !== 'planned');
+const planned = shown.filter((project) => project.status === 'planned');
+const title = `${profile.name[lang]} — ${profile.role[lang]}`;
+/** Three focus areas get the shaped layout (one tall card); other counts use an even grid. */
+const threeFocus = focusAreas.length === 3;
+const focusColumns = threeFocus
+  ? undefined
+  : `--c2: ${Math.min(2, focusAreas.length)}; --c3: ${Math.min(3, focusAreas.length)}`;
+const focusNumber = (index: number) => String(index + 1).padStart(2, '0');
+/** Number of a block among the blocks shown (the projects block may be hidden): the outlined mark and the "// 0n" label. */
+const blockMark = (id: HomeSection) => String(homeSections.indexOf(id) + 1).padStart(2, '0');
+/** Width of the contact command line in characters (prompt, space, command, cursor), so typing never moves it. */
+const commandChars = contactCommand.prompt.length + contactCommand.text.length + 2;
+---
+
+<Base lang={lang} title={title} description={profile.tagline[lang]} path="/">
+  <HeroSection lang={lang} />
+
+  <section id="about" class="section" aria-labelledby="about-title">
+    <div class="container">
+      <SectionHead lang={lang} id="about-title" label="aboutLabel" title="navAbout" mark={blockMark('about')} />
+      <div class="about-body">
+        {profile.about[lang].map((paragraph) => <p class="reveal">{paragraph}</p>)}
+      </div>
+      <h3 class="sub-title reveal">{tr('focusTitle', lang)}</h3>
+      <ul class:list={['bento', 'focus', { three: threeFocus }]} style={focusColumns}>
+        {
+          focusAreas.map((area, index) => (
+            <li class:list={['card', 'spot', 'focus-card', 'reveal', { tall: threeFocus && index === 0 }]}>
+              {threeFocus && index === 0 && (
+                <span class="wm" aria-hidden="true">
+                  {focusNumber(index)}
+                </span>
+              )}
+              {area.scene && <FocusScene kind={area.scene} />}
+              <span class="num" aria-hidden="true">
+                {focusNumber(index)}
+              </span>
+              <h4>{area.title[lang]}</h4>
+              <p>{area.body[lang]}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  {
+    homeSections.includes('projects') && (
+      <section id="projects" class="section" aria-labelledby="projects-title">
+        <div class="container">
+          <SectionHead
+            lang={lang}
+            id="projects-title"
+            label="projectsLabel"
+            title="projectsTitle"
+            intro="projectsIntro"
+            mark={blockMark('projects')}
+          />
+          {featured.length > 0 && (
+            <ul class="project-list">
+              {featured.map((project) => (
+                <li class="reveal">
+                  <ProjectCard project={project} lang={lang} featured />
+                </li>
+              ))}
+            </ul>
+          )}
+          {planned.length > 0 && (
+            <ul class="project-grid">
+              {planned.map((project) => (
+                <li class="reveal">
+                  <ProjectCard project={project} lang={lang} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  <section id="experience" class="section" aria-labelledby="experience-title">
+    <div class="container">
+      <SectionHead
+        lang={lang}
+        id="experience-title"
+        label="experienceLabel"
+        title="experienceTitle"
+        mark={blockMark('experience')}
+      />
+      <ExperienceTimeline lang={lang} />
+    </div>
+  </section>
+
+  <section id="skills" class="section" aria-labelledby="skills-title">
+    <div class="container">
+      <SectionHead lang={lang} id="skills-title" label="skillsLabel" title="skillsTitle" mark={blockMark('skills')} />
+      <SkillsBento lang={lang} />
+    </div>
+  </section>
+
+  <section id="contact" class="section last" aria-labelledby="contact-title">
+    <div class="container">
+      <div class="card spot contact reveal" data-fx>
+        <GlowRing spin />
+        <span class="contact-beam no-print" aria-hidden="true"></span>
+        <SectionHead
+          lang={lang}
+          id="contact-title"
+          label="contactLabel"
+          title="contactTitle"
+          reveal={false}
+          mark={blockMark('contact')}
+          class="contact-head"
+        />
+        <p class="contact-body">{tr('contactBody', lang)}</p>
+        {
+          profile.links.linkedin && (
+            <p class="contact-cmd no-print" aria-hidden="true" data-cmd-line style={`--chars: ${commandChars}`}><span class="cmd-prompt">{contactCommand.prompt}</span>{' '}<span class="cmd-text">{contactCommand.text}</span><span class="cmd-cursor"></span></p>
+          )
+        }
+        <div class="contact-ctas">
+          {
+            profile.links.linkedin && (
+              <ExternalLink
+                href={profile.links.linkedin}
+                lang={lang}
+                label={profile.linkNames.linkedin}
+                icon="linkedin"
+                class="button primary"
+              />
+            )
+          }
+          {
+            profile.links.github && (
+              <ExternalLink
+                href={profile.links.github}
+                lang={lang}
+                label={profile.linkNames.github}
+                icon="github"
+                class="button secondary"
+              />
+            )
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Phone: blocks closer together than the global spacing. */
+  .section {
+    padding: 24px 0;
+  }
+
+  .section.last {
+    padding-bottom: 56px;
+  }
+
+  .section :global(.section-head) {
+    margin-bottom: 24px;
+  }
+
+  .about-body {
+    display: grid;
+    gap: 16px;
+    max-width: 65ch;
+    font-size: 17px;
+    color: var(--muted);
+  }
+
+  .about-body p {
+    margin: 0;
+  }
+
+  .about-body p:first-child {
+    color: var(--text);
+  }
+
+  .sub-title {
+    margin: 40px 0 16px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .focus-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  /* Small animated diagram at the top of the card (FocusScene). */
+  .focus-card :global(.scene) {
+    margin-bottom: 4px;
+  }
+
+  .focus-card h4 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .focus-card p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .num {
+    font: 13px/1.5 var(--mono);
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+
+  .tall {
+    justify-content: flex-end;
+  }
+
+  /* The diagram stays at the top of the tall card, the text at its bottom. */
+  .tall :global(.scene) {
+    margin-bottom: auto;
+  }
+
+  .tall h4 {
+    font-size: 24px;
+    letter-spacing: -0.02em;
+  }
+
+  .tall p {
+    max-width: 44ch;
+    font-size: 16px;
+  }
+
+  /* Large decorative number of the tall card, from 640px only: on phones the card is short and the number would lie under the text. */
+  .wm {
+    display: none;
+    position: absolute;
+    right: 20px;
+    top: 0;
+    z-index: 0;
+    font: 700 150px/1 var(--mono);
+    letter-spacing: -0.06em;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    opacity: 0.12;
+    pointer-events: none;
+  }
+
+  .project-list,
+  .project-grid {
+    display: grid;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .project-grid {
+    margin-top: 16px;
+  }
+
+  /* Cards in one row share the row height. */
+  .project-grid > li {
+    display: grid;
+  }
+
+  /* Call-to-action panel: gradient edge that turns on hover (GlowRing), lights at the top and bottom. */
+  .contact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 36px 20px;
+    text-align: center;
+    border-color: var(--border-strong);
+    background:
+      radial-gradient(720px 300px at 50% 0%, var(--glow), transparent 70%),
+      radial-gradient(560px 240px at 50% 100%, var(--glow-2), transparent 70%),
+      var(--glass);
+    box-shadow: 0 0 0 1px var(--chip-bg), 0 0 72px -16px var(--glow);
+  }
+
+  .contact :global(.section-head.contact-head),
+  .contact :global(.eyebrow) {
+    margin-bottom: 0;
+  }
+
+  .contact :global(.section-title) {
+    font-size: clamp(32px, 5.2vw, 52px);
+  }
+
+  .contact-body {
+    max-width: 46ch;
+    margin: 0;
+    font-size: 18px;
+    color: var(--muted);
+  }
+
+  /* Command line in the terminal colours of the hero; it stays on one line of markup and its width is fixed in
+     characters, so typing never moves it. */
+  .contact-cmd {
+    display: block;
+    width: calc(var(--chars) * 1ch + 30px);
+    max-width: 100%;
+    margin: 0;
+    padding: 8px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    background: var(--term-bg);
+    color: var(--term-text);
+    font: 13.5px/1.5 var(--mono);
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .cmd-prompt {
+    color: var(--term-muted);
+  }
+
+  .cmd-cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.1em;
+    margin-left: 2px;
+    vertical-align: -0.18em;
+    background: var(--term-event);
+    opacity: 0.85;
+  }
+
+  /* Once the line is typed, the cursor blinks for five seconds, then stays still. */
+  @media (prefers-reduced-motion: no-preference) {
+    .contact-cmd.typed .cmd-cursor {
+      animation: cmd-blink 1s steps(1, end) 5;
+    }
+  }
+
+  @keyframes cmd-blink {
+    0% {
+      opacity: 0.85;
+    }
+
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* A glowing packet runs twice around the panel edge once the panel comes on screen (SiteScripts adds .fx-run):
+     a narrow conic wedge turns behind a 2px ring mask, as in GlowRing. Hidden at the end and with reduced motion. */
+  .contact-beam {
+    position: absolute;
+    inset: -1px;
+    z-index: 0;
+    border-radius: inherit;
+    padding: 2px;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .contact-beam::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(150%, 1200px);
+    aspect-ratio: 1;
+    background: conic-gradient(from 0deg, transparent 0 80%, var(--accent) 93%, var(--accent-2) 98.5%, transparent 99%);
+    transform: translate(-50%, -50%);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .contact.fx-run .contact-beam {
+      animation: contact-beam-fade 5.6s linear 1 both;
+      animation-play-state: paused;
+    }
+
+    .contact.fx-run .contact-beam::before {
+      animation: contact-beam-spin 2.8s linear 2 both;
+      animation-play-state: paused;
+    }
+
+    .contact.fx-run.fx-on .contact-beam,
+    .contact.fx-run.fx-on .contact-beam::before {
+      animation-play-state: running;
+    }
+  }
+
+  @keyframes contact-beam-spin {
+    from {
+      transform: translate(-50%, -50%) rotate(0turn);
+    }
+
+    to {
+      transform: translate(-50%, -50%) rotate(1turn);
+    }
+  }
+
+  @keyframes contact-beam-fade {
+    0% {
+      opacity: 0;
+    }
+
+    6%,
+    92% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .contact-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 10px;
+  }
+
+  .contact-ctas :global(.button) {
+    min-height: 48px;
+    padding: 0 24px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .card.contact:hover {
+      box-shadow: 0 0 0 1px var(--chip-bg), 0 0 96px -8px var(--glow);
+    }
+  }
+
+  @media (min-width: 640px) {
+    .section {
+      padding: 56px 0;
+    }
+
+    .section.last {
+      padding-bottom: 112px;
+    }
+
+    .section :global(.section-head) {
+      margin-bottom: 32px;
+    }
+
+    .sub-title {
+      margin: 56px 0 20px;
+    }
+
+    .focus-card {
+      padding: 24px;
+    }
+
+    .focus.three {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .focus.three .tall {
+      grid-column: 1 / -1;
+    }
+
+    .focus:not(.three) {
+      grid-template-columns: repeat(var(--c2), minmax(0, 1fr));
+    }
+
+    .tall {
+      min-height: 240px;
+      padding: 32px;
+    }
+
+    /* The full-width tall card is short here: the heading wraps before the number at the right. */
+    .tall h4 {
+      max-width: calc(100% - 160px);
+      font-size: 26px;
+    }
+
+    .wm {
+      display: block;
+    }
+
+    .project-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .contact {
+      padding: 64px 40px;
+    }
+
+    /* Block number at the right edge of the panel; an empty column of the same width on the left keeps the heading centred. */
+    .contact :global(.contact-head.has-mark) {
+      align-self: stretch;
+      grid-template-columns: var(--mark-w) minmax(0, 1fr) var(--mark-w);
+    }
+
+    .contact :global(.contact-head.has-mark > :not(.sh-mark)) {
+      grid-column: 2;
+    }
+
+    .contact :global(.contact-head .sh-mark) {
+      grid-column: 3;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .focus.three .tall {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+    }
+
+    .focus:not(.three) {
+      grid-template-columns: repeat(var(--c3), minmax(0, 1fr));
+    }
+
+    /* Spanning two rows, the card is tall enough to keep the text below the number. */
+    .tall h4 {
+      max-width: none;
+    }
+
+    /* The diagram keeps clear of the large number (about 200px wide, 20px from the right edge of the card). */
+    .tall :global(.scene) {
+      max-width: min(260px, calc(100% - 182px));
+    }
+
+    .wm {
+      font-size: 176px;
+    }
+
+    .contact {
+      padding: 80px 56px;
+    }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    // Featured project cards lean towards the pointer, at most 4 degrees; mouse only, off with reduced motion.
+    const cards = Array.from(document.querySelectorAll('[data-tilt]'));
+    if (!cards.length) return;
+    const fine = matchMedia('(hover: hover) and (pointer: fine)');
+    const rm = matchMedia('(prefers-reduced-motion: reduce)');
+    const maxTilt = 4;
+    const resets = cards.map((card) => {
+      let frame = 0;
+      let x = 0.5;
+      let y = 0.5;
+      const apply = () => {
+        frame = 0;
+        card.style.setProperty('--rx', `${((0.5 - y) * 2 * maxTilt).toFixed(2)}deg`);
+        card.style.setProperty('--ry', `${((x - 0.5) * 2 * maxTilt).toFixed(2)}deg`);
+      };
+      const reset = () => {
+        cancelAnimationFrame(frame);
+        frame = 0;
+        card.classList.remove('tilting');
+        card.style.removeProperty('--rx');
+        card.style.removeProperty('--ry');
+      };
+      card.addEventListener('pointermove', (event) => {
+        if (event.pointerType !== 'mouse' || !fine.matches || rm.matches) return;
+        const rect = card.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        x = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+        y = Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
+        card.classList.add('tilting');
+        if (!frame) frame = requestAnimationFrame(apply);
+      });
+      card.addEventListener('pointerleave', reset);
+      return reset;
+    });
+    rm.addEventListener('change', (event) => {
+      if (event.matches) resets.forEach((reset) => reset());
+    });
+  })();
+</script>
+
+<script is:inline>
+  (() => {
+    // Contact command line: typed once when it comes on screen with the tab visible; the cursor then blinks for five
+    // seconds (CSS). Reduced motion or no observer: the whole line shows at once, with a still cursor.
+    const line = document.querySelector('[data-cmd-line]');
+    const rm = matchMedia('(prefers-reduced-motion: reduce)');
+    if (!line || !('IntersectionObserver' in window) || rm.matches) return;
+    const text = line.querySelector('.cmd-text');
+    if (!text) return;
+    const full = text.textContent || '';
+    let timer = 0;
+    let finished = false;
+    let observer = null;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+      if (observer) observer.disconnect();
+      text.textContent = full;
+      line.classList.add('typed');
+    };
+    const type = (count) => {
+      if (document.hidden || count >= full.length) {
+        finish();
+        return;
+      }
+      text.textContent = full.slice(0, count);
+      timer = setTimeout(() => type(count + 1), 55);
+    };
+    observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        if (document.hidden) finish();
+        else type(1);
+      },
+      { threshold: 0.6 },
+    );
+    text.textContent = '';
+    observer.observe(line);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && timer) finish();
+    });
+    rm.addEventListener('change', () => {
+      if (rm.matches) finish();
+    });
+  })();
+</script>

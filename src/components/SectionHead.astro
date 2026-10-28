@@ -1,0 +1,163 @@
+---
+import { tr, type Lang, type Text, type UiKey } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Id of the heading, referenced by aria-labelledby of the section. */
+  id: string;
+  /** Code-style label above the heading, such as "// 01 · about"; "{n}" in the label is replaced by `mark`. */
+  label: UiKey;
+  /** Label key, or text from a data file (case study lifecycle title). */
+  title: UiKey | Text;
+  intro?: UiKey;
+  /** Fade the head in on scroll; off when a parent block already does. */
+  reveal?: boolean;
+  /** Large outlined block number at the right end of the heading row, such as "01"; shown from 640px. */
+  mark?: string;
+  class?: string;
+}
+
+const { lang, id, label, title, intro, reveal = true, mark, class: className } = Astro.props;
+const heading = typeof title === 'string' ? tr(title, lang) : title[lang];
+const eyebrow = tr(label, lang).replace('{n}', mark ?? '');
+/** Digits of the monospace font are 0.6em wide, so the viewBox follows the digit count. */
+const markWidth = mark ? mark.length * 60 + 8 : 0;
+const markGradient = `${id}-mark`;
+---
+
+<div
+  class:list={['section-head', className, { reveal, 'has-mark': Boolean(mark) }]}
+  style={mark ? `--mark-units: ${markWidth}` : undefined}
+>
+  {
+    mark && (
+      <svg class="sh-mark no-print" viewBox={`0 0 ${markWidth} 100`} aria-hidden="true" focusable="false" data-fx>
+        <defs>
+          <linearGradient id={markGradient} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" class="stop-1" />
+            <stop offset="0.52" class="stop-2" />
+            <stop offset="1" class="stop-3" />
+          </linearGradient>
+        </defs>
+        <text x="4" y="86" stroke={`url(#${markGradient})`}>{mark}</text>
+      </svg>
+    )
+  }
+  <p class="eyebrow" aria-hidden="true">{eyebrow}</p>
+  <h2 class="section-title" id={id} tabindex="-1">{heading}</h2>
+  {intro && <p class="section-intro">{tr(intro, lang)}</p>}
+</div>
+
+<style>
+  .section-head {
+    margin-bottom: 32px;
+  }
+
+  .section-title {
+    margin: 0;
+  }
+
+  .section-intro {
+    margin: 12px 0 0;
+  }
+
+  /* Outlined gradient number, faint. Phones leave it out: there is no room beside the heading. */
+  .sh-mark {
+    display: none;
+    overflow: visible;
+    opacity: 0.12;
+    pointer-events: none;
+  }
+
+  .sh-mark text {
+    font: 700 100px/1 var(--mono);
+    letter-spacing: -0.04em;
+    fill: none;
+    stroke-width: 1.4;
+  }
+
+  /* The outline draws itself once when the number comes on screen (SiteScripts sets .fx-wait, then .fx-run).
+     The dash restarts on every glyph contour, so 360 units cover the longest contour of a 100px digit; after the
+     animation the dash is dropped, which leaves the full outline. */
+  @media screen and (prefers-reduced-motion: no-preference) {
+    .sh-mark.fx-wait text {
+      stroke-dasharray: 360;
+      stroke-dashoffset: 360;
+    }
+
+    .sh-mark.fx-run text {
+      animation: sh-draw 1.8s var(--ease) 0.1s 1 backwards;
+      animation-play-state: paused;
+    }
+
+    .sh-mark.fx-run.fx-on text {
+      animation-play-state: running;
+    }
+  }
+
+  @keyframes sh-draw {
+    from {
+      stroke-dasharray: 360;
+      stroke-dashoffset: 360;
+    }
+
+    to {
+      stroke-dasharray: 360;
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .stop-1 {
+    stop-color: var(--accent);
+  }
+
+  .stop-2 {
+    stop-color: var(--accent-2);
+  }
+
+  .stop-3 {
+    stop-color: var(--accent-3);
+  }
+
+  :global(:root[data-theme='light']) .sh-mark {
+    opacity: 0.1;
+  }
+
+  /* From 640px the number has its own column at the right end of the heading row, so it never sits under the text. */
+  @media (min-width: 640px) {
+    .has-mark {
+      --mark-h: clamp(120px, 10.5vw, 144px);
+      --mark-w: calc(var(--mark-h) * var(--mark-units) / 100);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) var(--mark-w);
+      column-gap: 24px;
+    }
+
+    .has-mark > :not(.sh-mark) {
+      grid-column: 1;
+    }
+
+    .has-mark .eyebrow {
+      grid-row: 1;
+    }
+
+    .has-mark .section-title {
+      grid-row: 2;
+    }
+
+    .has-mark .section-intro {
+      grid-row: 3;
+    }
+
+    /* Centred on the label and the heading; the negative margins keep the rows at the height of the text. */
+    .sh-mark {
+      display: block;
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: center;
+      width: var(--mark-w);
+      height: var(--mark-h);
+      margin: calc(var(--mark-h) / -2) 0;
+    }
+  }
+</style>

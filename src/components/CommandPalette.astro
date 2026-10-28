@@ -1,0 +1,562 @@
+---
+import Icon from './Icon.astro';
+import { profile } from '../data/profile';
+import { caseStudyProjects, homeSections, otherLang, type HomeSection } from '../i18n/nav';
+import { keyLabels, localePath, tr, type Lang, type UiKey } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Path of this page without the language prefix, e.g. "/resume/". */
+  path: string;
+}
+
+type Command = {
+  id: string;
+  name: string;
+  hint: string;
+  terms: string[];
+  href?: string;
+  section?: string;
+  url?: string;
+};
+
+const { lang, path } = Astro.props;
+const other = otherLang(lang);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+/** Target shown to the visitor: the internal path without BASE_PATH. */
+const shown = (href: string) => href.slice(base.length) || '/';
+const caseStudyName = (name: string, value: Lang) => tr('cmdkCaseStudy', value).replace('{name}', name);
+
+const sectionLabels: Record<HomeSection, UiKey> = {
+  about: 'navAbout',
+  projects: 'navProjects',
+  experience: 'navExperience',
+  skills: 'navSkills',
+  contact: 'contactTitle',
+};
+
+const goCommands: Command[] = [
+  ...homeSections.map((id) => ({
+    id: `go-${id}`,
+    name: tr(sectionLabels[id], lang),
+    hint: `#${id}`,
+    terms: [tr(sectionLabels[id], lang), tr(sectionLabels[id], other), `#${id}`],
+    href: localePath(lang, `/#${id}`),
+    section: id,
+  })),
+  ...caseStudyProjects().map((project) => {
+    const href = localePath(lang, `/projects/${project.slug}/`);
+    return {
+      id: `go-case-${project.slug}`,
+      name: caseStudyName(project.name, lang),
+      hint: shown(href),
+      terms: [caseStudyName(project.name, lang), caseStudyName(project.name, other), shown(href)],
+      href,
+    };
+  }),
+  {
+    id: 'go-resume',
+    name: tr('navResume', lang),
+    hint: shown(localePath(lang, '/resume/')),
+    terms: [tr('navResume', lang), tr('navResume', other), shown(localePath(lang, '/resume/'))],
+    href: localePath(lang, '/resume/'),
+  },
+];
+
+const langHref = localePath(other, path);
+const switchName = `${tr('cmdkSwitchTo', lang)} ${tr('switchLang', lang)}`;
+const switchTerms = [switchName, `${tr('cmdkSwitchTo', other)} ${tr('switchLang', lang)}`, shown(langHref)];
+const themeTerms = {
+  dark: [tr('cmdkToLight', lang), tr('cmdkToLight', other), 'light'],
+  light: [tr('cmdkToDark', lang), tr('cmdkToDark', other), 'dark'],
+};
+
+const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => ({
+  id: `open-${key}`,
+  name: profile.linkNames[key],
+  hint: host(profile.links[key]),
+  terms: [profile.linkNames[key], host(profile.links[key])],
+  url: profile.links[key],
+}));
+---
+
+<div class="cmdk-scrim no-print" data-cmdk-scrim hidden></div>
+<div
+  id="cmdk"
+  class="dialog cmdk no-print"
+  role="dialog"
+  aria-modal="true"
+  aria-label={tr('cmdkTitle', lang)}
+  hidden
+>
+  <div class="cmdk-input-row">
+    <span class="cmdk-prompt" aria-hidden="true">{keyLabels.prompt}</span>
+    <input
+      id="cmdk-input"
+      class="cmdk-input"
+      type="text"
+      role="combobox"
+      aria-expanded="true"
+      aria-controls="cmdk-list"
+      aria-autocomplete="list"
+      autocomplete="off"
+      spellcheck="false"
+      placeholder={tr('cmdkPlaceholder', lang)}
+      aria-label={tr('cmdkPlaceholder', lang)}
+    />
+    <kbd aria-hidden="true">{keyLabels.esc}</kbd>
+  </div>
+  <div id="cmdk-list" class="cmdk-list" role="listbox" aria-label={tr('cmdkTitle', lang)}>
+    <div class="cmdk-group" role="group" aria-labelledby="cmdk-group-go">
+      <div class="cmdk-group-label" id="cmdk-group-go">{tr('cmdkGroupGo', lang)}</div>
+      {
+        goCommands.map((command) => (
+          <div
+            class="cmdk-opt"
+            role="option"
+            id={`cmdk-opt-${command.id}`}
+            aria-selected="false"
+            data-cmd={command.id}
+            data-href={command.href}
+            data-section={command.section}
+            data-terms={command.terms.join('\n')}
+          >
+            <span class="cmdk-name">{command.name}</span>
+            <span class="cmdk-hint">{command.hint}</span>
+          </div>
+        ))
+      }
+    </div>
+    <div class="cmdk-group" role="group" aria-labelledby="cmdk-group-prefs">
+      <div class="cmdk-group-label" id="cmdk-group-prefs">{tr('cmdkGroupPrefs', lang)}</div>
+      <div
+        class="cmdk-opt"
+        role="option"
+        id="cmdk-opt-switch-lang"
+        aria-selected="false"
+        data-cmd="switch-lang"
+        data-href={langHref}
+        data-terms={switchTerms.join('\n')}
+      >
+        <span class="cmdk-name">
+          {tr('cmdkSwitchTo', lang)} <span lang={other}>{tr('switchLang', lang)}</span>
+        </span>
+        <span class="cmdk-hint" data-lang-hint>{shown(langHref)}</span>
+      </div>
+      <div
+        class="cmdk-opt"
+        role="option"
+        id="cmdk-opt-toggle-theme"
+        aria-selected="false"
+        data-cmd="toggle-theme"
+        data-terms-dark={themeTerms.dark.join('\n')}
+        data-terms-light={themeTerms.light.join('\n')}
+      >
+        <span class="cmdk-name">
+          <span data-when="dark">{tr('cmdkToLight', lang)}</span>
+          <span data-when="light">{tr('cmdkToDark', lang)}</span>
+        </span>
+        <span class="cmdk-hint">
+          <span data-when="dark">light</span>
+          <span data-when="light">dark</span>
+        </span>
+      </div>
+    </div>
+    <div class="cmdk-group" role="group" aria-labelledby="cmdk-group-links">
+      <div class="cmdk-group-label" id="cmdk-group-links">{tr('cmdkGroupLinks', lang)}</div>
+      {
+        linkCommands.map((command) => (
+          <div
+            class="cmdk-opt"
+            role="option"
+            id={`cmdk-opt-${command.id}`}
+            aria-selected="false"
+            data-cmd={command.id}
+            data-url={command.url}
+            data-terms={command.terms.join('\n')}
+          >
+            <span class="cmdk-name">
+              {command.name}
+              <Icon name="external" size={13} class="ext" />
+              <span class="sr-only">{` ${tr('newTab', lang)}`}</span>
+            </span>
+            <span class="cmdk-hint">{command.hint}</span>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+  <p class="cmdk-empty" role="status" hidden>{tr('cmdkEmpty', lang)}</p>
+  <div class="cmdk-foot" aria-hidden="true">
+    <span><kbd>{keyLabels.up}</kbd> <kbd>{keyLabels.down}</kbd> {tr('cmdkSelect', lang)}</span>
+    <span><kbd>{keyLabels.enter}</kbd> {tr('cmdkRun', lang)}</span>
+    <span><kbd>{keyLabels.esc}</kbd> {tr('cmdkClose', lang)}</span>
+  </div>
+</div>
+
+<style>
+  .cmdk-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: var(--scrim);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    animation: cmdk-fade 0.16s linear;
+  }
+
+  .cmdk {
+    position: fixed;
+    top: 8vh;
+    left: 50%;
+    z-index: 81;
+    width: min(560px, calc(100vw - 24px));
+    transform: translateX(-50%);
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    box-shadow: var(--shadow-dialog);
+    animation: cmdk-in 0.16s var(--ease);
+  }
+
+  /* Glass surface only where the blur is supported; otherwise the solid surface stays readable. */
+  @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    .cmdk {
+      background: var(--glass);
+      -webkit-backdrop-filter: saturate(150%) blur(18px);
+      backdrop-filter: saturate(150%) blur(18px);
+    }
+  }
+
+  .cmdk::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 1px;
+    background: var(--grad);
+    opacity: 0.9;
+  }
+
+  @keyframes cmdk-in {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) scale(0.985);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+  }
+
+  @keyframes cmdk-fade {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  .cmdk-input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 56px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cmdk-input-row:focus-within {
+    box-shadow: inset 0 -2px 0 var(--accent);
+  }
+
+  .cmdk-prompt {
+    font: 700 16px var(--mono);
+    color: var(--accent-2);
+  }
+
+  /* The accent line under the row replaces the focus outline of the field. */
+  .cmdk-input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 16px;
+  }
+
+  .cmdk-input::placeholder {
+    color: var(--faint);
+  }
+
+  .cmdk-list {
+    max-height: min(380px, 55vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 6px 8px 8px;
+  }
+
+  .cmdk-group-label {
+    padding: 10px 10px 6px;
+    font: 600 11px var(--mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .cmdk-opt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 42px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .cmdk-opt[aria-selected='true'] {
+    background: var(--accent-soft);
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+
+  .cmdk-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .cmdk-name :global(.ext) {
+    width: 13px;
+    height: 13px;
+    color: var(--muted);
+  }
+
+  .cmdk-hint {
+    max-width: 52%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font: 12px var(--mono);
+    color: var(--muted);
+  }
+
+  :global(:root[data-theme='dark']) [data-when='light'],
+  :global(:root[data-theme='light']) [data-when='dark'] {
+    display: none;
+  }
+
+  .cmdk-empty {
+    margin: 0;
+    padding: 28px 16px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .cmdk-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    font: 12px var(--mono);
+    color: var(--muted);
+  }
+
+  @media (min-width: 640px) {
+    .cmdk {
+      top: 12vh;
+    }
+  }
+</style>
+
+<script is:inline define:vars={{ base }}>
+  (() => {
+    const root = document.documentElement;
+    const dialog = document.getElementById('cmdk');
+    const scrim = document.querySelector('[data-cmdk-scrim]');
+    const input = document.getElementById('cmdk-input');
+    const list = document.getElementById('cmdk-list');
+    const opener = document.getElementById('cmdk-open');
+    const empty = dialog && dialog.querySelector('.cmdk-empty');
+    if (!dialog || !scrim || !input || !list || !empty) return;
+
+    const mac = root.dataset.os === 'mac';
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    const options = Array.from(list.querySelectorAll('.cmdk-opt'));
+    const groups = Array.from(list.querySelectorAll('.cmdk-group'));
+    const langOption = list.querySelector('[data-cmd="switch-lang"]');
+    const fold = (value) =>
+      value.replace(/[đĐ]/g, 'd').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+    const split = (value) => (value || '').split('\n').map(fold);
+    const terms = new Map();
+    options.forEach((option) => {
+      const own = option.dataset.cmd === 'toggle-theme'
+        ? { dark: split(option.dataset.termsDark), light: split(option.dataset.termsLight) }
+        : split(option.dataset.terms);
+      terms.set(option, own);
+    });
+    let visible = [];
+    let active = -1;
+    let returnTo = null;
+
+    const isOpen = () => !dialog.hidden;
+    const isDark = () => root.dataset.theme !== 'light';
+
+    const select = (index, scroll) => {
+      active = index;
+      options.forEach((option) => option.setAttribute('aria-selected', 'false'));
+      const option = visible[index];
+      if (!option) {
+        input.removeAttribute('aria-activedescendant');
+        return;
+      }
+      option.setAttribute('aria-selected', 'true');
+      input.setAttribute('aria-activedescendant', option.id);
+      if (scroll) option.scrollIntoView({ block: 'nearest' });
+    };
+
+    const filter = () => {
+      const query = fold(input.value.trim());
+      const theme = isDark() ? 'dark' : 'light';
+      visible = options.filter((option) => {
+        const own = terms.get(option);
+        const words = Array.isArray(own) ? own : own[theme];
+        const match = !query || words.some((word) => word.includes(query));
+        option.hidden = !match;
+        return match;
+      });
+      groups.forEach((group) => {
+        group.hidden = !group.querySelector('.cmdk-opt:not([hidden])');
+      });
+      list.hidden = visible.length === 0;
+      empty.hidden = visible.length > 0;
+      select(visible.length ? 0 : -1, true);
+    };
+
+    const refreshLangOption = () => {
+      const site = window.__site;
+      if (!langOption || !site) return;
+      const href = site.langTarget();
+      const shown = href.slice(base.length) || '/';
+      const names = (langOption.dataset.terms || '').split('\n').slice(0, 2);
+      langOption.dataset.href = href;
+      langOption.querySelector('[data-lang-hint]').textContent = shown;
+      terms.set(langOption, [...names, shown].map(fold));
+    };
+
+    const open = () => {
+      const site = window.__site;
+      const summary = document.querySelector('[data-mnav] > summary');
+      if (site && site.isMenuOpen()) {
+        site.closeMenu(false);
+        returnTo = summary;
+      } else {
+        returnTo = document.activeElement;
+      }
+      refreshLangOption();
+      input.value = '';
+      root.classList.add('cmdk-lock');
+      scrim.hidden = false;
+      dialog.hidden = false;
+      filter();
+      input.focus();
+    };
+
+    const close = (restoreFocus) => {
+      dialog.hidden = true;
+      scrim.hidden = true;
+      root.classList.remove('cmdk-lock');
+      if (restoreFocus && returnTo && returnTo.isConnected && typeof returnTo.focus === 'function') {
+        returnTo.focus();
+      }
+    };
+
+    const goToSection = (id) => {
+      const section = document.querySelector(`section#${id}`);
+      if (!section) return false;
+      history.pushState(null, '', `#${id}`);
+      section.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
+      const heading = section.querySelector('h2');
+      if (heading) heading.focus({ preventScroll: true });
+      return true;
+    };
+
+    const run = (option) => {
+      if (!option) return;
+      const site = window.__site;
+      if (option.dataset.cmd === 'toggle-theme') {
+        if (site) site.toggleTheme();
+        close(true);
+        return;
+      }
+      if (option.dataset.url) {
+        window.open(option.dataset.url, '_blank', 'noopener,noreferrer');
+        close(true);
+        return;
+      }
+      close(false);
+      if (option.dataset.section && goToSection(option.dataset.section)) return;
+      if (option.dataset.href) location.assign(option.dataset.href);
+    };
+
+    input.addEventListener('input', filter);
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        if (!visible.length) return;
+        const step = event.key === 'ArrowDown' ? 1 : -1;
+        select((active + step + visible.length) % visible.length, true);
+      } else if (event.key === 'Enter') {
+        if (event.isComposing) return;
+        event.preventDefault();
+        run(visible[active]);
+      } else if (event.key === 'Tab') {
+        event.preventDefault();
+      }
+    });
+    // Keep focus in the field: clicks inside the dialog never move it.
+    dialog.addEventListener('mousedown', (event) => {
+      if (event.target !== input) event.preventDefault();
+    });
+    list.addEventListener('mousemove', (event) => {
+      const index = visible.indexOf(event.target.closest('.cmdk-opt'));
+      if (index >= 0 && index !== active) select(index, false);
+    });
+    list.addEventListener('click', (event) => {
+      const option = event.target.closest('.cmdk-opt');
+      if (option) run(option);
+    });
+    scrim.addEventListener('click', () => close(true));
+
+    if (opener) {
+      opener.setAttribute('aria-keyshortcuts', mac ? 'Meta+K' : 'Control+K');
+      opener.addEventListener('click', open);
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (isOpen() && event.key === 'Escape') {
+        event.preventDefault();
+        close(true);
+        return;
+      }
+      if (event.isComposing || event.altKey || event.shiftKey) return;
+      if (!(mac ? event.metaKey : event.ctrlKey) || (event.key || '').toLowerCase() !== 'k') return;
+      event.preventDefault();
+      if (isOpen()) close(true);
+      else open();
+    });
+  })();
+</script>

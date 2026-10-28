@@ -1,0 +1,22 @@
+---
+import { skills } from '../data/profile';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const groups = skills.filter((skill) => skill.items.length > 0);
+---
+
+<dl class="cv-skills">
+  {
+    groups.map((skill) => (
+      <div class="cv-skill">
+        <dt>{skill.group[lang]}</dt>
+        <dd>{skill.items.join(' · ')}</dd>
+      </div>
+    ))
+  }
+</dl>
