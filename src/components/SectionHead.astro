@@ -5,7 +5,7 @@ interface Props {
   lang: Lang;
   /** Id of the heading, referenced by aria-labelledby of the section. */
   id: string;
-  /** Code-style label above the heading, such as "// 01 · about"; "{n}" in the label is replaced by `mark`. */
+  /** Code-style label above the heading, such as "// about"; the block number is only in `mark`. */
   label: UiKey;
   /** Label key, or text from a data file (case study lifecycle title). */
   title: UiKey | Text;
@@ -19,7 +19,6 @@ interface Props {
 
 const { lang, id, label, title, intro, reveal = true, mark, class: className } = Astro.props;
 const heading = typeof title === 'string' ? tr(title, lang) : title[lang];
-const eyebrow = tr(label, lang).replace('{n}', mark ?? '');
 /** Digits of the monospace font are 0.6em wide, so the viewBox follows the digit count. */
 const markWidth = mark ? mark.length * 60 + 8 : 0;
 const markGradient = `${id}-mark`;
@@ -43,7 +42,7 @@ const markGradient = `${id}-mark`;
       </svg>
     )
   }
-  <p class="eyebrow" aria-hidden="true">{eyebrow}</p>
+  <p class="eyebrow" aria-hidden="true">{tr(label, lang)}</p>
   <h2 class="section-title" id={id} tabindex="-1">{heading}</h2>
   {intro && <p class="section-intro">{tr(intro, lang)}</p>}
 </div>

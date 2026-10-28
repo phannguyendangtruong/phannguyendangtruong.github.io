@@ -2,7 +2,7 @@
 import Icon from './Icon.astro';
 import { profile } from '../data/profile';
 import { caseStudyProjects, homeSections, otherLang, type HomeSection } from '../i18n/nav';
-import { keyLabels, localePath, tr, type Lang, type UiKey } from '../i18n/ui';
+import { apiLabels, keyLabels, localePath, tr, type Lang, type UiKey } from '../i18n/ui';
 
 interface Props {
   lang: Lang;
@@ -13,6 +13,10 @@ interface Props {
 type Command = {
   id: string;
   name: string;
+  /** Muted text after the name. */
+  description?: string;
+  /** The name is a request line, shown in the code font. */
+  code?: boolean;
   hint: string;
   terms: string[];
   href?: string;
@@ -26,6 +30,9 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 /** Target shown to the visitor: the internal path without BASE_PATH. */
 const shown = (href: string) => href.slice(base.length) || '/';
 const caseStudyName = (name: string, value: Lang) => tr('cmdkCaseStudy', value).replace('{name}', name);
+/** JSON view of the home page (ApiView.astro): it opens with #api in the address, on load or on a hash change. */
+const apiHref = localePath(lang, '/#api');
+const apiName = `${apiLabels.method} ${apiLabels.path}`;
 
 const sectionLabels: Record<HomeSection, UiKey> = {
   about: 'navAbout',
@@ -44,6 +51,15 @@ const goCommands: Command[] = [
     href: localePath(lang, `/#${id}`),
     section: id,
   })),
+  {
+    id: 'go-api',
+    name: apiName,
+    description: tr('apiOpen', lang),
+    code: true,
+    hint: shown(apiHref),
+    terms: [apiName, tr('apiOpen', lang), tr('apiOpen', other), shown(apiHref), 'json', 'api', 'me', 'whoami'],
+    href: apiHref,
+  },
   ...caseStudyProjects().map((project) => {
     const href = localePath(lang, `/projects/${project.slug}/`);
     return {
@@ -122,7 +138,10 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
             data-section={command.section}
             data-terms={command.terms.join('\n')}
           >
-            <span class="cmdk-name">{command.name}</span>
+            <span class="cmdk-name">
+              {command.code ? <span class="cmdk-code">{command.name}</span> : command.name}
+              {command.description && <span class="cmdk-desc">{command.description}</span>}
+            </span>
             <span class="cmdk-hint">{command.hint}</span>
           </div>
         ))
@@ -342,6 +361,22 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
     color: var(--muted);
   }
 
+  /* "GET /api/me" in the code font, then what the command does; the description is cut first on narrow screens. */
+  .cmdk-code {
+    flex: none;
+    font: 600 13.5px var(--mono);
+  }
+
+  .cmdk-desc {
+    min-width: 0;
+    margin-left: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
   .cmdk-hint {
     max-width: 52%;
     overflow: hidden;
@@ -414,6 +449,8 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
 
     const isOpen = () => !dialog.hidden;
     const isDark = () => root.dataset.theme !== 'light';
+    // JSON view of the home page (ApiView.astro) open: html[data-view='api'].
+    const isApiView = () => root.dataset.view === 'api';
 
     const select = (index, scroll) => {
       active = index;
@@ -484,13 +521,24 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
       }
     };
 
-    const goToSection = (id) => {
-      const section = document.querySelector(`section#${id}`);
-      if (!section) return false;
-      history.pushState(null, '', `#${id}`);
+    const reachSection = (section) => {
       section.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
       const heading = section.querySelector('h2');
       if (heading) heading.focus({ preventScroll: true });
+    };
+
+    const goToSection = (id) => {
+      const section = document.querySelector(`section#${id}`);
+      if (!section) return false;
+      // The JSON view hides the blocks and closes itself when the hash moves to one of them (its hashchange
+      // handler), so a real hash change goes first and the block is reached once the view has closed.
+      if (isApiView() && location.hash !== `#${id}`) {
+        addEventListener('hashchange', () => reachSection(section), { once: true });
+        location.hash = id;
+        return true;
+      }
+      history.pushState(null, '', `#${id}`);
+      reachSection(section);
       return true;
     };
 
@@ -507,8 +555,14 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
         close(true);
         return;
       }
+      // The JSON view is already open: #api is the current address, so going there would do nothing.
+      if (option.dataset.cmd === 'go-api' && isApiView()) {
+        close(true);
+        return;
+      }
       close(false);
       if (option.dataset.section && goToSection(option.dataset.section)) return;
+      // Same page (home): only the hash changes and ApiView opens on hashchange; other pages load the home page.
       if (option.dataset.href) location.assign(option.dataset.href);
     };
 

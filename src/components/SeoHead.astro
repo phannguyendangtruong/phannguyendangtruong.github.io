@@ -36,6 +36,7 @@ const imageAlt = ogImageAlt ?? `${profile.name[lang]} — ${profile.role[lang]}`
 {!noindex && <link rel="canonical" href={canonical} />}
 {!noindex && alternates.map((alternate) => <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />)}
 <link rel="icon" type="image/svg+xml" href={asset('favicon.svg')} />
+<link rel="apple-touch-icon" href={asset('apple-touch-icon.png')} />
 <meta property="og:type" content="website" />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
@@ -53,3 +54,4 @@ const imageAlt = ogImageAlt ?? `${profile.name[lang]} — ${profile.role[lang]}`
   )
 }
 <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+{image && <meta name="twitter:image" content={image} />}

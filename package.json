@@ -7,7 +7,8 @@
     "dev": "astro dev",
     "check": "astro check",
     "build": "astro check && astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "images": "node scripts/make-images.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",

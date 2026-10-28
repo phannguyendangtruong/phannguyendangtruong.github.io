@@ -1,9 +1,10 @@
 ---
 import ExternalLink from './ExternalLink.astro';
 import HeroIllustration from './HeroIllustration.astro';
+import { profileJsonPath } from '../data/api';
 import { experienceNewestFirst, profile } from '../data/profile';
 import { homeSections } from '../i18n/nav';
-import { localePath, tr, type Lang, type UiKey } from '../i18n/ui';
+import { apiLabels, localePath, tr, type Lang, type UiKey } from '../i18n/ui';
 
 interface Props {
   lang: Lang;
@@ -22,6 +23,8 @@ const companies = experienceNewestFirst()
 const primary: { href: string; label: UiKey } = homeSections.includes('projects')
   ? { href: '#projects', label: 'viewProjects' }
   : { href: '#experience', label: 'viewExperience' };
+/** Accessible name of the JSON toggle: the visible request line first (WCAG 2.5.3), then what the link does. */
+const apiToggleLabel = `${apiLabels.method} ${apiLabels.path} – ${tr('apiOpen', lang)}`;
 ---
 
 <section id="top" class="hero" aria-labelledby="hero-name" data-hero>
@@ -60,6 +63,15 @@ const primary: { href: string; label: UiKey } = homeSections.includes('projects'
             <ExternalLink href={profile.links.github} lang={lang} label={profile.linkNames.github} icon="github" class="text-link" />
           )
         }
+        <a
+          class="text-link api-toggle no-print"
+          href={localePath(lang, profileJsonPath)}
+          aria-label={apiToggleLabel}
+          data-api-open
+        >
+          <span class="api-braces" aria-hidden="true">{apiLabels.braces}</span>
+          <span>{apiLabels.method} {apiLabels.path}</span>
+        </a>
       </div>
       <ul class="stats" data-counter>
         {
@@ -284,6 +296,17 @@ const primary: { href: string; label: UiKey } = homeSections.includes('projects'
   .hero-links :global(.text-link svg:not(.ext)) {
     width: 16px;
     height: 16px;
+  }
+
+  /* "{ } GET /api/me": opens the JSON view (ApiView.astro); without the script it is a plain link to the JSON file. */
+  .api-toggle {
+    font: 500 13.5px/1.4 var(--mono);
+    letter-spacing: 0.01em;
+  }
+
+  .api-braces {
+    color: var(--accent);
+    font-weight: 700;
   }
 
   .stats {

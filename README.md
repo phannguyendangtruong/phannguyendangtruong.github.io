@@ -41,6 +41,20 @@ npm run preview
 
 `npm run build` runs `astro check` (types) before building into `dist/`. Set `ASTRO_TELEMETRY_DISABLED=1` to turn off Astro's anonymous usage data.
 
+## Share images
+
+`public/og/default-en.png` and `public/og/default-vi.png` (1200×630, shown when a link to the site is shared) and `public/apple-touch-icon.png` (180×180, from `public/favicon.svg`) are made by `scripts/make-images.mjs`, which draws them in headless Chrome with the name, role, location and main technologies from `src/data/profile.ts` and the hero diagram from `src/data/hero.ts`. Run it again whenever you change those, then commit the images in `public/`:
+
+```bash
+SITE_URL=https://<your-domain> npm run images
+```
+
+In PowerShell: `$env:SITE_URL="https://<your-domain>"; npm run images`.
+
+- `SITE_URL` gives the domain printed at the bottom of the share images; without it the line is left out.
+- The script needs Chrome, Chromium or Edge. If it is not found, set `CHROME_PATH` to the browser executable.
+- The image paths are `shareImages` in `src/data/profile.ts`; set them to `null` to drop the `og:image` tags.
+
 ## Deploying
 
 The site is plain static files in `dist/`.

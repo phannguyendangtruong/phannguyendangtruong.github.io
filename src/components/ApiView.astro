@@ -1,0 +1,428 @@
+---
+import Icon from './Icon.astro';
+import { jsonLines, profileJsonPath, profileJsonText, sizeInKb } from '../data/api';
+import { apiLabels, localePath, tr, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const text = profileJsonText(lang);
+const lines = jsonLines(text);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const fileHref = localePath(lang, profileJsonPath);
+/** File address shown to the visitor, without BASE_PATH: "/api/me.json", "/vi/api/me.json". */
+const filePath = fileHref.slice(base.length);
+/** Request path of the bar: the file address without its extension. */
+const requestPath = filePath.replace(/\.json$/, '');
+/** Delay between two lines of the opening animation: the whole body shows within about 450ms, whatever its length. */
+const lineStep = Math.min(30, 450 / lines.length).toFixed(2);
+const codeStyle = `--gutter: ${String(lines.length).length}; --step: ${lineStep}ms`;
+---
+
+<p class="api-live sr-only" role="status" aria-live="polite" data-api-live></p>
+<section
+  id="api-view"
+  class="api-view no-print"
+  aria-labelledby="api-title"
+  data-api-view
+  data-opened={tr('apiOpened', lang)}
+  data-closed={tr('apiClosed', lang)}
+  data-copied={tr('apiCopied', lang)}
+  data-select={tr('apiCopySelect', lang)}
+>
+  <div class="container">
+    <div class="api-toolbar">
+      <p class="eyebrow api-label" aria-hidden="true">{tr('apiLabel', lang)}</p>
+      <button type="button" class="back-link api-back" data-api-close>
+        <Icon name="arrow-left" size={16} />
+        <span>{tr('apiBack', lang)}</span>
+      </button>
+    </div>
+    <h2 class="section-title api-title" id="api-title" tabindex="-1">{tr('apiTitle', lang)}</h2>
+    <div class="api-actions">
+      <button type="button" class="button primary" data-api-copy>
+        <span data-api-copy-label>{tr('apiCopy', lang)}</span>
+      </button>
+      <a class="button secondary" href={fileHref}>{tr('apiOpenFile', lang).replace('{path}', filePath)}</a>
+    </div>
+    <div class="frame api-panel">
+      <p class="api-req">
+        <span class="api-method">{apiLabels.method}</span>
+        <span class="api-path">{requestPath}</span>
+        <span class="state-chip ok api-status">{apiLabels.status}</span>
+        <span class="api-type">{apiLabels.type} · {sizeInKb(text, lang)} {apiLabels.sizeUnit}</span>
+      </p>
+      <div class="api-code" role="region" aria-label={tr('apiBody', lang)} tabindex="0">
+        <code class="api-lines" style={codeStyle} data-api-lines>
+          {
+            lines.map((line, index) => (
+              <span class="j-line" style={`--i: ${index}; --in: ${line.indent}`}><span class="j-text">{line.tokens.map((token) => (token.kind === 'space' ? token.text : <span class={`j-${token.kind}`}>{token.text}</span>))}</span></span>
+            ))
+          }
+        </code>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Hidden until the script sets html[data-view='api']; the view then takes the place of the hero and the home
+     blocks on screen, while the header and the footer stay. Printing keeps the page. */
+  .api-view {
+    display: none;
+    padding: 24px 0 56px;
+  }
+
+  :global(html[data-view='api']) .api-view {
+    display: block;
+  }
+
+  @media screen {
+    :global(html[data-view='api'] main > :not(.api-view):not(.api-live)) {
+      display: none;
+    }
+  }
+
+  /* Label and back button share the first row, as on the résumé toolbar. */
+  .api-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px 16px;
+  }
+
+  .api-label {
+    margin: 0;
+  }
+
+  .api-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .api-title {
+    margin: 4px 0 0;
+  }
+
+  .api-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0 16px;
+  }
+
+  .api-actions .button {
+    flex: 1 1 auto;
+  }
+
+  /* Request bar of an API client: method, path, status and body size. */
+  .api-req {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin: 0;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+    font: 13px/1.4 var(--mono);
+  }
+
+  .api-method {
+    padding: 5px 10px;
+    border: 1px solid var(--chip-border);
+    border-radius: 8px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .api-path {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .api-status {
+    height: 28px;
+  }
+
+  .api-type {
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  /* Response body on the solid surface, so every token colour keeps its contrast in both themes. On phones the lines
+     do not wrap: the block scrolls sideways inside the panel, the page never does. */
+  .api-code {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    background: var(--surface);
+    font: 12.5px/1.7 var(--mono);
+  }
+
+  .api-code:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .api-lines {
+    display: block;
+    width: max-content;
+    min-width: 100%;
+    padding: 14px 16px 16px 0;
+    border-radius: 0;
+    background: none;
+    font: inherit;
+    counter-reset: line;
+  }
+
+  .j-line {
+    display: flex;
+    counter-increment: line;
+  }
+
+  /* Line number: generated, so it is neither copied nor read out; it stays at the left edge while the code scrolls. */
+  .j-line::before {
+    content: counter(line);
+    content: counter(line) / '';
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    flex: none;
+    box-sizing: content-box;
+    width: calc(var(--gutter) * 1ch);
+    margin-right: 14px;
+    padding: 0 12px 0 14px;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--faint);
+    text-align: right;
+  }
+
+  .j-text {
+    white-space: pre;
+  }
+
+  .j-key {
+    color: var(--accent);
+  }
+
+  .j-string {
+    color: var(--ok);
+  }
+
+  .j-number {
+    color: var(--progress);
+  }
+
+  .j-literal {
+    color: var(--accent-3);
+  }
+
+  .j-punct {
+    color: var(--muted);
+  }
+
+  /* Opening: the lines come in one after another, as if the response were streamed (the script sets .streaming). */
+  @media (prefers-reduced-motion: no-preference) {
+    .api-view.streaming .j-line {
+      animation: api-line 0.14s var(--ease) calc(var(--i) * var(--step)) 1 both;
+    }
+  }
+
+  @keyframes api-line {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* From 640px long lines wrap, going on two characters past the indent of their line. */
+  @media (min-width: 640px) {
+    .api-view {
+      padding: 40px 0 96px;
+    }
+
+    .api-actions .button {
+      flex: none;
+    }
+
+    .api-req {
+      padding: 12px 16px;
+    }
+
+    .api-code {
+      font-size: 13px;
+    }
+
+    .api-lines {
+      width: auto;
+    }
+
+    .j-text {
+      flex: 1;
+      min-width: 0;
+      padding-left: calc((var(--in) + 2) * 1ch);
+      text-indent: calc((var(--in) + 2) * -1ch);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    // JSON view of the profile: opened by the hero toggle or by #api in the address (on load or on hashchange);
+    // closed by "Back to page", Esc or a link to a block of the page.
+    const root = document.documentElement;
+    const view = document.querySelector('[data-api-view]');
+    const live = document.querySelector('[data-api-live]');
+    const lines = view && view.querySelector('[data-api-lines]');
+    if (!view || !live || !lines) return;
+    const main = document.getElementById('main');
+    const title = view.querySelector('#api-title');
+    const copyButton = view.querySelector('[data-api-copy]');
+    const copyLabel = view.querySelector('[data-api-copy-label]');
+    const copyText = copyLabel ? copyLabel.textContent : '';
+    const hash = '#api';
+    let copyTimer = 0;
+
+    const isOpen = () => root.dataset.view === 'api';
+    const say = (message) => {
+      live.textContent = message || '';
+    };
+    const address = (fragment) => location.pathname + location.search + fragment;
+    // The page goes to the top at once: its content has just been swapped, a smooth scroll would only distract.
+    const jumpToTop = () => {
+      root.style.scrollBehavior = 'auto';
+      scrollTo(0, 0);
+      root.style.removeProperty('scroll-behavior');
+    };
+    // Element named by a fragment such as "#about", or null.
+    const blockOf = (fragment) => {
+      let id = '';
+      try {
+        id = decodeURIComponent(fragment.slice(1));
+      } catch (_) {
+        return null;
+      }
+      return id ? document.getElementById(id) : null;
+    };
+    // A block the view hides: inside main, outside the view, not main itself (the skip link keeps the view open).
+    const isPageBlock = (el) => Boolean(el && main && el !== main && main.contains(el) && !view.contains(el));
+
+    const open = () => {
+      if (!isOpen()) {
+        root.dataset.view = 'api';
+        say(view.dataset.opened);
+      }
+      if (location.hash !== hash) history.replaceState(history.state, '', address(hash));
+      // The lines come in one after another (CSS, off with reduced motion); the class is set again to restart it.
+      view.classList.remove('streaming');
+      void view.offsetWidth;
+      view.classList.add('streaming');
+      jumpToTop();
+      if (title) title.focus({ preventScroll: true });
+    };
+
+    // `toToggle`: the focus goes back to the hero toggle; after a link to a block the browser places it.
+    const close = (toToggle) => {
+      if (!isOpen()) return;
+      delete root.dataset.view;
+      view.classList.remove('streaming');
+      if (location.hash === hash) history.replaceState(history.state, '', address(''));
+      say(view.dataset.closed);
+      const toggle = document.querySelector('[data-api-open]');
+      if (toToggle && toggle) toggle.focus();
+    };
+
+    const plainClick = (event) =>
+      event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+
+    document.addEventListener('click', (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (!target || event.defaultPrevented || !plainClick(event)) return;
+      // The hero toggle is a real link to the JSON file; a plain click opens the view instead.
+      if (target.closest('[data-api-open]')) {
+        event.preventDefault();
+        open();
+        return;
+      }
+      // A link to a block of this page (header, menu): the view closes first, then the browser goes to the block.
+      const link = isOpen() ? target.closest('a[href]') : null;
+      if (!link || view.contains(link)) return;
+      const url = new URL(link.href, location.href);
+      if (url.pathname === location.pathname && url.hash !== hash && isPageBlock(blockOf(url.hash))) close(false);
+    });
+
+    view.querySelectorAll('[data-api-close]').forEach((button) => {
+      button.addEventListener('click', () => close(true));
+    });
+
+    // Esc closes the view; the command palette and the mobile menu close first.
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || event.defaultPrevented || !isOpen()) return;
+      if (root.classList.contains('cmdk-lock') || root.classList.contains('menu-lock')) return;
+      event.preventDefault();
+      close(true);
+    });
+
+    addEventListener('hashchange', () => {
+      if (location.hash === hash) {
+        open();
+        return;
+      }
+      if (!isOpen()) return;
+      const block = blockOf(location.hash);
+      if (block && !isPageBlock(block)) return;
+      close(!block);
+      if (block) block.scrollIntoView({ block: 'start' });
+    });
+
+    // Copy: the text of the lines, as served in the file. Without the clipboard API the code is selected instead.
+    const jsonText = () => `${Array.from(lines.querySelectorAll('.j-text'), (line) => line.textContent).join('\n')}\n`;
+    const copied = () => {
+      const done = view.dataset.copied || '';
+      if (copyLabel) copyLabel.textContent = done;
+      say(done);
+      clearTimeout(copyTimer);
+      copyTimer = setTimeout(() => {
+        if (copyLabel) copyLabel.textContent = copyText;
+        if (live.textContent === done) say('');
+      }, 2000);
+    };
+    const selectCode = () => {
+      const selection = getSelection();
+      if (selection) selection.selectAllChildren(lines);
+      say(view.dataset.select);
+    };
+    if (copyButton) {
+      copyButton.addEventListener('click', () => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(jsonText()).then(copied, selectCode);
+        } else {
+          selectCode();
+        }
+      });
+    }
+
+    if (location.hash === hash) open();
+  })();
+</script>

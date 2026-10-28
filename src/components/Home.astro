@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import ApiView from './ApiView.astro';
 import ExperienceTimeline from './ExperienceTimeline.astro';
 import ExternalLink from './ExternalLink.astro';
 import FocusScene from './FocusScene.astro';
@@ -28,13 +29,14 @@ const focusColumns = threeFocus
   ? undefined
   : `--c2: ${Math.min(2, focusAreas.length)}; --c3: ${Math.min(3, focusAreas.length)}`;
 const focusNumber = (index: number) => String(index + 1).padStart(2, '0');
-/** Number of a block among the blocks shown (the projects block may be hidden): the outlined mark and the "// 0n" label. */
+/** Number of a block among the blocks shown (the projects block may be hidden), drawn as the outlined mark of its heading row. */
 const blockMark = (id: HomeSection) => String(homeSections.indexOf(id) + 1).padStart(2, '0');
 /** Width of the contact command line in characters (prompt, space, command, cursor), so typing never moves it. */
 const commandChars = contactCommand.prompt.length + contactCommand.text.length + 2;
 ---
 
 <Base lang={lang} title={title} description={profile.tagline[lang]} path="/">
+  <ApiView lang={lang} />
   <HeroSection lang={lang} />
 
   <section id="about" class="section" aria-labelledby="about-title">
@@ -48,12 +50,11 @@ const commandChars = contactCommand.prompt.length + contactCommand.text.length +
         {
           focusAreas.map((area, index) => (
             <li class:list={['card', 'spot', 'focus-card', 'reveal', { tall: threeFocus && index === 0 }]}>
-              {threeFocus && index === 0 && (
-                <span class="wm" aria-hidden="true">
-                  {focusNumber(index)}
-                </span>
+              {area.scene && (
+                <div class="scene-stage no-print">
+                  <FocusScene kind={area.scene} />
+                </div>
               )}
-              {area.scene && <FocusScene kind={area.scene} />}
               <span class="num" aria-hidden="true">
                 {focusNumber(index)}
               </span>
@@ -239,15 +240,6 @@ const commandChars = contactCommand.prompt.length + contactCommand.text.length +
     color: var(--accent);
   }
 
-  .tall {
-    justify-content: flex-end;
-  }
-
-  /* The diagram stays at the top of the tall card, the text at its bottom. */
-  .tall :global(.scene) {
-    margin-bottom: auto;
-  }
-
   .tall h4 {
     font-size: 24px;
     letter-spacing: -0.02em;
@@ -256,23 +248,6 @@ const commandChars = contactCommand.prompt.length + contactCommand.text.length +
   .tall p {
     max-width: 44ch;
     font-size: 16px;
-  }
-
-  /* Large decorative number of the tall card, from 640px only: on phones the card is short and the number would lie under the text. */
-  .wm {
-    display: none;
-    position: absolute;
-    right: 20px;
-    top: 0;
-    z-index: 0;
-    font: 700 150px/1 var(--mono);
-    letter-spacing: -0.06em;
-    background: var(--grad);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    opacity: 0.12;
-    pointer-events: none;
   }
 
   .project-list,
@@ -496,18 +471,31 @@ const commandChars = contactCommand.prompt.length + contactCommand.text.length +
     }
 
     .tall {
-      min-height: 240px;
       padding: 32px;
     }
 
-    /* The full-width tall card is short here: the heading wraps before the number at the right. */
-    .tall h4 {
-      max-width: calc(100% - 160px);
-      font-size: 26px;
+    /* The tall card has no large number: its diagram is larger than on the other cards, centred on a faint grid
+       above the text. */
+    .tall .scene-stage {
+      display: grid;
+      place-items: center;
+      margin-bottom: 8px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 22px 22px;
     }
 
-    .wm {
-      display: block;
+    .tall :global(.scene) {
+      max-width: 360px;
+      margin: 0;
+    }
+
+    .tall h4 {
+      font-size: 26px;
     }
 
     .project-grid {
@@ -543,18 +531,14 @@ const commandChars = contactCommand.prompt.length + contactCommand.text.length +
       grid-template-columns: repeat(var(--c3), minmax(0, 1fr));
     }
 
-    /* Spanning two rows, the card is tall enough to keep the text below the number. */
-    .tall h4 {
-      max-width: none;
+    /* Spanning two rows, the card gives its extra height to the grid, so the diagram sits in the middle of the upper
+       part, the text stays at the bottom and no empty band opens between them. */
+    .tall .scene-stage {
+      flex: 1;
     }
 
-    /* The diagram keeps clear of the large number (about 200px wide, 20px from the right edge of the card). */
     .tall :global(.scene) {
-      max-width: min(260px, calc(100% - 182px));
-    }
-
-    .wm {
-      font-size: 176px;
+      max-width: 380px;
     }
 
     .contact {

@@ -38,11 +38,13 @@ const sections: readonly string[] = homeSections;
     syncThemeButtons();
     syncThemeColor();
 
-    // Language switch keeps a home section anchor from the current address.
+    // Language switch keeps a home section anchor from the current address, and #api while the JSON view is open
+    // (html[data-view='api'], see ApiView.astro), so the other language opens the same view.
     const langLinks = Array.from(document.querySelectorAll('[data-lang-switch]'));
     const keptAnchor = (link) => {
       const hash = location.hash.slice(1);
-      return link.hasAttribute('data-keep-anchor') && sections.includes(hash) ? location.hash : '';
+      const kept = sections.includes(hash) || (hash === 'api' && root.dataset.view === 'api');
+      return link.hasAttribute('data-keep-anchor') && kept ? location.hash : '';
     };
     const langTarget = () => {
       const link = langLinks[0];

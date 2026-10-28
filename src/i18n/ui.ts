@@ -22,11 +22,11 @@ export const ui = {
   statCompanies: { en: 'companies', vi: 'công ty' },
   statCompanyProjects: { en: 'company projects', vi: 'dự án tại công ty' },
   pauseAnimation: { en: 'Pause animation', vi: 'Tạm dừng hiệu ứng' },
-  aboutLabel: { en: '// {n} · about', vi: '// {n} · giới thiệu' },
-  projectsLabel: { en: '// {n} · projects', vi: '// {n} · dự án' },
-  experienceLabel: { en: '// {n} · experience', vi: '// {n} · kinh nghiệm' },
-  skillsLabel: { en: '// {n} · skills', vi: '// {n} · kỹ năng' },
-  contactLabel: { en: '// {n} · contact', vi: '// {n} · liên hệ' },
+  aboutLabel: { en: '// about', vi: '// giới thiệu' },
+  projectsLabel: { en: '// projects', vi: '// dự án' },
+  experienceLabel: { en: '// experience', vi: '// kinh nghiệm' },
+  skillsLabel: { en: '// skills', vi: '// kỹ năng' },
+  contactLabel: { en: '// contact', vi: '// liên hệ' },
   focusTitle: { en: 'What I work on', vi: 'Tôi làm gì' },
   projectsTitle: { en: 'Projects', vi: 'Dự án' },
   projectsIntro: {
@@ -39,6 +39,22 @@ export const ui = {
   skillsTitle: { en: 'Skills', vi: 'Kỹ năng' },
   educationTitle: { en: 'Education', vi: 'Học vấn' },
   techLabel: { en: 'Technologies', vi: 'Công nghệ' },
+  showMoreItems: { en: 'Show {n} more', vi: 'Xem thêm {n} ý' },
+  showLess: { en: 'Show less', vi: 'Thu gọn' },
+  showMoreTechOne: { en: 'Show 1 more technology', vi: 'Xem thêm 1 công nghệ' },
+  showMoreTechMany: { en: 'Show {n} more technologies', vi: 'Xem thêm {n} công nghệ' },
+  skillFilterOne: {
+    en: '{name} – used in 1 project, filter Experience',
+    vi: '{name} – dùng trong 1 dự án, lọc Kinh nghiệm',
+  },
+  skillFilterMany: {
+    en: '{name} – used in {n} projects, filter Experience',
+    vi: '{name} – dùng trong {n} dự án, lọc Kinh nghiệm',
+  },
+  filterStatus: { en: 'Filtering: {name}', vi: 'Đang lọc: {name}' },
+  filterCountOne: { en: '1 project', vi: '1 dự án' },
+  filterCountMany: { en: '{n} projects', vi: '{n} dự án' },
+  filterClear: { en: 'Clear', vi: 'Bỏ lọc' },
   contactTitle: { en: 'Contact', vi: 'Liên hệ' },
   contactBody: {
     en: 'The best way to reach me is a message on LinkedIn.',
@@ -83,6 +99,20 @@ export const ui = {
   cmdkSelect: { en: 'select', vi: 'chọn' },
   cmdkRun: { en: 'run', vi: 'thực hiện' },
   cmdkClose: { en: 'close', vi: 'đóng' },
+  apiOpen: { en: 'View profile as JSON', vi: 'Xem hồ sơ dạng JSON' },
+  apiLabel: { en: '// api', vi: '// api' },
+  apiTitle: { en: 'Profile as JSON', vi: 'Hồ sơ dạng JSON' },
+  apiBody: { en: 'Response body', vi: 'Nội dung phản hồi' },
+  apiCopy: { en: 'Copy JSON', vi: 'Sao chép JSON' },
+  apiCopied: { en: 'Copied', vi: 'Đã chép' },
+  apiCopySelect: {
+    en: 'JSON selected: press Ctrl + C (⌘ + C on Mac) to copy',
+    vi: 'Đã chọn JSON: nhấn Ctrl + C (⌘ + C trên Mac) để chép',
+  },
+  apiOpenFile: { en: 'Open {path}', vi: 'Mở {path}' },
+  apiBack: { en: 'Back to page', vi: 'Quay lại giao diện' },
+  apiOpened: { en: 'JSON view opened', vi: 'Đã mở chế độ xem JSON' },
+  apiClosed: { en: 'Back to the page view', vi: 'Đã quay lại giao diện trang' },
   csTitle: { en: 'Case study', vi: 'Case study' },
   csEyebrow: { en: '// case study', vi: '// case study' },
   tocLabel: { en: 'On this page', vi: 'Trong trang này' },
@@ -136,11 +166,26 @@ export const notFoundLabels = {
   status: 'status: 404 · route not found',
 } as const;
 
+/** Request labels of the JSON view (hero toggle, request bar), shown as-is in both languages. */
+export const apiLabels = {
+  braces: '{ }',
+  method: 'GET',
+  path: '/api/me',
+  status: '200 OK',
+  type: 'application/json',
+  sizeUnit: 'KB',
+} as const;
+
 /** Separator of the screen reader sentences of the case study lifecycle. */
 export const flowArrow = ' → ';
 
 export function tr(key: keyof typeof ui, lang: Lang): string {
   return ui[key][lang];
+}
+
+/** Label with a count: the `one` key for 1, the `many` key otherwise; "{n}" is replaced by the count. */
+export function trCount(one: UiKey, many: UiKey, count: number, lang: Lang): string {
+  return tr(count === 1 ? one : many, lang).replace('{n}', String(count));
 }
 
 /** Path for a page in the given language, including the configured base path. */

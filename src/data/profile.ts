@@ -36,9 +36,12 @@ export const profile = {
   coreTech: ['Java 21', 'Spring Boot', 'Kafka', 'Keycloak'],
 };
 
-/** Share images (1200×630 PNG, path under BASE_URL such as 'og/default-en.png'); null means no og:image tags. */
+/**
+ * Share images (1200×630 PNG, path under BASE_URL such as 'og/default-en.png'); null means no og:image tags.
+ * The default ones are made by `npm run images` (scripts/make-images.mjs).
+ */
 export const shareImages: Record<'default', Record<Lang, string | null>> = {
-  default: { en: null, vi: null },
+  default: { en: 'og/default-en.png', vi: 'og/default-vi.png' },
 };
 
 /** `scene` draws a small animated diagram at the top of the card (see focusScenes in src/data/hero.ts). */
