@@ -375,7 +375,8 @@ function mapLines() {
 /** Map of the share image: tracks, stations, the end capsule and its label, then the route bullets on top. */
 function mapSvg(lang) {
   const lines = mapLines();
-  const colour = (line) => `style="--line: var(--line-${line.number})"`;
+  // Each line carries its colour and the colour of the text on it (the numeral of its bullet).
+  const colour = (line) => `style="--line: var(--line-${line.number}); --on-line: var(--on-line-${line.number})"`;
   const path = (points) => points.map(([x, y], index) => `${index ? 'L' : 'M'}${round(x)} ${round(y)}`).join('');
   const tracks = lines.map((line) => `<path class="track" ${colour(line)} d="${path(line.track)}"/>`).join('');
   const stations = lines

@@ -1,54 +1,63 @@
 /* Dark theme: the default, whatever the OS preference, until the visitor picks light.
-   --line-1/2/3 colour the lines of the network (one per job) and are the only accent colours; --accent is line 3.
+   --line-1/2/3 colour the lines of the network (one per job) and nothing else: tracks, stations, route bullets and
+   the bands under section signs; text on a line colour takes --on-line-1/2/3 of that line. Actions (primary button,
+   links, current nav underline, palette ring, brand mark) take the ink pair --accent / --accent-text. --line-neutral
+   draws the diagrams that belong to no job. --term-* colour the JSON code panel, dark in both themes.
    Older names (--grad, --btn-bg, --glass, --glow*, --hero-glow*, --grad-rail, --accent-2/3) stay flat: a single
    colour, transparent or none, so blocks that still use them draw plain. */
 :root {
-  --bg: #0a1120;
-  --bg-2: #0d1626;
-  --surface: #101a2c;
-  --surface-2: #152238;
-  --glass: #101a2c;
-  --header-bg: #0a1120;
-  --text: #eef2f8;
-  --muted: #a7b3c6;
-  --faint: #8592a8;
-  --border: #25344d;
-  --border-strong: #3a4d6d;
-  --focus: #eef2f8;
-  --line-1: #22c08f;
-  --line-2: #4d86ff;
-  --line-3: #f5b13d;
-  --on-line: #0a1120;
-  --interchange-fill: #eef2f8;
-  --interchange-stroke: #0a1120;
-  --accent: #f5b13d;
-  --accent-text: #0a1120;
-  --accent-soft: #f5b13d1f;
-  --accent-2: #f5b13d;
-  --accent-3: #f5b13d;
+  --bg: #0b1918;
+  --bg-2: #0e1f1d;
+  --surface: #112421;
+  --surface-2: #162d29;
+  --glass: #112421;
+  --header-bg: #0b1918;
+  --text: #f1eee6;
+  --muted: #b4c0b9;
+  --faint: #93a39d;
+  --border: #22403b;
+  --border-strong: #345a53;
+  --focus: #f1eee6;
+  --line-1: #5bb8f2;
+  --line-2: #f2c14e;
+  --line-3: #ff7d5c;
+  --on-line-1: #0b1918;
+  --on-line-2: #0b1918;
+  --on-line-3: #0b1918;
+  --line-neutral: #7f9c95;
+  --line-neutral-fill: #f1eee6;
+  --interchange-fill: #f1eee6;
+  --interchange-stroke: #0b1918;
+  --accent: #f1eee6;
+  --accent-text: #0b1918;
+  --accent-soft: #f1eee61f;
+  --accent-2: #f1eee6;
+  --accent-3: #f1eee6;
   --chip-bg: transparent;
-  --chip-border: #3a4d6d;
-  --ok: #22c08f;
-  --ok-soft: #22c08f1f;
-  --progress: #f5b13d;
-  --progress-soft: #f5b13d1f;
-  --planned: #a7b3c6;
-  --planned-soft: #a7b3c61f;
-  --danger: #ff8574;
-  --danger-soft: #ff85741f;
+  --chip-border: #345a53;
+  --ok: #7ad9a6;
+  --ok-soft: #7ad9a61f;
+  --progress: #f1eee6;
+  --progress-soft: #f1eee61f;
+  --planned: #b4c0b9;
+  --planned-soft: #b4c0b91f;
+  --danger: #ff8fb0;
+  --danger-soft: #ff8fb01f;
   --grid-line: transparent;
   --glow: transparent;
   --glow-2: transparent;
   --glow-btn: transparent;
-  --scrim: #02050bb3;
-  --term-bg: #060b16;
-  --term-text: #d5dce7;
-  --term-muted: #8592a8;
-  --term-ok: #22c08f;
-  --term-event: #4d86ff;
-  --grad: linear-gradient(#f5b13d, #f5b13d);
-  --btn-bg: #f5b13d;
-  --grad-rail: #3a4d6d;
+  --scrim: #030807b3;
+  --term-bg: #081311;
+  --term-text: #dfe3da;
+  --term-muted: #93a39d;
+  --term-border: #22403b;
+  --term-key: #5bb8f2;
+  --term-string: #7ad9a6;
+  --term-number: #f2c14e;
+  --grad: linear-gradient(#f1eee6, #f1eee6);
+  --btn-bg: #f1eee6;
+  --grad-rail: #345a53;
   --hero-glow: none;
   --hero-glow-2: none;
   --shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
@@ -70,47 +79,51 @@
 
 /* Light theme: only when the visitor has picked it (data-theme set by the script in Base.astro). */
 :root[data-theme='light'] {
-  --bg: #f6f8fb;
-  --bg-2: #eef2f7;
+  --bg: #f4f7f5;
+  --bg-2: #e9efec;
   --surface: #ffffff;
-  --surface-2: #eef2f7;
+  --surface-2: #e9efec;
   --glass: #ffffff;
-  --header-bg: #f6f8fb;
-  --text: #0e1626;
-  --muted: #46546a;
-  --faint: #5b6779;
-  --border: #d5dce7;
-  --border-strong: #9aa7ba;
-  --focus: #0e1626;
-  --line-1: #0b7a57;
-  --line-2: #2453c8;
-  --line-3: #946000;
-  --on-line: #ffffff;
+  --header-bg: #f4f7f5;
+  --text: #0f1f1d;
+  --muted: #44564f;
+  --faint: #4f625b;
+  --border: #d3ddd8;
+  --border-strong: #a3b5ae;
+  --focus: #0f1f1d;
+  --line-1: #1a6fa8;
+  --line-2: #b07d00;
+  --line-3: #b8462a;
+  --on-line-1: #ffffff;
+  --on-line-2: #0f1f1d;
+  --on-line-3: #ffffff;
+  --line-neutral: #6b8a82;
+  --line-neutral-fill: #ffffff;
   --interchange-fill: #ffffff;
-  --interchange-stroke: #0e1626;
-  --accent: #946000;
-  --accent-text: #ffffff;
-  --accent-soft: #9460001a;
-  --accent-2: #946000;
-  --accent-3: #946000;
+  --interchange-stroke: #0f1f1d;
+  --accent: #0f1f1d;
+  --accent-text: #f4f7f5;
+  --accent-soft: #0f1f1d1a;
+  --accent-2: #0f1f1d;
+  --accent-3: #0f1f1d;
   --chip-bg: transparent;
-  --chip-border: #9aa7ba;
-  --ok: #0b7a57;
-  --ok-soft: #0b7a571a;
-  --progress: #946000;
-  --progress-soft: #9460001a;
-  --planned: #46546a;
-  --planned-soft: #46546a1a;
-  --danger: #b42318;
-  --danger-soft: #b423181a;
+  --chip-border: #a3b5ae;
+  --ok: #1d7a52;
+  --ok-soft: #1d7a521a;
+  --progress: #0f1f1d;
+  --progress-soft: #0f1f1d1a;
+  --planned: #44564f;
+  --planned-soft: #44564f1a;
+  --danger: #c2185b;
+  --danger-soft: #c2185b1a;
   --grid-line: transparent;
   --glow: transparent;
   --glow-2: transparent;
   --glow-btn: transparent;
-  --scrim: #0e162666;
-  --grad: linear-gradient(#946000, #946000);
-  --btn-bg: #946000;
-  --grad-rail: #9aa7ba;
+  --scrim: #0f1f1d66;
+  --grad: linear-gradient(#0f1f1d, #0f1f1d);
+  --btn-bg: #0f1f1d;
+  --grad-rail: #a3b5ae;
   --hero-glow: none;
   --hero-glow-2: none;
   --shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
@@ -138,7 +151,11 @@
     --line-1: #000000;
     --line-2: #000000;
     --line-3: #000000;
-    --on-line: #ffffff;
+    --on-line-1: #ffffff;
+    --on-line-2: #ffffff;
+    --on-line-3: #ffffff;
+    --line-neutral: #000000;
+    --line-neutral-fill: #ffffff;
     --interchange-fill: #ffffff;
     --interchange-stroke: #000000;
     --accent: #000000;
@@ -164,8 +181,10 @@
     --term-bg: #ffffff;
     --term-text: #000000;
     --term-muted: #000000;
-    --term-ok: #000000;
-    --term-event: #000000;
+    --term-border: #000000;
+    --term-key: #000000;
+    --term-string: #000000;
+    --term-number: #000000;
     --grad: none;
     --btn-bg: #ffffff;
     --grad-rail: #000000;
@@ -197,8 +216,8 @@ html {
 }
 
 ::selection {
-  background: var(--line-3);
-  color: var(--on-line);
+  background: var(--accent);
+  color: var(--accent-text);
 }
 
 html:not(.js) .js-only {
@@ -415,14 +434,15 @@ time,
   transition: background-color var(--t-hover), border-color var(--t-hover), color var(--t-hover);
 }
 
-/* Solid line 3 with ink text (dark) or white text (light). */
+/* Solid ink: an ivory fill with dark text (dark theme), a dark fill with light text (light theme). The ink is also
+   the text colour, so hover mixes in the page background instead. */
 .button.primary {
   background: var(--btn-bg);
   color: var(--accent-text);
 }
 
 .button.primary:hover {
-  background: color-mix(in srgb, var(--btn-bg) 85%, var(--text));
+  background: color-mix(in srgb, var(--btn-bg) 85%, var(--bg));
 }
 
 .button.secondary {
@@ -741,7 +761,7 @@ time,
   grid-template-columns: 1fr;
 }
 
-/* Points marked as small stations on line 3. */
+/* Points marked as small station rings in the ink of the actions. */
 .points {
   list-style: none;
   margin: 0;

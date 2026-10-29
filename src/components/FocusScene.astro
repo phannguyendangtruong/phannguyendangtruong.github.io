@@ -4,7 +4,6 @@ import Station from './metro/Station.astro';
 import Terminal from './metro/Terminal.astro';
 import Track from './metro/Track.astro';
 import { focusScenes, type FocusScene, type FocusSceneStops } from '../data/hero';
-import { lines } from '../data/network';
 
 interface Props {
   kind: FocusScene;
@@ -19,8 +18,6 @@ const width = 400;
 const height = 100;
 const left = 20;
 const right = 380;
-/** The diagrams are drawn in the colour of the current line. */
-const line = lines[lines.length - 1].number;
 const scene: FocusSceneStops = focusScenes[kind];
 /** Height of the line, and of the labels: above it when a loop runs below (workflow), below it otherwise. */
 const y = { ingest: 46, workflow: 36, security: 62 }[kind];
@@ -75,23 +72,24 @@ const middle = stops.slice(1, -1).filter((stop) => !(joined && stop === second))
   aria-hidden="true"
   focusable="false"
 >
-  <Track line={line} points={main} />
-  {loop && <Track line={line} points={loop} />}
-  {spur && <Track line={line} points={spur} />}
-  <Terminal x={first.x} y={y} line={line} />
-  <Terminal x={last.x} y={y} line={line} />
-  {spur && <Terminal x={spur[1][0]} y={spur[1][1]} line={line} track="y" />}
-  {middle.map((stop) => <Station x={stop.x} y={y} line={line} />)}
+  <Track points={main} />
+  {loop && <Track points={loop} />}
+  {spur && <Track points={spur} />}
+  <Terminal x={first.x} y={y} />
+  <Terminal x={last.x} y={y} />
+  {spur && <Terminal x={spur[1][0]} y={spur[1][1]} track="y" />}
+  {middle.map((stop) => <Station x={stop.x} y={y} />)}
   {joined && second && <Interchange x={second.x} y={y} tracks={1} />}
-  {loop && <Station x={branchX} y={y + depth} line={line} />}
+  {loop && <Station x={branchX} y={y + depth} />}
   {stops.map((stop) => <text class="fs-label" x={stop.lx} y={labelY} text-anchor={stop.anchor}>{stop.name}</text>)}
   {loop && scene.branch && <text class="fs-label" x={branchX} y={y + depth + 24} text-anchor="middle">{scene.branch}</text>}
   {spur && scene.spur && <text class="fs-label" x={spur[1][0] + 18} y={spurTop + 5}>{scene.spur}</text>}
 </svg>
 
 <style>
-  /* Static diagram in the grammar of the map: a line, its stations, its end bars. It takes the width it is given,
-     up to 480px; the labels are station signs in the condensed face, written as the data gives them. */
+  /* Static diagram in the grammar of the map: a line, its stations, its end bars, in the neutral colour since it
+     belongs to no job. It takes the width it is given, up to 480px; the labels are station signs in the condensed
+     face, written as the data gives them. */
   .scene {
     display: block;
     width: 100%;

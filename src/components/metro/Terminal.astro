@@ -1,12 +1,12 @@
 ---
-import { lineByNumber } from '../../data/network';
+import { lineColor } from '../../data/network';
 
 interface Props {
   /** End of the track, in the units of the parent SVG. */
   x: number;
   y: number;
-  /** Route number of the line that ends here. */
-  line: number;
+  /** Route number of the line that ends here; without it the bar takes the neutral colour. */
+  line?: number;
   /** Direction of the track that ends here; the bar is drawn across it. */
   track?: 'x' | 'y';
   /** Length of the bar. */
@@ -28,7 +28,7 @@ const [x1, y1, x2, y2] = track === 'x' ? [x, y - half, x, y + half] : [x - half,
   x2={x2}
   y2={y2}
   stroke-width={width}
-  style={`--line: ${lineByNumber(line).color}`}
+  style={`--line: ${lineColor(line)}`}
 />
 
 <style>

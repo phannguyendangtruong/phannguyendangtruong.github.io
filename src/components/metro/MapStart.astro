@@ -16,7 +16,7 @@ const route = lineByNumber(line);
 const year = route.job.start.split('/')[1];
 ---
 
-<g class="nm-start" style={`--line: ${route.color}`}>
+<g class="nm-start" style={`--line: ${route.color}; --on-line: ${route.textColor}`}>
   <circle class="nm-bullet" cx={x} cy={y} r="10" />
   <text class="nm-bullet-n" x={x} y={y + 4.5} text-anchor="middle">{route.number}</text>
   <text class="nm-start-text" x={x + 16} y={y + 5}><tspan class="nm-company">{route.job.company[lang]}</tspan><tspan class="nm-year" dx="6">{year}</tspan></text>

@@ -1,12 +1,12 @@
 ---
-import { lineByNumber } from '../../data/network';
+import { lineColor } from '../../data/network';
 
 interface Props {
   /** Centre in the units of the parent SVG. */
   x: number;
   y: number;
-  /** Route number of the line the station is on. */
-  line: number;
+  /** Route number of the line the station is on; without it the station sits on a neutral track. */
+  line?: number;
   /** Radius; the ring is 3 units wide. */
   r?: number;
   class?: string;
@@ -15,7 +15,13 @@ interface Props {
 const { x, y, line, r = 7, class: className } = Astro.props;
 ---
 
-<circle class:list={['station', className]} cx={x} cy={y} r={r} style={`--line: ${lineByNumber(line).color}`} />
+<circle
+  class:list={['station', { neutral: line === undefined }, className]}
+  cx={x}
+  cy={y}
+  r={r}
+  style={`--line: ${lineColor(line)}`}
+/>
 
 <style>
   /* SVG element for a parent <svg>: a ring in the line colour on the page background. */
@@ -23,5 +29,10 @@ const { x, y, line, r = 7, class: className } = Astro.props;
     fill: var(--bg);
     stroke: var(--line);
     stroke-width: 3;
+  }
+
+  /* On a diagram that belongs to no job: a light station on the neutral track. */
+  .neutral {
+    fill: var(--line-neutral-fill);
   }
 </style>

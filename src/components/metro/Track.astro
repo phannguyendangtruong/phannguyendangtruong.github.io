@@ -1,9 +1,9 @@
 ---
-import { checkTrack, lineByNumber } from '../../data/network';
+import { checkTrack, lineColor } from '../../data/network';
 
 interface Props {
-  /** Route number of the line. */
-  line: number;
+  /** Route number of the line; without it the track takes the neutral colour of diagrams that belong to no job. */
+  line?: number;
   /** Points in order, in the units of the parent SVG; every segment is horizontal, vertical or at 45°. */
   points: [number, number][];
   /** Thickness of the track. */
@@ -14,7 +14,7 @@ interface Props {
 }
 
 const { line, points, width = 7, dashed = false, class: className } = Astro.props;
-checkTrack(points, `tuyến ${line}`);
+checkTrack(points, line === undefined ? 'đường trung tính' : `tuyến ${line}`);
 const d = points.map(([x, y], index) => `${index === 0 ? 'M' : 'L'}${x} ${y}`).join('');
 ---
 
@@ -22,7 +22,7 @@ const d = points.map(([x, y], index) => `${index === 0 ? 'M' : 'L'}${x} ${y}`).j
   class:list={['track', { dashed }, className]}
   d={d}
   stroke-width={width}
-  style={`--line: ${lineByNumber(line).color}`}
+  style={`--line: ${lineColor(line)}`}
 />
 
 <style>

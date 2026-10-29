@@ -21,7 +21,7 @@ const label = lang
 
 <span
   class:list={['route-bullet', size, className]}
-  style={`--line: ${route.color}`}
+  style={`--line: ${route.color}; --on-line: ${route.textColor}`}
   role={label ? 'img' : undefined}
   aria-label={label}
   aria-hidden={label ? undefined : 'true'}

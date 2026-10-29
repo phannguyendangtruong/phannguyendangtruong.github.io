@@ -162,8 +162,10 @@ const chips = project.tech.map((name) => {
     display: none;
   }
 
+  /* The ink of the label is also the text colour: hover underlines it. */
   .stop-more summary:hover {
-    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 4px;
   }
 
   .stop-more[open] .stop-more-show,

@@ -2,36 +2,48 @@
 name: Transit Network Portfolio
 description: A backend career drawn as a schematic night transit map, with lines, stations and interchanges computed from the experience data.
 colors:
-  bg: "#0a1120"
-  surface: "#101a2c"
-  surface-2: "#152238"
-  text: "#eef2f8"
-  muted: "#a7b3c6"
-  faint: "#8592a8"
-  border: "#25344d"
-  border-strong: "#3a4d6d"
-  line-1: "#22c08f"
-  line-2: "#4d86ff"
-  line-3: "#f5b13d"
-  on-line: "#0a1120"
-  interchange-fill: "#eef2f8"
-  interchange-stroke: "#0a1120"
-  danger: "#ff8574"
-  scrim: "#02050bb3"
-  bg-light: "#f6f8fb"
+  bg: "#0b1918"
+  surface: "#112421"
+  surface-2: "#162d29"
+  text: "#f1eee6"
+  muted: "#b4c0b9"
+  faint: "#93a39d"
+  border: "#22403b"
+  border-strong: "#345a53"
+  line-1: "#5bb8f2"
+  line-2: "#f2c14e"
+  line-3: "#ff7d5c"
+  on-line-1: "#0b1918"
+  on-line-2: "#0b1918"
+  on-line-3: "#0b1918"
+  line-neutral: "#7f9c95"
+  interchange-fill: "#f1eee6"
+  interchange-stroke: "#0b1918"
+  accent: "#f1eee6"
+  ok: "#7ad9a6"
+  danger: "#ff8fb0"
+  scrim: "#030807b3"
+  term-bg: "#081311"
+  term-text: "#dfe3da"
+  bg-light: "#f4f7f5"
   surface-light: "#ffffff"
-  surface-2-light: "#eef2f7"
-  text-light: "#0e1626"
-  muted-light: "#46546a"
-  faint-light: "#5b6779"
-  border-light: "#d5dce7"
-  border-strong-light: "#9aa7ba"
-  line-1-light: "#0b7a57"
-  line-2-light: "#2453c8"
-  line-3-light: "#946000"
-  on-line-light: "#ffffff"
-  danger-light: "#b42318"
-  scrim-light: "#0e162666"
+  surface-2-light: "#e9efec"
+  text-light: "#0f1f1d"
+  muted-light: "#44564f"
+  faint-light: "#4f625b"
+  border-light: "#d3ddd8"
+  border-strong-light: "#a3b5ae"
+  line-1-light: "#1a6fa8"
+  line-2-light: "#b07d00"
+  line-3-light: "#b8462a"
+  on-line-1-light: "#ffffff"
+  on-line-2-light: "#0f1f1d"
+  on-line-3-light: "#ffffff"
+  line-neutral-light: "#6b8a82"
+  accent-light: "#0f1f1d"
+  ok-light: "#1d7a52"
+  danger-light: "#c2185b"
+  scrim-light: "#0f1f1d66"
 typography:
   display:
     fontFamily: "Barlow Condensed, Arial Narrow, Barlow, system-ui, sans-serif"
@@ -109,14 +121,14 @@ spacing:
   3xl: "56px"
 components:
   button-primary:
-    backgroundColor: "{colors.line-3}"
-    textColor: "{colors.on-line}"
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.bg}"
     typography: "{typography.button}"
     rounded: "{rounded.md}"
     padding: "0 20px"
     height: "44px"
   button-primary-hover:
-    backgroundColor: "#f4bb59"
+    backgroundColor: "#cfcec7"
   button-primary-large:
     padding: "0 22px"
     height: "48px"
@@ -136,7 +148,7 @@ components:
     size: "44px"
   route-bullet:
     backgroundColor: "{colors.line-3}"
-    textColor: "{colors.on-line}"
+    textColor: "{colors.on-line-3}"
     rounded: "{rounded.full}"
     size: "28px"
   route-bullet-sm:
@@ -184,8 +196,8 @@ components:
     padding: "40px 48px 44px"
     width: "800px"
   code-frame:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.text}"
+    backgroundColor: "{colors.term-bg}"
+    textColor: "{colors.term-text}"
     rounded: "{rounded.lg}"
 ---
 
@@ -197,12 +209,12 @@ components:
 
 The site is drawn as a schematic transit map at night. A career is a network: each employer is a coloured line, numbered by start date; each project is a station on its line; every technology used at two employers or more is an interchange where their lines meet, and all lines converge on a shared terminus labelled "Now". These relationships are computed from the experience data, and the build stops when a hand-placed map no longer matches that data, so the drawing is a record, not an illustration. Map language (lines, stations, end bars, legend, "not to scale") reaches every block, from the route of the experience section to the CV sheet and the 404 page.
 
-The material is flat navy with 1px rules. Colour is scarce and semantic: three line colours, each owned by one job, with the current line doubling as the interface accent. Type is split into signs and text: condensed capitals for the name, section signs and station labels; a plain sans for anything a person reads; mono only for code. Density is moderate and reading-first: a recruiter must find role, stack and contact without decoding the map, and every map has a plain equivalent (accessible SVG title and description, the route list, the interchange table).
+The material is flat night-green ink with 1px rules. Colour is scarce and semantic: three line colours, each owned by one job and used for nothing else; actions are drawn in ink, the text colour of the theme. Type is split into signs and text: condensed capitals for the name, section signs and station labels; a plain sans for anything a person reads; mono only for code. Density is moderate and reading-first: a recruiter must find role, stack and contact without decoding the map, and every map has a plain equivalent (accessible SVG title and description, the route list, the interchange table).
 
 Motion is one quiet loop: small data packets running along the hero map's lines, paused off screen, paused by a button, and absent under reduced motion. The world rejects the generic dark developer portfolio: no gradient name, frosted stat tiles, comment-style labels, numbered sections, glows or blobs.
 
 **Key Characteristics:**
-- Three line colours are the only hues; the current line (line 3) is the accent.
+- Three line colours (sky, gold, coral) belong to the lines only; actions are ink, never a line colour.
 - Tracks run only horizontally, vertically or at 45°, with rounded bends and square end bars.
 - Stations are rings on the page background; interchanges are light capsules with an ink edge.
 - Barlow Condensed for signs, Barlow for text, JetBrains Mono for code only.
@@ -211,35 +223,42 @@ Motion is one quiet loop: small data packets running along the hero map's lines,
 
 ## Colors
 
-A flat night palette of blue-grey neutrals carrying three saturated line colours, each tuned to keep ink or white text legible on it.
+A flat night palette of green-ink neutrals carrying three line colours of matched brightness, each tuned to keep its bullet numeral legible: ink on all three in dark, ink or white in light.
 
 ### Primary
-- **Turmeric Line 3** (#f5b13d dark / #946000 light): the line of the current job and the interface accent (`--accent`, `--btn-bg`, `--progress`). Fills the primary button, the header brand mark and route bullet 3; colours links, the current nav underline (3px), the station ring of the selected palette row, the palette input underline, `::selection`, `caret-color` and `accent-color`. Focus-scene diagrams are drawn in it because they describe current work.
+- **Action Ink** (#f1eee6 fill with #0b1918 text in dark / #0f1f1d fill with #f4f7f5 text in light): `--accent`, `--btn-bg`, `--accent-text`; also `--progress`. Fills the primary button and the header brand mark; colours links, the "Show n more" fold, the current nav underline (3px), the station ring of the selected palette row, the palette input underline, the method chip of the JSON view, `::selection`, `caret-color` and `accent-color`. The ink is also the text colour of its theme, so hover states mix in the page background or add an underline instead of changing colour.
 
 ### Secondary
-- **Cobalt Line 2** (#4d86ff dark / #2453c8 light): the second job's track, stations, route bullet and band stretch. It carries no interface role.
-- **Jade Line 1** (#22c08f dark / #0b7a57 light): the first job's track, stations, route bullet and band stretch; also the "ok" status (`--ok`) and JSON string values.
+- **Sky Line 1** (#5bb8f2 dark / #1a6fa8 light): the first job's track, stations, route bullet, band stretch and chip dots.
+- **Gold Line 2** (#f2c14e dark / #b07d00 light): the second job's track, stations, route bullet, band stretch and chip dots.
+- **Coral Line 3** (#ff7d5c dark / #b8462a light): the current job's track, stations, route bullet, band stretch and chip dots; also the line of the 404 page.
+- The line colours carry no interface role.
 
 ### Tertiary
-- **Signal Coral** (#ff8574 dark / #b42318 light): `--danger`, the only hue outside the lines, reserved for error states (failed status chip, error dot, danger button). Never decorative.
+- **Signal Mint** (#7ad9a6 dark / #1d7a52 light): `--ok`, the "200 OK" chip and done dots.
+- **Signal Pink** (#ff8fb0 dark / #c2185b light): `--danger`, reserved for error states (failed status chip, error dot, danger button), kept apart from Coral Line 3. Never decorative.
 
 ### Neutral
-- **Night Navy** (#0a1120 / light #f6f8fb): page background (`--bg`), header background, station ring fill, and `--on-line` ink in the dark theme.
-- **Map Panel** (#101a2c / light #ffffff): `--surface`, solid panels: CV sheet, command palette, filter bar, JSON body, mobile menu panel.
-- **Raised Panel** (#152238 / light #eef2f7): `--surface-2`, hover fill for rows and map labels, selected palette row, code and kbd backgrounds, frame header bar.
-- **Signal White** (#eef2f8 / light #0e1626): `--text`; also `--focus` and, in dark, the interchange capsule fill (`--interchange-fill`; white in light).
-- **Platform Grey** (#a7b3c6 / light #46546a): `--muted`, secondary text, periods, roles, inactive nav links, the "planned" status.
-- **Tunnel Grey** (#8592a8 / light #5b6779): `--faint`, tertiary text (legend scale note, footer note, placeholders, dash bullets); still at least 5:1 on every surface.
-- **Rule Blue** (#25344d / light #d5dce7): `--border`, 1px rules between bands, rows and sheet sections.
-- **Edge Blue** (#3a4d6d / light #9aa7ba): `--border-strong`, edges of controls (secondary button, chips, icon buttons), the scrollbar thumb.
-- **Scrim** (#02050bb3 / light #0e162666): behind the command palette and the mobile menu.
+- **Night Ink** (#0b1918 / light #f4f7f5): page background (`--bg`), header background, station ring fill; in dark also the text on every line colour (`--on-line-1/2/3`) and on the action ink.
+- **Map Panel** (#112421 / light #ffffff): `--surface`, solid panels: CV sheet, command palette, filter bar, request bar chips, mobile menu panel.
+- **Raised Panel** (#162d29 / light #e9efec): `--surface-2`, hover fill for rows and map labels, selected palette row, code and kbd backgrounds, frame header bar.
+- **Signal Ivory** (#f1eee6 / light #0f1f1d): `--text`; also `--focus`, the action ink and, in dark, the interchange capsule fill (`--interchange-fill`; white in light).
+- **Platform Grey** (#b4c0b9 / light #44564f): `--muted`, secondary text, periods, roles, inactive nav links, the "planned" status.
+- **Tunnel Grey** (#93a39d / light #4f625b): `--faint`, tertiary text (legend scale note, footer note, placeholders, dash bullets); still at least 5.5:1 on every surface.
+- **Rule Green** (#22403b / light #d3ddd8): `--border`, 1px rules between bands, rows and sheet sections.
+- **Edge Green** (#345a53 / light #a3b5ae): `--border-strong`, edges of controls (secondary button, chips, icon buttons), the scrollbar thumb.
+- **Sage Line** (#7f9c95 / light #6b8a82): `--line-neutral`, track, stations and end bars of the "What I do" diagrams, which belong to no job; their stations are filled ivory (`--line-neutral-fill`, white in light).
+- **Code Night** (#081311, text #dfe3da, secondary #93a39d): `--term-*`, the JSON body, dark in both themes.
+- **Scrim** (#030807b3 / light #0f1f1d66): behind the command palette and the mobile menu.
 
-**Themes.** Dark is the default whatever the OS preference; light applies only when the visitor picks it (`html[data-theme='light']`, remembered in local storage). The light theme swaps every token above for its light value; text on a line colour flips from ink to white so all three bullets keep at least 4.5:1. Print overrides every token to black or white, removes all shadows, and drops colour fills.
+**Themes.** Dark is the default whatever the OS preference; light applies only when the visitor picks it (`html[data-theme='light']`, remembered in local storage). The light theme swaps every token above for its light value except the code panel; text on a line colour is white on Sky and Coral and ink #0f1f1d on Gold (`--on-line-1/2/3`), so all three bullets keep at least 4.5:1. Print overrides every token to black or white, removes all shadows, and drops colour fills.
 
 ### Named Rules
-**The Three Lines Rule.** The line colours are the only hues on the page, and each belongs to one job in start order (line 1 = first job). A line colour may appear only where that line is meant (track, station, bullet, band stretch, its chip dots) or, for line 3, as the accent. Status colours reuse lines (ok = line 1, in progress = line 3); only danger adds a hue.
+**The Three Lines Rule.** The line colours belong to the lines and to nothing else. Each belongs to one job in start order (line 1 = first job) and appears only where that line is meant: track, station, bullet, band stretch, its chip dots, and the 404 line. Status, actions and diagrams that belong to no job have colours of their own.
 
-**The Ink-on-Line Rule.** Text on a line colour is always `--on-line`: ink #0a1120 in dark, white in light. Body text never takes a line colour unless it passes 4.5:1 on its surface (JSON tokens are set on the solid surface for that reason).
+**The Action Ink Rule.** Every action is drawn in ink (`--accent` / `--accent-text`): the primary button, links, the "Show n more" fold, the current nav underline, the palette ring and underline, the brand mark. Ivory with dark text in dark, dark green with light text in light; never a line colour.
+
+**The Ink-on-Line Rule.** Text on a line colour takes the `--on-line-N` of that line: ink #0b1918 on all three in dark; white on Sky and Coral, ink #0f1f1d on Gold in light. Body text never takes a line colour unless it passes 4.5:1 on its surface (JSON tokens sit on the dark code panel for that reason).
 
 **The Flat Night Rule.** No gradients, frosted glass, backdrop blur, glows or coloured shadows. The older tokens (`--grad`, `--glass`, `--glow*`, `--hero-glow*`, `--grad-rail`, `--accent-2/3`) resolve to a flat colour, transparent or none; they must never be re-inflated.
 
@@ -287,7 +306,7 @@ Breakpoints: 640px (tablet layout, wider gutters and padding), 960px (full heade
 
 ## Elevation & Depth
 
-Flat and tonal. Depth comes from three steps of navy (background, surface, raised surface) separated by 1px rules, never from light. Within a map, depth is drawing order: tracks, then packets, then end bars, stations, interchange capsules, and labels on top. Two soft black shadows exist, both for layers that float over content.
+Flat and tonal. Depth comes from three steps of night-green ink (background, surface, raised surface) separated by 1px rules, never from light. Within a map, depth is drawing order: tracks, then packets, then end bars, stations, interchange capsules, and labels on top. Two soft black shadows exist, both for layers that float over content.
 
 ### Shadow Vocabulary
 - **Float** (`box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4)`; 0.12 in light): the sticky filter status bar, the mobile menu panel, the skip link.
@@ -311,34 +330,34 @@ The form language is the map's own: circles are stops, capsules are joins, squar
 ### Buttons
 Solid, compact and plain; a button is a sign, not a gem.
 - **Shape:** gently squared (8px), at least 44px high (48px for hero, contact and 404 calls to action), 20px side padding (22–24px when large), 8px icon gap with 16px icons.
-- **Primary:** Turmeric Line 3 fill with ink text in dark, white text in light; Barlow 600 1rem.
-- **Hover / Focus:** hover mixes 15% of the text colour into the fill (`color-mix(in srgb, var(--btn-bg) 85%, var(--text))`); 150ms ease-out colour transitions; focus is the global 2px text-colour outline at 3px offset.
-- **Secondary:** transparent with a 1px Edge Blue border and text colour; hover turns the border to text colour.
-- **Danger:** coral text and border on a 12% coral tint; hover fills coral with background-coloured text.
+- **Primary:** Action Ink fill: ivory with ink text in dark, dark green with light text in light; Barlow 600 1rem.
+- **Hover / Focus:** the fill is also the text colour, so hover mixes 15% of the page background into it (`color-mix(in srgb, var(--btn-bg) 85%, var(--bg))`); 150ms ease-out colour transitions; focus is the global 2px text-colour outline at 3px offset.
+- **Secondary:** transparent with a 1px Edge Green border and text colour; hover turns the border to text colour.
+- **Danger:** pink text and border on a 12% pink tint; hover fills pink with background-coloured text.
 - **Disabled:** raised panel fill, faint text, plain border, not-allowed cursor.
 - **Text link:** muted Barlow 0.9375rem, 44px high, turns to text colour on hover; LinkedIn and GitHub sit beside the hero buttons as text links.
-- **Icon button:** 36px (44px large) square with 8px corners and an Edge Blue border, muted icon; hover lifts icon to text colour and border to muted.
+- **Icon button:** 36px (44px large) square with 8px corners and an Edge Green border, muted icon; hover lifts icon to text colour and border to muted.
 
 ### Chips
-- **Technology chip (route):** a 32px Barlow 500 0.875rem capsule with an Edge Blue border, extended to a 44px touch target by an invisible `::after`. When the technology is an interchange, small 8px dots in the colours of the lines through it precede the name, in route order. A button that filters the route.
+- **Technology chip (route):** a 32px Barlow 500 0.875rem capsule with an Edge Green border, extended to a 44px touch target by an invisible `::after`. When the technology is an interchange, small 8px dots in the colours of the lines through it precede the name, in route order. A button that filters the route.
 - **State:** hover shows a text-colour border; pressed inverts (text-colour fill, background-colour text). Chips past the sixth wait behind a dashed "+n" chip.
-- **Status chip (JSON view):** 32px mono capsule; ok, warn and fail tint border, text and a 12% fill with jade, turmeric or coral.
+- **Status chip (JSON view):** 32px mono capsule; ok, warn and fail tint border, text and a 12% fill with mint, ink or pink.
 
 ### Cards / Containers
 - **Corner Style:** 8px; the JSON frame 12px.
-- **Background:** Map Panel (`--surface`) on Night Navy; raised panel for a frame's header bar.
+- **Background:** Map Panel (`--surface`) on Night Ink; raised panel for a frame's header bar.
 - **Shadow Strategy:** none at rest (see Elevation & Depth).
-- **Border:** 1px Rule Blue; Edge Blue for the code frame and floating bars.
+- **Border:** 1px Rule Green; Edge Green for the code frame and floating bars.
 - **Internal Padding:** CV sheet 24px 18px 28px on phones, 40px 48px 44px from 640px.
 - Prefer ruled rows and bands to boxes: the focus areas, the interchange table, and route stops have no card around them.
 
 ### Inputs / Fields
 - **Style:** the command palette field is borderless and transparent in a 56px row under a 1px rule, 16px text, faint placeholder.
-- **Focus:** the row gains a 2px inset Turmeric underline (`inset 0 -2px 0 var(--accent)`), which replaces the field's outline.
+- **Focus:** the row gains a 2px inset ink underline (`inset 0 -2px 0 var(--accent)`), which replaces the field's outline.
 
 ### Navigation
-- **Header:** sticky, solid page background, 1px bottom rule, 64px. Left: the brand mark (a 28px Turmeric route bullet with initials in the sign face) and the name in Barlow 600. Centre from 960px: links in Barlow 500 0.9375rem, muted, 44px high; hover and current turn to text colour, and the current section carries a 3px Turmeric underline inset 12px. Right: palette key chip (⌘K on Mac, Ctrl K elsewhere), language chip, theme icon button.
-- **Mobile menu:** a 44px menu button opens a panel on the surface colour with a float shadow and scrim; links are Condensed 600 1.375rem uppercase rows of 52px between rules, hover in Turmeric; no item numbers.
+- **Header:** sticky, solid page background, 1px bottom rule, 64px. Left: the brand mark (a 28px Action Ink route bullet with initials in the sign face) and the name in Barlow 600. Centre from 960px: links in Barlow 500 0.9375rem, muted, 44px high; hover and current turn to text colour, and the current section carries a 3px ink underline inset 12px. Right: palette key chip (⌘K on Mac, Ctrl K elsewhere), language chip, theme icon button.
+- **Mobile menu:** a 44px menu button opens a panel on the surface colour with a float shadow and scrim; links are Condensed 600 1.375rem uppercase rows of 52px between rules, hover adds a 3px ink underline; no item numbers.
 - **Footer:** a map legend: small route bullets with each employer, the "Diagram not to scale" note in faint text, then the JSON profile link, icon buttons, a no-tracking note and copyright; right-aligned from 640px.
 
 ### Network Map (signature)
@@ -347,7 +366,7 @@ The hero drawing, built only from four parts: **Track** (7px line-colour stroke,
 Motion: one data packet per line, a 4px round dot in the interchange-fill colour drawn as a dash on a 100-unit path, running linearly at about 80 units a second (kept to 8–14s a run), each line offset by a share of its run so they never move together. Packets show only with the script, run only while the map is on screen and the tab visible, stop with the 44px pause button in the map's corner, and are removed with the button under reduced motion.
 
 ### Route (signature)
-The experience section as one line diagram: each employer is a 6px stretch of its colour with a 28px route bullet sitting on the track, the employer name (Barlow 600), role and period. Projects are 16px station rings on the stretch with name, summary, two points and a "Show n more" fold, and technology chips. The route ends at the education origin ring. While a filter is on, matching stations fill their ring with the line colour, others fade to 45% opacity, and a sticky status bar ("Passing through: …" with a project count and a Clear button) floats under the header.
+The experience section as one line diagram: each employer is a 6px stretch of its colour with a 28px route bullet sitting on the track, the employer name (Barlow 600), role and period. Projects are 16px station rings on the stretch with name, summary, two points and a "Show n more" fold in ink that underlines on hover, and technology chips. The route ends at the education origin ring. While a filter is on, matching stations fill their ring with the line colour, others fade to 45% opacity, and a sticky status bar ("Passing through: …" with a project count and a Clear button) floats under the header.
 
 ### Interchange Table (signature)
 Skills as a ruled table grouped under condensed caps titles. Each row is at least 44px on three columns: name, one 20px slot per line (route bullet or empty, so a line keeps its column), and the project count in muted tabular figures. Rows with projects are buttons: raised-panel hover, pressed inverts like the chips.
@@ -355,24 +374,27 @@ Skills as a ruled table grouped under condensed caps titles. Each row is at leas
 ### Section Sign
 An uppercase condensed headline with, 12px below, a band of 6px stretches (40px each) in the colours of the lines the section concerns, in route order. No label above, no number, no outline numerals. The contact block replaces the band with the lines arriving from the left and stopping at end bars against the word "Terminus".
 
+### Focus Diagrams
+The "What I do" bands draw small static diagrams with the map parts, but they belong to no job: track, stations and end bars take Sage Line (`--line-neutral`), stations are filled ivory, and the interchange round stop keeps its ink edge. No line colour appears in them.
+
 ### JSON View
-The profile as an API response, opened in place of the home blocks: a request bar in mono (Turmeric method chip, path, jade "200 OK" status chip, type and size) over a 12px-cornered frame with a numbered, syntax-coloured body (keys Turmeric, strings Jade, numbers Turmeric, punctuation muted). On opening, lines arrive one after another (fade and 4px rise, 140ms each on the standard ease `cubic-bezier(0.22, 0.61, 0.36, 1)`), staggered by at most 30ms so the last line starts within 450ms whatever the length; only without a reduced-motion preference.
+The profile as an API response, opened in place of the home blocks: a request bar in mono (ink method chip, path, mint "200 OK" status chip, type and size) over a 12px-cornered frame with a numbered, syntax-coloured body on the Code Night panel, dark in both themes (keys Sky #5bb8f2, strings Mint #7ad9a6, numbers and literals Gold #f2c14e, punctuation and line numbers #93a39d, text #dfe3da). On opening, lines arrive one after another (fade and 4px rise, 140ms each on the standard ease `cubic-bezier(0.22, 0.61, 0.36, 1)`), staggered by at most 30ms so the last line starts within 450ms whatever the length; only without a reduced-motion preference.
 
 ### CV Sheet and Print
-On screen: one flat surface sheet with a 1px edge, solid-colour name, condensed section signs over a thin band of line colours that runs on as a hairline, route bullets beside employer names, and projects as rings on a 3px track in the line colour. The print button is outlined on phones and solid Turmeric from 640px. In print: A4 portrait, 15mm margins, 10pt / 1.4 body, 20pt name, section signs become 10.5pt Barlow caps over a 0.75pt black rule, route bullets become black rings with no fill, tracks and rings are dropped, bullets print as text dashes, skills print as plain text, jobs, projects and the skills list avoid page breaks, and everything marked no-print (header, footer, maps, diagrams, filter bar, toolbar, colour bands) disappears. The sheet must fit two pages in black and white.
+On screen: one flat surface sheet with a 1px edge, solid-colour name, condensed section signs over a thin band of line colours that runs on as a hairline, route bullets beside employer names, and projects as rings on a 3px track in the line colour. The print button is outlined on phones and solid Action Ink from 640px. In print: A4 portrait, 15mm margins, 10pt / 1.4 body, 20pt name, section signs become 10.5pt Barlow caps over a 0.75pt black rule, route bullets become black rings with no fill, tracks and rings are dropped, bullets print as text dashes, skills print as plain text, jobs, projects and the skills list avoid page breaks, and everything marked no-print (header, footer, maps, diagrams, filter bar, toolbar, colour bands) disappears. The sheet must fit two pages in black and white.
 
 ### 404
-"This station is not on the map": a short stretch of the current line with two stations runs into a dashed unbuilt section ending at a large ring with a question mark; the code sits in muted condensed figures above an English title with the Vietnamese one under it in muted text; each language gets its own primary "home" and secondary "CV" buttons.
+"This station is not on the map": a short stretch of the current line (Coral Line 3) with two stations runs into a dashed unbuilt section ending at a large ring with a question mark; the code sits in muted condensed figures above an English title with the Vietnamese one under it in muted text; each language gets its own primary "home" and secondary "CV" buttons.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** draw every new diagram with the map parts (Track, Station, Interchange, Terminal) and the 45-Degree Rule: 7px tracks, 3px station rings on the page background, capsules with a 2px ink edge, square end bars.
+- **Do** draw every new diagram with the map parts (Track, Station, Interchange, Terminal) and the 45-Degree Rule: 7px tracks, 3px station rings on the page background, capsules with a 2px ink edge, square end bars; a diagram that belongs to no job leaves out the route number and draws in `--line-neutral`.
 - **Do** take a line's colour from its route number (`--line-1`, `--line-2`, `--line-3`), and derive any new interchange or relationship from the experience data, never by hand.
-- **Do** put `--on-line` text on any line-colour fill, and check every new text pair for 4.5:1 in both themes (3:1 for large text).
+- **Do** put the `--on-line-N` text of the line on any line-colour fill, draw every action in ink (`--accent` / `--accent-text`), and check every new text pair for 4.5:1 in both themes (3:1 for large text, tracks and stations).
 - **Do** open each home block with the section sign: condensed uppercase headline and the 6px band of related line colours.
 - **Do** keep touch targets at least 44px, extending a smaller visual (32px chip) with an invisible `::after` rather than enlarging it.
-- **Do** keep interaction feedback to colour and border changes at 150ms ease-out, with the 2px text-colour focus outline at 3px offset; a pressed filter control inverts to text-colour fill.
+- **Do** keep interaction feedback to colour and border changes at 150ms ease-out, with the 2px text-colour focus outline at 3px offset; a pressed filter control inverts to text-colour fill; where the ink equals the text colour, hover underlines instead.
 - **Do** keep dark as the default theme regardless of OS preference, and give every block a black-on-white print state.
 - **Do** use Barlow at 400, 500 and 600 only; 700 belongs to the condensed face.
 
@@ -380,7 +402,7 @@ On screen: one flat surface sheet with a 1px edge, solid-colour name, condensed 
 - **Don't** use gradients, frosted glass, backdrop blur, glows, coloured shadows, blobs, noise or background grids.
 - **Don't** put a kicker or eyebrow label above a heading, number sections (01–04), or use comment-style labels such as `// about`.
 - **Don't** set dates, names, labels or footers in mono; mono is for code.
-- **Don't** add a fourth accent hue or use a line colour for something that is not its line (line 3 as accent excepted).
+- **Don't** add another hue or use a line colour for something that is not its line: actions are ink, status is mint or pink, unowned diagrams are sage.
 - **Don't** add scroll reveals, count-ups, typing effects or looping decoration; content is visible on load, and the packet loop stays the only ambient motion.
 - **Don't** nest cards inside cards or box content that reads as a list; use rules and bands.
 - **Don't** draw a track segment at any angle other than 0°, 45° or 90°, or label a map relationship the data does not contain.

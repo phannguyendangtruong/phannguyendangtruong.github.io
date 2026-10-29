@@ -4,6 +4,8 @@ import type { Text } from '../i18n/ui';
 
 /** Colour tokens of the lines in src/styles/global.css, in route number order. */
 const lineTokens = ['--line-1', '--line-2', '--line-3'] as const;
+/** Tokens of the text set on each line colour (route bullets), in the same order. */
+const onLineTokens = ['--on-line-1', '--on-line-2', '--on-line-3'] as const;
 
 export type JobProject = Job['projects'][number];
 
@@ -27,6 +29,8 @@ export type Line = {
   job: Job;
   /** CSS colour of the line: "var(--line-1)". */
   color: string;
+  /** CSS colour of text on the line colour: "var(--on-line-1)". */
+  textColor: string;
   stations: Station[];
 };
 
@@ -74,6 +78,7 @@ function buildLines(): Line[] {
       key: `line-${number}`,
       job,
       color: `var(${lineTokens[index]})`,
+      textColor: `var(${onLineTokens[index]})`,
       stations: job.projects.map((project) => ({
         key: slug(project.name.en),
         line: number,
@@ -133,6 +138,11 @@ export function lineByNumber(number: number): Line {
   const line = lines.find((item) => item.number === number);
   if (!line) throw new Error(`Sơ đồ tuyến: không có tuyến số ${number}.`);
   return line;
+}
+
+/** CSS colour of a line by route number; without a number, the neutral colour of diagrams that belong to no job. */
+export function lineColor(number?: number): string {
+  return number === undefined ? 'var(--line-neutral)' : lineByNumber(number).color;
 }
 
 /** Line of a job of `experience`. */

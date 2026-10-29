@@ -6,283 +6,167 @@
     "colorMeta": {
       "bg": {
         "role": "neutral",
-        "displayName": "Night Navy",
-        "canonical": "#0a1120",
-        "oklch": "oklch(17.9% 0.033 264)",
-        "tonalRamp": [
-          "#080b11",
-          "#1f242d",
-          "#39404d",
-          "#565e6e",
-          "#768095",
-          "#9da5b4",
-          "#c6cbd4",
-          "#edeef2"
-        ],
-        "note": "Page background (--bg), dark theme default."
+        "displayName": "Night Ink",
+        "canonical": "#0b1918",
+        "oklch": "oklch(20.0% 0.020 190)",
+        "note": "Page background (--bg), dark theme default; also --header-bg, the text on every line colour (--on-line-1/2/3) and on the action ink (--accent-text)."
       },
       "surface": {
         "role": "neutral",
         "displayName": "Map Panel",
-        "canonical": "#101a2c",
-        "oklch": "oklch(21.8% 0.038 262)",
-        "tonalRamp": [
-          "#070b12",
-          "#1e242f",
-          "#38404f",
-          "#535e71",
-          "#748198",
-          "#9ba5b6",
-          "#c5cbd5",
-          "#eceef2"
-        ]
+        "canonical": "#112421",
+        "oklch": "oklch(24.3% 0.026 183)"
       },
       "surface-2": {
         "role": "neutral",
         "displayName": "Raised Panel",
-        "canonical": "#152238",
-        "oklch": "oklch(25.2% 0.046 260)",
-        "tonalRamp": [
-          "#070b14",
-          "#1d2431",
-          "#364051",
-          "#515e74",
-          "#71819c",
-          "#99a5b9",
-          "#c3cbd7",
-          "#eceff3"
-        ]
+        "canonical": "#162d29",
+        "oklch": "oklch(27.7% 0.030 182)"
       },
       "text": {
         "role": "neutral",
-        "displayName": "Signal White",
-        "canonical": "#eef2f8",
-        "oklch": "oklch(96.0% 0.009 258)",
-        "tonalRamp": [
-          "#090b0f",
-          "#212429",
-          "#3d4045",
-          "#5a5e63",
-          "#7d8086",
-          "#a1a5aa",
-          "#c7cbd1",
-          "#ebeff5"
-        ],
-        "note": "Also --focus."
+        "displayName": "Signal Ivory",
+        "canonical": "#f1eee6",
+        "oklch": "oklch(94.9% 0.011 90)",
+        "note": "Also --focus and the action ink (--accent)."
       },
       "muted": {
         "role": "neutral",
         "displayName": "Platform Grey",
-        "canonical": "#a7b3c6",
-        "oklch": "oklch(76.3% 0.030 260)",
-        "tonalRamp": [
-          "#080b11",
-          "#1f242d",
-          "#39404b",
-          "#555e6d",
-          "#768193",
-          "#9da5b2",
-          "#c6cbd3",
-          "#edeef2"
-        ],
+        "canonical": "#b4c0b9",
+        "oklch": "oklch(79.6% 0.016 161)",
         "note": "Also --planned."
       },
       "faint": {
         "role": "neutral",
         "displayName": "Tunnel Grey",
-        "canonical": "#8592a8",
-        "oklch": "oklch(65.7% 0.036 261)",
-        "tonalRamp": [
-          "#080b12",
-          "#1e242e",
-          "#38404e",
-          "#545e6f",
-          "#748196",
-          "#9ca5b5",
-          "#c5cbd5",
-          "#eceef2"
-        ]
+        "canonical": "#93a39d",
+        "oklch": "oklch(70.1% 0.020 171)",
+        "note": "Also --term-muted on the code panel."
       },
       "border": {
         "role": "neutral",
-        "displayName": "Rule Blue",
-        "canonical": "#25344d",
-        "oklch": "oklch(32.4% 0.049 260)",
-        "tonalRamp": [
-          "#060b14",
-          "#1c2432",
-          "#354053",
-          "#505e76",
-          "#6f819e",
-          "#98a5bb",
-          "#c3cbd8",
-          "#eceff4"
-        ]
+        "displayName": "Rule Green",
+        "canonical": "#22403b",
+        "oklch": "oklch(34.6% 0.037 182)",
+        "note": "Also --term-border on the code panel."
       },
       "border-strong": {
         "role": "neutral",
-        "displayName": "Edge Blue",
-        "canonical": "#3a4d6d",
-        "oklch": "oklch(41.9% 0.059 261)",
-        "tonalRamp": [
-          "#050b16",
-          "#1a2435",
-          "#334056",
-          "#4d5e7a",
-          "#6c81a4",
-          "#96a5bf",
-          "#c2cbdb",
-          "#ebeff5"
-        ],
+        "displayName": "Edge Green",
+        "canonical": "#345a53",
+        "oklch": "oklch(43.7% 0.045 181)",
         "note": "Also --chip-border."
       },
       "line-1": {
         "role": "secondary",
-        "displayName": "Jade Line 1",
-        "canonical": "#22c08f",
-        "oklch": "oklch(71.9% 0.143 166)",
-        "tonalRamp": [
-          "#001007",
-          "#002c1e",
-          "#044c36",
-          "#036f50",
-          "#0c976f",
-          "#60b996",
-          "#a6d7c1",
-          "#e2f3eb"
-        ],
-        "note": "Also --ok."
+        "displayName": "Sky Line 1",
+        "canonical": "#5bb8f2",
+        "oklch": "oklch(74.9% 0.122 239)",
+        "note": "Line 1 only: track, stations, bullet, band stretch, chip dots. Also --term-key on the code panel."
       },
       "line-2": {
         "role": "secondary",
-        "displayName": "Cobalt Line 2",
-        "canonical": "#4d86ff",
-        "oklch": "oklch(64.4% 0.190 263)",
-        "tonalRamp": [
-          "#00052d",
-          "#051e58",
-          "#163986",
-          "#2a56b7",
-          "#4078f0",
-          "#78a3f9",
-          "#b0cbff",
-          "#e6efff"
-        ]
+        "displayName": "Gold Line 2",
+        "canonical": "#f2c14e",
+        "oklch": "oklch(83.4% 0.141 85)",
+        "note": "Line 2 only: track, stations, bullet, band stretch, chip dots. Also --term-number on the code panel."
       },
       "line-3": {
-        "role": "primary",
-        "displayName": "Turmeric Line 3",
-        "canonical": "#f5b13d",
-        "oklch": "oklch(80.5% 0.148 76)",
-        "tonalRamp": [
-          "#160700",
-          "#332000",
-          "#573900",
-          "#7c5508",
-          "#a87512",
-          "#ca9b54",
-          "#e2c69e",
-          "#f7edde"
-        ],
-        "note": "Also --accent, --btn-bg, --progress."
+        "role": "secondary",
+        "displayName": "Coral Line 3",
+        "canonical": "#ff7d5c",
+        "oklch": "oklch(73.4% 0.166 35)",
+        "note": "Line 3 only: track, stations, bullet, band stretch, chip dots, and the 404 line."
       },
-      "on-line": {
+      "on-line-1": {
         "role": "neutral",
-        "displayName": "Ink",
-        "canonical": "#0a1120",
-        "oklch": "oklch(17.9% 0.033 264)",
-        "tonalRamp": [
-          "#080b11",
-          "#1f242d",
-          "#39404d",
-          "#565e6e",
-          "#768095",
-          "#9da5b4",
-          "#c6cbd4",
-          "#edeef2"
-        ],
-        "note": "Text on line colours; also --accent-text."
+        "displayName": "Ink on Sky",
+        "canonical": "#0b1918",
+        "oklch": "oklch(20.0% 0.020 190)",
+        "note": "Text on line 1 (--on-line-1)."
+      },
+      "on-line-2": {
+        "role": "neutral",
+        "displayName": "Ink on Gold",
+        "canonical": "#0b1918",
+        "oklch": "oklch(20.0% 0.020 190)",
+        "note": "Text on line 2 (--on-line-2)."
+      },
+      "on-line-3": {
+        "role": "neutral",
+        "displayName": "Ink on Coral",
+        "canonical": "#0b1918",
+        "oklch": "oklch(20.0% 0.020 190)",
+        "note": "Text on line 3 (--on-line-3)."
+      },
+      "line-neutral": {
+        "role": "neutral",
+        "displayName": "Sage Line",
+        "canonical": "#7f9c95",
+        "oklch": "oklch(66.9% 0.034 179)",
+        "note": "--line-neutral: track, stations and end bars of the diagrams that belong to no job; their stations are filled with --line-neutral-fill (#f1eee6)."
       },
       "interchange-fill": {
         "role": "neutral",
-        "displayName": "Capsule White",
-        "canonical": "#eef2f8",
-        "oklch": "oklch(96.0% 0.009 258)",
-        "tonalRamp": [
-          "#090b0f",
-          "#212429",
-          "#3d4045",
-          "#5a5e63",
-          "#7d8086",
-          "#a1a5aa",
-          "#c7cbd1",
-          "#ebeff5"
-        ],
+        "displayName": "Capsule Ivory",
+        "canonical": "#f1eee6",
+        "oklch": "oklch(94.9% 0.011 90)",
         "note": "Interchange capsule fill and data packet colour."
       },
       "interchange-stroke": {
         "role": "neutral",
         "displayName": "Capsule Ink",
-        "canonical": "#0a1120",
-        "oklch": "oklch(17.9% 0.033 264)",
-        "tonalRamp": [
-          "#080b11",
-          "#1f242d",
-          "#39404d",
-          "#565e6e",
-          "#768095",
-          "#9da5b4",
-          "#c6cbd4",
-          "#edeef2"
-        ]
+        "canonical": "#0b1918",
+        "oklch": "oklch(20.0% 0.020 190)"
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Action Ink",
+        "canonical": "#f1eee6",
+        "oklch": "oklch(94.9% 0.011 90)",
+        "note": "--accent, --btn-bg, --progress: primary button, links, nav underline, palette ring, brand mark. Text on it is --accent-text (#0b1918)."
+      },
+      "ok": {
+        "role": "tertiary",
+        "displayName": "Signal Mint",
+        "canonical": "#7ad9a6",
+        "oklch": "oklch(81.3% 0.117 159)",
+        "note": "--ok: the 200 OK chip and done dots. Also --term-string on the code panel."
       },
       "danger": {
         "role": "tertiary",
-        "displayName": "Signal Coral",
-        "canonical": "#ff8574",
-        "oklch": "oklch(74.9% 0.151 29)",
-        "tonalRamp": [
-          "#200000",
-          "#450c07",
-          "#6e231b",
-          "#993b30",
-          "#cb5648",
-          "#e08a7d",
-          "#f1bcb3",
-          "#fee9e6"
-        ]
+        "displayName": "Signal Pink",
+        "canonical": "#ff8fb0",
+        "oklch": "oklch(77.9% 0.139 2)",
+        "note": "--danger: error states only, apart from Coral Line 3."
       },
       "scrim": {
         "role": "neutral",
         "displayName": "Scrim",
-        "canonical": "#02050bb3",
-        "oklch": "oklch(9% 0.02 263 / 0.7)",
-        "tonalRamp": [
-          "#090b10",
-          "#20242b",
-          "#3b404a",
-          "#575e6a",
-          "#788190",
-          "#9fa5b0",
-          "#c7cbd2",
-          "#edeef1"
-        ]
+        "canonical": "#030807b3",
+        "oklch": "oklch(12.6% 0.012 183 / 0.7)"
+      },
+      "term-bg": {
+        "role": "neutral",
+        "displayName": "Code Night",
+        "canonical": "#081311",
+        "oklch": "oklch(17.5% 0.017 182)",
+        "note": "JSON code panel (--term-bg), dark in both themes."
+      },
+      "term-text": {
+        "role": "neutral",
+        "displayName": "Code Text",
+        "canonical": "#dfe3da",
+        "oklch": "oklch(91.0% 0.013 126)",
+        "note": "Code text (--term-text); keys Sky #5bb8f2, strings Mint #7ad9a6, numbers and literals Gold #f2c14e, punctuation #93a39d."
       },
       "bg-light": {
         "role": "neutral",
         "displayName": "Day Paper",
-        "canonical": "#f6f8fb",
-        "oklch": "oklch(97.8% 0.005 258)",
-        "tonalRamp": [
-          "#0a0b0d",
-          "#232426",
-          "#3e4042",
-          "#5c5e60",
-          "#7e8083",
-          "#a3a5a7",
-          "#c9cbcd",
-          "#edeff1"
-        ]
+        "canonical": "#f4f7f5",
+        "oklch": "oklch(97.3% 0.004 157)",
+        "note": "Also the text on the light action ink (--accent-text)."
       },
       "surface-light": {
         "role": "neutral",
@@ -299,156 +183,66 @@
           "#cacaca",
           "#eeeeee"
         ],
-        "note": "Also the light interchange fill."
+        "note": "Also the light interchange fill and the light --line-neutral-fill."
       },
       "surface-2-light": {
         "role": "neutral",
         "displayName": "Day Raised Panel",
-        "canonical": "#eef2f7",
-        "oklch": "oklch(96.0% 0.008 254)",
-        "tonalRamp": [
-          "#090b0e",
-          "#212428",
-          "#3d4044",
-          "#5b5e62",
-          "#7d8185",
-          "#a1a5aa",
-          "#c7cbd0",
-          "#ebeff4"
-        ]
+        "canonical": "#e9efec",
+        "oklch": "oklch(94.7% 0.008 165)"
       },
       "text-light": {
         "role": "neutral",
         "displayName": "Day Ink",
-        "canonical": "#0e1626",
-        "oklch": "oklch(20.1% 0.034 263)",
-        "tonalRamp": [
-          "#080b12",
-          "#1f242e",
-          "#39404d",
-          "#555e6f",
-          "#768195",
-          "#9da5b4",
-          "#c6cbd4",
-          "#edeef2"
-        ],
-        "note": "Also the light --focus and interchange stroke."
+        "canonical": "#0f1f1d",
+        "oklch": "oklch(22.4% 0.022 186)",
+        "note": "Also the light --focus, interchange stroke, action ink and the text on Gold Line 2."
       },
       "muted-light": {
         "role": "neutral",
         "displayName": "Day Platform Grey",
-        "canonical": "#46546a",
-        "oklch": "oklch(44.3% 0.040 259)",
-        "tonalRamp": [
-          "#070b13",
-          "#1d242f",
-          "#37404f",
-          "#525e71",
-          "#728199",
-          "#9aa5b7",
-          "#c4cbd6",
-          "#eceff3"
-        ]
+        "canonical": "#44564f",
+        "oklch": "oklch(43.6% 0.025 169)"
       },
       "faint-light": {
         "role": "neutral",
         "displayName": "Day Tunnel Grey",
-        "canonical": "#5b6779",
-        "oklch": "oklch(51.0% 0.032 258)",
-        "tonalRamp": [
-          "#080b11",
-          "#1f242d",
-          "#38404c",
-          "#545e6d",
-          "#758194",
-          "#9ca5b3",
-          "#c5cbd3",
-          "#eceff2"
-        ]
+        "canonical": "#4f625b",
+        "oklch": "oklch(47.8% 0.026 171)"
       },
       "border-light": {
         "role": "neutral",
         "displayName": "Day Rule",
-        "canonical": "#d5dce7",
-        "oklch": "oklch(89.2% 0.017 259)",
-        "tonalRamp": [
-          "#070b12",
-          "#1f242c",
-          "#3a4049",
-          "#585e67",
-          "#7a818b",
-          "#9ea5af",
-          "#c4cbd6",
-          "#e8effa"
-        ]
+        "canonical": "#d3ddd8",
+        "oklch": "oklch(88.8% 0.013 165)"
       },
       "border-strong-light": {
         "role": "neutral",
         "displayName": "Day Edge",
-        "canonical": "#9aa7ba",
-        "oklch": "oklch(72.4% 0.031 258)",
-        "tonalRamp": [
-          "#080b11",
-          "#1f242d",
-          "#38404c",
-          "#545e6d",
-          "#758193",
-          "#9ca5b3",
-          "#c5cbd3",
-          "#eceff2"
-        ]
+        "canonical": "#a3b5ae",
+        "oklch": "oklch(75.7% 0.022 170)"
       },
       "line-1-light": {
         "role": "secondary",
-        "displayName": "Jade Line 1 (light)",
-        "canonical": "#0b7a57",
-        "oklch": "oklch(51.4% 0.106 164)",
-        "tonalRamp": [
-          "#001007",
-          "#002c1c",
-          "#064c35",
-          "#1c6d50",
-          "#34946f",
-          "#77b498",
-          "#b1d4c3",
-          "#e5f2ec"
-        ]
+        "displayName": "Sky Line 1 (light)",
+        "canonical": "#1a6fa8",
+        "oklch": "oklch(52.2% 0.118 244)"
       },
       "line-2-light": {
         "role": "secondary",
-        "displayName": "Cobalt Line 2 (light)",
-        "canonical": "#2453c8",
-        "oklch": "oklch(48.5% 0.189 264)",
-        "tonalRamp": [
-          "#00052d",
-          "#071d57",
-          "#193986",
-          "#2c56b7",
-          "#4477ef",
-          "#79a2f9",
-          "#b1cbff",
-          "#e7efff"
-        ]
+        "displayName": "Gold Line 2 (light)",
+        "canonical": "#b07d00",
+        "oklch": "oklch(62.5% 0.129 80)"
       },
       "line-3-light": {
-        "role": "primary",
-        "displayName": "Turmeric Line 3 (light)",
-        "canonical": "#946000",
-        "oklch": "oklch(53.3% 0.114 73)",
-        "tonalRamp": [
-          "#170700",
-          "#351e00",
-          "#593700",
-          "#7e530e",
-          "#a97424",
-          "#c49d6b",
-          "#dec6a9",
-          "#f6ede2"
-        ]
+        "role": "secondary",
+        "displayName": "Coral Line 3 (light)",
+        "canonical": "#b8462a",
+        "oklch": "oklch(54.5% 0.154 35)"
       },
-      "on-line-light": {
+      "on-line-1-light": {
         "role": "neutral",
-        "displayName": "White on Line",
+        "displayName": "White on Sky",
         "canonical": "#ffffff",
         "oklch": "oklch(100% 0 0)",
         "tonalRamp": [
@@ -462,37 +256,58 @@
           "#eeeeee"
         ]
       },
+      "on-line-2-light": {
+        "role": "neutral",
+        "displayName": "Ink on Gold (light)",
+        "canonical": "#0f1f1d",
+        "oklch": "oklch(22.4% 0.022 186)"
+      },
+      "on-line-3-light": {
+        "role": "neutral",
+        "displayName": "White on Coral",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#808080",
+          "#a4a4a4",
+          "#cacaca",
+          "#eeeeee"
+        ]
+      },
+      "line-neutral-light": {
+        "role": "neutral",
+        "displayName": "Sage Line (light)",
+        "canonical": "#6b8a82",
+        "oklch": "oklch(60.7% 0.037 177)"
+      },
+      "accent-light": {
+        "role": "primary",
+        "displayName": "Action Ink (light)",
+        "canonical": "#0f1f1d",
+        "oklch": "oklch(22.4% 0.022 186)",
+        "note": "Text on it is #f4f7f5."
+      },
+      "ok-light": {
+        "role": "tertiary",
+        "displayName": "Signal Mint (light)",
+        "canonical": "#1d7a52",
+        "oklch": "oklch(51.6% 0.106 160)"
+      },
       "danger-light": {
         "role": "tertiary",
-        "displayName": "Signal Coral (light)",
-        "canonical": "#b42318",
-        "oklch": "oklch(50.0% 0.182 30)",
-        "tonalRamp": [
-          "#230000",
-          "#4b0100",
-          "#75170f",
-          "#a32e23",
-          "#d74839",
-          "#ea8374",
-          "#f8b9ae",
-          "#ffe9e5"
-        ]
+        "displayName": "Signal Pink (light)",
+        "canonical": "#c2185b",
+        "oklch": "oklch(53.1% 0.202 6)"
       },
       "scrim-light": {
         "role": "neutral",
         "displayName": "Day Scrim",
-        "canonical": "#0e162666",
-        "oklch": "oklch(20.1% 0.034 263 / 0.4)",
-        "tonalRamp": [
-          "#080b12",
-          "#1f242e",
-          "#39404d",
-          "#555e6f",
-          "#768195",
-          "#9da5b4",
-          "#c6cbd4",
-          "#edeef2"
-        ]
+        "canonical": "#0f1f1d66",
+        "oklch": "oklch(22.4% 0.022 186 / 0.4)"
       }
     },
     "typographyMeta": {
@@ -610,25 +425,25 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Solid Turmeric Line 3 with ink text; the one main action of a block.",
+      "description": "Solid action ink: ivory with dark text in dark, dark green with light text in light; the one main action of a block.",
       "html": "<a class=\"ds-btn-primary\" href=\"#\">Follow the route <svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5v14M6 13l6 6 6-6\"/></svg></a>",
-      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px; border: 1px solid transparent; border-radius: var(--radius, 8px); background: var(--btn-bg, #f5b13d); color: var(--accent-text, #0a1120); font: 600 1rem/1 var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; white-space: nowrap; cursor: pointer; transition: background-color 150ms ease-out; } .ds-btn-primary:hover { background: color-mix(in srgb, var(--btn-bg, #f5b13d) 85%, var(--text, #eef2f8)); } .ds-btn-primary:focus-visible { outline: 2px solid var(--focus, #eef2f8); outline-offset: 3px; } .ds-btn-primary svg { width: 16px; height: 16px; }"
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px; border: 1px solid transparent; border-radius: var(--radius, 8px); background: var(--btn-bg, #f1eee6); color: var(--accent-text, #0b1918); font: 600 1rem/1 var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; white-space: nowrap; cursor: pointer; transition: background-color 150ms ease-out; } .ds-btn-primary:hover { background: color-mix(in srgb, var(--btn-bg, #f1eee6) 85%, var(--bg, #0b1918)); } .ds-btn-primary:focus-visible { outline: 2px solid var(--focus, #f1eee6); outline-offset: 3px; } .ds-btn-primary svg { width: 16px; height: 16px; }"
     },
     {
       "name": "Secondary Button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "Transparent with an Edge Blue border; the alternative action beside a primary.",
+      "description": "Transparent with an Edge Green border; the alternative action beside a primary.",
       "html": "<a class=\"ds-btn-secondary\" href=\"#\">View CV</a>",
-      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; border: 1px solid var(--border-strong, #3a4d6d); border-radius: var(--radius, 8px); background: transparent; color: var(--text, #eef2f8); font: 600 1rem/1 var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; white-space: nowrap; cursor: pointer; transition: border-color 150ms ease-out, color 150ms ease-out; } .ds-btn-secondary:hover { border-color: var(--text, #eef2f8); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--focus, #eef2f8); outline-offset: 3px; }"
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; border: 1px solid var(--border-strong, #345a53); border-radius: var(--radius, 8px); background: transparent; color: var(--text, #f1eee6); font: 600 1rem/1 var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; white-space: nowrap; cursor: pointer; transition: border-color 150ms ease-out, color 150ms ease-out; } .ds-btn-secondary:hover { border-color: var(--text, #f1eee6); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--focus, #f1eee6); outline-offset: 3px; }"
     },
     {
       "name": "Route Bullet",
       "kind": "custom",
       "refersTo": "route-bullet",
-      "description": "Filled circle in a line colour with its route number in the condensed face; 28px heads, 20px tables and legends.",
+      "description": "Filled circle in a line colour with its route number in the condensed face, in the text colour of that line; 28px heads, 20px tables and legends.",
       "html": "<div class=\"ds-bullets\"><span class=\"ds-rb ds-l1\">1</span><span class=\"ds-rb ds-l2\">2</span><span class=\"ds-rb ds-l3\">3</span><span class=\"ds-rb sm ds-l1\">1</span><span class=\"ds-rb sm ds-l2\">2</span><span class=\"ds-rb sm ds-l3\">3</span></div>",
-      "css": ".ds-bullets { display: flex; align-items: center; gap: 8px; } .ds-rb { --size: 28px; display: inline-grid; place-items: center; flex: none; width: var(--size); height: var(--size); border-radius: 50%; background: var(--line); color: var(--on-line, #0a1120); font: 700 calc(var(--size) * 0.6) / 1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); font-variant-numeric: tabular-nums; } .ds-rb.sm { --size: 20px; } .ds-l1 { --line: var(--line-1, #22c08f); } .ds-l2 { --line: var(--line-2, #4d86ff); } .ds-l3 { --line: var(--line-3, #f5b13d); }"
+      "css": ".ds-bullets { display: flex; align-items: center; gap: 8px; } .ds-rb { --size: 28px; display: inline-grid; place-items: center; flex: none; width: var(--size); height: var(--size); border-radius: 50%; background: var(--line); color: var(--on-line, #0b1918); font: 700 calc(var(--size) * 0.6) / 1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); font-variant-numeric: tabular-nums; } .ds-rb.sm { --size: 20px; } .ds-l1 { --line: var(--line-1, #5bb8f2); --on-line: var(--on-line-1, #0b1918); } .ds-l2 { --line: var(--line-2, #f2c14e); --on-line: var(--on-line-2, #0b1918); } .ds-l3 { --line: var(--line-3, #ff7d5c); --on-line: var(--on-line-3, #0b1918); }"
     },
     {
       "name": "Technology Chip",
@@ -636,7 +451,7 @@
       "refersTo": "chip-tech",
       "description": "32px capsule filter button (44px touch area); interchanges carry dots of the lines through them; pressed inverts.",
       "html": "<div class=\"ds-chips\"><button type=\"button\" class=\"ds-chip\" aria-pressed=\"false\"><span class=\"ds-dots\" aria-hidden=\"true\"><i class=\"ds-l1\"></i><i class=\"ds-l2\"></i><i class=\"ds-l3\"></i></span>Spring Boot</button><button type=\"button\" class=\"ds-chip\" aria-pressed=\"true\"><span class=\"ds-dots\" aria-hidden=\"true\"><i class=\"ds-l1\"></i><i class=\"ds-l2\"></i><i class=\"ds-l3\"></i></span>Redis</button><button type=\"button\" class=\"ds-chip\" aria-pressed=\"false\">Kafka</button><button type=\"button\" class=\"ds-chip ds-chip-more\" aria-expanded=\"false\">+3</button></div>",
-      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 12px 8px; } .ds-chip { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 44px; min-height: 32px; padding: 0 12px; border: 1px solid var(--border-strong, #3a4d6d); border-radius: 999px; background: transparent; color: var(--text, #eef2f8); font: 500 0.875rem/1 var(--font, 'Barlow', system-ui, sans-serif); cursor: pointer; transition: border-color 150ms ease-out, background-color 150ms ease-out, color 150ms ease-out; } .ds-chip::after { content: ''; position: absolute; inset: -6px -4px; } .ds-chip:hover { border-color: var(--text, #eef2f8); } .ds-chip:focus-visible { outline: 2px solid var(--focus, #eef2f8); outline-offset: 3px; } .ds-chip[aria-pressed='true'] { border-color: var(--text, #eef2f8); background: var(--text, #eef2f8); color: var(--bg, #0a1120); } .ds-chip-more { border-style: dashed; } .ds-dots { display: inline-flex; gap: 3px; } .ds-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); } .ds-l1 { --line: var(--line-1, #22c08f); } .ds-l2 { --line: var(--line-2, #4d86ff); } .ds-l3 { --line: var(--line-3, #f5b13d); }"
+      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 12px 8px; } .ds-chip { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 44px; min-height: 32px; padding: 0 12px; border: 1px solid var(--border-strong, #345a53); border-radius: 999px; background: transparent; color: var(--text, #f1eee6); font: 500 0.875rem/1 var(--font, 'Barlow', system-ui, sans-serif); cursor: pointer; transition: border-color 150ms ease-out, background-color 150ms ease-out, color 150ms ease-out; } .ds-chip::after { content: ''; position: absolute; inset: -6px -4px; } .ds-chip:hover { border-color: var(--text, #f1eee6); } .ds-chip:focus-visible { outline: 2px solid var(--focus, #f1eee6); outline-offset: 3px; } .ds-chip[aria-pressed='true'] { border-color: var(--text, #f1eee6); background: var(--text, #f1eee6); color: var(--bg, #0b1918); } .ds-chip-more { border-style: dashed; } .ds-dots { display: inline-flex; gap: 3px; } .ds-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); } .ds-l1 { --line: var(--line-1, #5bb8f2); } .ds-l2 { --line: var(--line-2, #f2c14e); } .ds-l3 { --line: var(--line-3, #ff7d5c); }"
     },
     {
       "name": "Section Sign",
@@ -644,23 +459,23 @@
       "refersTo": "headline",
       "description": "Condensed uppercase headline over a band of 6px stretches in the related line colours, route order; no kicker, no number.",
       "html": "<div class=\"ds-sign\"><h2 class=\"ds-sign-title\">Experience</h2><span class=\"ds-band\" aria-hidden=\"true\"><span class=\"ds-l1\"></span><span class=\"ds-l2\"></span><span class=\"ds-l3\"></span></span><p class=\"ds-sign-intro\">Each company is a line; each project is a station on it.</p></div>",
-      "css": ".ds-sign-title { margin: 0; font: 700 clamp(2rem, 5vw, 2.75rem) / 1.05 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.01em; text-transform: uppercase; color: var(--text, #eef2f8); text-wrap: balance; } .ds-band { display: flex; width: fit-content; margin-top: 12px; } .ds-band span { width: 40px; height: 6px; background: var(--line); } .ds-sign-intro { max-width: 70ch; margin: 16px 0 0; font: 400 1.0625rem/1.6 var(--font, 'Barlow', system-ui, sans-serif); color: var(--muted, #a7b3c6); } .ds-l1 { --line: var(--line-1, #22c08f); } .ds-l2 { --line: var(--line-2, #4d86ff); } .ds-l3 { --line: var(--line-3, #f5b13d); }"
+      "css": ".ds-sign-title { margin: 0; font: 700 clamp(2rem, 5vw, 2.75rem) / 1.05 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.01em; text-transform: uppercase; color: var(--text, #f1eee6); text-wrap: balance; } .ds-band { display: flex; width: fit-content; margin-top: 12px; } .ds-band span { width: 40px; height: 6px; background: var(--line); } .ds-sign-intro { max-width: 70ch; margin: 16px 0 0; font: 400 1.0625rem/1.6 var(--font, 'Barlow', system-ui, sans-serif); color: var(--muted, #b4c0b9); } .ds-l1 { --line: var(--line-1, #5bb8f2); } .ds-l2 { --line: var(--line-2, #f2c14e); } .ds-l3 { --line: var(--line-3, #ff7d5c); }"
     },
     {
       "name": "Header Navigation",
       "kind": "nav",
       "refersTo": "nav-link",
-      "description": "Solid header with a Turmeric route-bullet brand mark; muted links, the current one in text colour over a 3px Turmeric bar.",
+      "description": "Solid header with an ink route-bullet brand mark; muted links, the current one in text colour over a 3px ink bar.",
       "html": "<nav class=\"ds-nav\" aria-label=\"Main\"><a class=\"ds-brand\" href=\"#\"><span class=\"ds-brand-mark\">PT</span><span>Portfolio</span></a><ul class=\"ds-nav-list\"><li><a class=\"ds-nav-link\" href=\"#\">About</a></li><li><a class=\"ds-nav-link\" href=\"#\" aria-current=\"location\">Experience</a></li><li><a class=\"ds-nav-link\" href=\"#\">Skills</a></li><li><a class=\"ds-nav-link\" href=\"#\">CV</a></li></ul></nav>",
-      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; padding: 0 20px; background: var(--header-bg, #0a1120); border-bottom: 1px solid var(--border, #25344d); } .ds-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--text, #eef2f8); font: 600 1rem var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; } .ds-brand-mark { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--line-3, #f5b13d); color: var(--on-line, #0a1120); font: 700 0.875rem/1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.02em; } .ds-nav-list { display: flex; align-items: center; gap: 2px; margin: 0; padding: 0; list-style: none; } .ds-nav-link { position: relative; display: inline-flex; align-items: center; height: 44px; padding: 0 12px; color: var(--muted, #a7b3c6); font: 500 0.9375rem var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; transition: color 150ms ease-out; } .ds-nav-link:hover, .ds-nav-link[aria-current] { color: var(--text, #eef2f8); } .ds-nav-link[aria-current]::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 4px; height: 3px; background: var(--accent, #f5b13d); } .ds-nav-link:focus-visible, .ds-brand:focus-visible { outline: 2px solid var(--focus, #eef2f8); outline-offset: 3px; }"
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; padding: 0 20px; background: var(--header-bg, #0b1918); border-bottom: 1px solid var(--border, #22403b); } .ds-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--text, #f1eee6); font: 600 1rem var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; } .ds-brand-mark { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent, #f1eee6); color: var(--accent-text, #0b1918); font: 700 0.875rem/1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.02em; } .ds-nav-list { display: flex; align-items: center; gap: 2px; margin: 0; padding: 0; list-style: none; } .ds-nav-link { position: relative; display: inline-flex; align-items: center; height: 44px; padding: 0 12px; color: var(--muted, #b4c0b9); font: 500 0.9375rem var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; transition: color 150ms ease-out; } .ds-nav-link:hover, .ds-nav-link[aria-current] { color: var(--text, #f1eee6); } .ds-nav-link[aria-current]::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 4px; height: 3px; background: var(--accent, #f1eee6); } .ds-nav-link:focus-visible, .ds-brand:focus-visible { outline: 2px solid var(--focus, #f1eee6); outline-offset: 3px; }"
     },
     {
       "name": "Palette Field",
       "kind": "input",
       "refersTo": "command-palette",
-      "description": "Borderless field in a 56px row of the command palette; focus draws a 2px inset Turmeric underline instead of an outline.",
+      "description": "Borderless field in a 56px row of the command palette; focus draws a 2px inset ink underline instead of an outline.",
       "html": "<div class=\"ds-palette\"><div class=\"ds-palette-row\"><input class=\"ds-palette-input\" type=\"text\" placeholder=\"Type a command or section…\" aria-label=\"Command\"></div><div class=\"ds-palette-opt\" aria-selected=\"true\">Experience</div><div class=\"ds-palette-opt\">Skills</div></div>",
-      "css": ".ds-palette { width: min(560px, 100%); overflow: hidden; border: 1px solid var(--border-strong, #3a4d6d); border-radius: var(--radius, 8px); background: var(--surface, #101a2c); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5); } .ds-palette-row { display: flex; align-items: center; height: 56px; padding: 0 16px; border-bottom: 1px solid var(--border, #25344d); } .ds-palette-row:focus-within { box-shadow: inset 0 -2px 0 var(--accent, #f5b13d); } .ds-palette-input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: var(--text, #eef2f8); font: 400 16px var(--font, 'Barlow', system-ui, sans-serif); } .ds-palette-input::placeholder { color: var(--faint, #8592a8); } .ds-palette-opt { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 6px 8px; padding: 8px 10px; border-radius: 6px; font: 400 0.9375rem var(--font, 'Barlow', system-ui, sans-serif); color: var(--text, #eef2f8); cursor: pointer; } .ds-palette-opt::before { content: ''; flex: none; width: 12px; height: 12px; border: 3px solid transparent; border-radius: 50%; } .ds-palette-opt:hover, .ds-palette-opt[aria-selected='true'] { background: var(--surface-2, #152238); } .ds-palette-opt[aria-selected='true']::before { border-color: var(--accent, #f5b13d); background: var(--bg, #0a1120); }"
+      "css": ".ds-palette { width: min(560px, 100%); overflow: hidden; border: 1px solid var(--border-strong, #345a53); border-radius: var(--radius, 8px); background: var(--surface, #112421); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5); } .ds-palette-row { display: flex; align-items: center; height: 56px; padding: 0 16px; border-bottom: 1px solid var(--border, #22403b); } .ds-palette-row:focus-within { box-shadow: inset 0 -2px 0 var(--accent, #f1eee6); } .ds-palette-input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: var(--text, #f1eee6); font: 400 16px var(--font, 'Barlow', system-ui, sans-serif); } .ds-palette-input::placeholder { color: var(--faint, #93a39d); } .ds-palette-opt { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 6px 8px; padding: 8px 10px; border-radius: 6px; font: 400 0.9375rem var(--font, 'Barlow', system-ui, sans-serif); color: var(--text, #f1eee6); cursor: pointer; } .ds-palette-opt::before { content: ''; flex: none; width: 12px; height: 12px; border: 3px solid transparent; border-radius: 50%; } .ds-palette-opt:hover, .ds-palette-opt[aria-selected='true'] { background: var(--surface-2, #162d29); } .ds-palette-opt[aria-selected='true']::before { border-color: var(--accent, #f1eee6); background: var(--bg, #0b1918); }"
     },
     {
       "name": "Interchange Table Row",
@@ -668,7 +483,7 @@
       "refersTo": "interchange-row",
       "description": "Ruled 44px rows: technology, one 20px slot per line, project count; rows with projects filter the route and invert when pressed.",
       "html": "<ul class=\"ds-xt\"><li><button type=\"button\" class=\"ds-xt-row\" aria-pressed=\"false\"><span>Spring Boot</span><span class=\"ds-xt-lines\"><span class=\"ds-rb ds-l1\">1</span><span class=\"ds-rb ds-l2\">2</span><span class=\"ds-rb ds-l3\">3</span></span><span class=\"ds-xt-count\">4 projects</span></button></li><li><button type=\"button\" class=\"ds-xt-row\" aria-pressed=\"true\"><span>Redis</span><span class=\"ds-xt-lines\"><span class=\"ds-rb ds-l1\">1</span><span class=\"ds-rb ds-l2\">2</span><span class=\"ds-rb ds-l3\">3</span></span><span class=\"ds-xt-count\">3 projects</span></button></li><li><button type=\"button\" class=\"ds-xt-row\" aria-pressed=\"false\"><span>Docker</span><span class=\"ds-xt-lines\"><span class=\"ds-xt-slot\"></span><span class=\"ds-rb ds-l2\">2</span><span class=\"ds-rb ds-l3\">3</span></span><span class=\"ds-xt-count\">2 projects</span></button></li></ul>",
-      "css": ".ds-xt { max-width: 360px; margin: 0; padding: 0; list-style: none; } .ds-xt li { border-bottom: 1px solid var(--border, #25344d); } .ds-xt-row { display: grid; grid-template-columns: minmax(0, 1fr) auto 5rem; align-items: center; column-gap: 12px; width: 100%; min-height: 44px; padding: 6px 8px; border: 0; border-radius: 0; background: transparent; color: var(--text, #eef2f8); font: 500 1rem/1.3 var(--font, 'Barlow', system-ui, sans-serif); text-align: left; cursor: pointer; transition: background-color 150ms ease-out, color 150ms ease-out; } .ds-xt-row:hover, .ds-xt-row:focus-visible { background: var(--surface-2, #152238); } .ds-xt-row:focus-visible { outline: 2px solid var(--focus, #eef2f8); outline-offset: -2px; } .ds-xt-row[aria-pressed='true'] { background: var(--text, #eef2f8); color: var(--bg, #0a1120); } .ds-xt-lines { display: inline-flex; gap: 4px; } .ds-xt-slot { width: 20px; height: 20px; } .ds-xt-count { font-size: 0.875rem; font-variant-numeric: tabular-nums; text-align: right; color: var(--muted, #a7b3c6); } .ds-xt-row[aria-pressed='true'] .ds-xt-count { color: inherit; } .ds-rb { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--line); color: var(--on-line, #0a1120); font: 700 12px/1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); } .ds-l1 { --line: var(--line-1, #22c08f); } .ds-l2 { --line: var(--line-2, #4d86ff); } .ds-l3 { --line: var(--line-3, #f5b13d); }"
+      "css": ".ds-xt { max-width: 360px; margin: 0; padding: 0; list-style: none; } .ds-xt li { border-bottom: 1px solid var(--border, #22403b); } .ds-xt-row { display: grid; grid-template-columns: minmax(0, 1fr) auto 5rem; align-items: center; column-gap: 12px; width: 100%; min-height: 44px; padding: 6px 8px; border: 0; border-radius: 0; background: transparent; color: var(--text, #f1eee6); font: 500 1rem/1.3 var(--font, 'Barlow', system-ui, sans-serif); text-align: left; cursor: pointer; transition: background-color 150ms ease-out, color 150ms ease-out; } .ds-xt-row:hover, .ds-xt-row:focus-visible { background: var(--surface-2, #162d29); } .ds-xt-row:focus-visible { outline: 2px solid var(--focus, #f1eee6); outline-offset: -2px; } .ds-xt-row[aria-pressed='true'] { background: var(--text, #f1eee6); color: var(--bg, #0b1918); } .ds-xt-lines { display: inline-flex; gap: 4px; } .ds-xt-slot { width: 20px; height: 20px; } .ds-xt-count { font-size: 0.875rem; font-variant-numeric: tabular-nums; text-align: right; color: var(--muted, #b4c0b9); } .ds-xt-row[aria-pressed='true'] .ds-xt-count { color: inherit; } .ds-rb { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--line); color: var(--on-line, #0b1918); font: 700 12px/1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); } .ds-l1 { --line: var(--line-1, #5bb8f2); --on-line: var(--on-line-1, #0b1918); } .ds-l2 { --line: var(--line-2, #f2c14e); --on-line: var(--on-line-2, #0b1918); } .ds-l3 { --line: var(--line-3, #ff7d5c); --on-line: var(--on-line-3, #0b1918); }"
     },
     {
       "name": "Map Grammar",
@@ -676,7 +491,7 @@
       "refersTo": "map-sign",
       "description": "Tracks at 0/45/90 degrees 12px apart, station rings, an interchange capsule, square end bars, a condensed label and one data packet.",
       "html": "<svg class=\"ds-map\" viewBox=\"0 0 320 96\" role=\"img\" aria-label=\"Two lines with stations, an interchange and end bars\"><path class=\"ds-track ds-l2\" d=\"M10 34L304 34\"/><path class=\"ds-track ds-l3\" d=\"M10 70L40 70L64 46L304 46\"/><path class=\"ds-packet\" d=\"M10 70L40 70L64 46L304 46\" pathLength=\"100\"/><line class=\"ds-terminal ds-l2\" x1=\"304\" y1=\"28\" x2=\"304\" y2=\"40\"/><line class=\"ds-terminal ds-l3\" x1=\"304\" y1=\"40\" x2=\"304\" y2=\"52\"/><circle class=\"ds-station ds-l2\" cx=\"96\" cy=\"34\" r=\"7\"/><circle class=\"ds-station ds-l3\" cx=\"22\" cy=\"70\" r=\"7\"/><rect class=\"ds-interchange\" x=\"194\" y=\"28\" width=\"12\" height=\"24\" rx=\"6\"/><text class=\"ds-map-label\" x=\"200\" y=\"18\" text-anchor=\"middle\">Redis</text><text class=\"ds-map-now\" x=\"298\" y=\"80\" text-anchor=\"end\">NOW</text></svg>",
-      "css": ".ds-map { display: block; width: 100%; max-width: 360px; height: auto; background: var(--bg, #0a1120); } .ds-track { fill: none; stroke: var(--line); stroke-width: 7; stroke-linejoin: round; stroke-linecap: butt; } .ds-terminal { stroke: var(--line); stroke-width: 6; stroke-linecap: butt; } .ds-station { fill: var(--bg, #0a1120); stroke: var(--line); stroke-width: 3; } .ds-interchange { fill: var(--interchange-fill, #eef2f8); stroke: var(--interchange-stroke, #0a1120); stroke-width: 2; } .ds-map-label { font: 700 16px var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); fill: var(--text, #eef2f8); } .ds-map-now { font: 700 22px var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.04em; fill: var(--text, #eef2f8); } .ds-packet { fill: none; stroke: var(--interchange-fill, #eef2f8); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 0.1 99.9; animation: ds-run 8s linear infinite; } @keyframes ds-run { to { stroke-dashoffset: -100; } } @media (prefers-reduced-motion: reduce) { .ds-packet { display: none; } } .ds-l1 { --line: var(--line-1, #22c08f); } .ds-l2 { --line: var(--line-2, #4d86ff); } .ds-l3 { --line: var(--line-3, #f5b13d); }"
+      "css": ".ds-map { display: block; width: 100%; max-width: 360px; height: auto; background: var(--bg, #0b1918); } .ds-track { fill: none; stroke: var(--line); stroke-width: 7; stroke-linejoin: round; stroke-linecap: butt; } .ds-terminal { stroke: var(--line); stroke-width: 6; stroke-linecap: butt; } .ds-station { fill: var(--bg, #0b1918); stroke: var(--line); stroke-width: 3; } .ds-interchange { fill: var(--interchange-fill, #f1eee6); stroke: var(--interchange-stroke, #0b1918); stroke-width: 2; } .ds-map-label { font: 700 16px var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); fill: var(--text, #f1eee6); } .ds-map-now { font: 700 22px var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.04em; fill: var(--text, #f1eee6); } .ds-packet { fill: none; stroke: var(--interchange-fill, #f1eee6); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 0.1 99.9; animation: ds-run 8s linear infinite; } @keyframes ds-run { to { stroke-dashoffset: -100; } } @media (prefers-reduced-motion: reduce) { .ds-packet { display: none; } } .ds-l1 { --line: var(--line-1, #5bb8f2); } .ds-l2 { --line: var(--line-2, #f2c14e); } .ds-l3 { --line: var(--line-3, #ff7d5c); }"
     },
     {
       "name": "Route Leg",
@@ -684,14 +499,14 @@
       "refersTo": "route-bullet",
       "description": "A stretch of the vertical route: 6px track in the line colour, route bullet on the track, project stations as rings.",
       "html": "<div class=\"ds-route\"><div class=\"ds-leg ds-l3\"><p class=\"ds-now\"><span class=\"ds-now-bar\"></span>Now</p><div class=\"ds-leg-head\"><span class=\"ds-leg-bullet\">3</span><div><h3 class=\"ds-company\">Current employer</h3><p class=\"ds-role\">Backend Developer</p></div><p class=\"ds-period\">2026 – Now</p></div><div class=\"ds-stop\"><h4 class=\"ds-stop-name\">Platform project</h4><p class=\"ds-stop-sum\">Report ingestion, approval workflow and scheduled jobs.</p></div></div></div>",
-      "css": ".ds-route { --rail: 14px; --pad: 44px; font: 400 1.0625rem/1.6 var(--font, 'Barlow', system-ui, sans-serif); color: var(--text, #eef2f8); } .ds-leg { position: relative; padding: 0 0 8px var(--pad); } .ds-leg::before { content: ''; position: absolute; left: calc(var(--rail) - 3px); top: 10px; bottom: 0; width: 6px; background: var(--line); } .ds-now { position: relative; margin: 0 0 20px; font: 700 1rem/20px var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.06em; text-transform: uppercase; } .ds-now-bar { position: absolute; left: calc(var(--rail) - var(--pad) - 14px); top: 7px; width: 28px; height: 6px; background: var(--line); } .ds-leg-head { position: relative; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 20px; } .ds-leg-bullet { position: absolute; left: calc(var(--rail) - var(--pad) - 14px); top: -1px; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--line); color: var(--on-line, #0a1120); font: 700 16.8px/1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); } .ds-company { margin: 0; font: 600 1.375rem/1.2 var(--font, 'Barlow', system-ui, sans-serif); } .ds-role, .ds-period { margin: 2px 0 0; color: var(--muted, #a7b3c6); } .ds-period { margin: 0; font-size: 0.9375rem; font-variant-numeric: tabular-nums; white-space: nowrap; } .ds-stop { position: relative; } .ds-stop::before { content: ''; position: absolute; left: calc(var(--rail) - var(--pad) - 8px); top: 5px; width: 16px; height: 16px; border: 3px solid var(--line); border-radius: 50%; background: var(--bg, #0a1120); box-sizing: border-box; } .ds-stop:hover::before { background: var(--line); } .ds-stop-name { margin: 0; font: 600 1.125rem/1.4 var(--font, 'Barlow', system-ui, sans-serif); } .ds-stop-sum { max-width: 70ch; margin: 6px 0 0; color: var(--muted, #a7b3c6); } .ds-l1 { --line: var(--line-1, #22c08f); } .ds-l2 { --line: var(--line-2, #4d86ff); } .ds-l3 { --line: var(--line-3, #f5b13d); }"
+      "css": ".ds-route { --rail: 14px; --pad: 44px; font: 400 1.0625rem/1.6 var(--font, 'Barlow', system-ui, sans-serif); color: var(--text, #f1eee6); } .ds-leg { position: relative; padding: 0 0 8px var(--pad); } .ds-leg::before { content: ''; position: absolute; left: calc(var(--rail) - 3px); top: 10px; bottom: 0; width: 6px; background: var(--line); } .ds-now { position: relative; margin: 0 0 20px; font: 700 1rem/20px var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.06em; text-transform: uppercase; } .ds-now-bar { position: absolute; left: calc(var(--rail) - var(--pad) - 14px); top: 7px; width: 28px; height: 6px; background: var(--line); } .ds-leg-head { position: relative; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 20px; } .ds-leg-bullet { position: absolute; left: calc(var(--rail) - var(--pad) - 14px); top: -1px; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--line); color: var(--on-line, #0b1918); font: 700 16.8px/1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); } .ds-company { margin: 0; font: 600 1.375rem/1.2 var(--font, 'Barlow', system-ui, sans-serif); } .ds-role, .ds-period { margin: 2px 0 0; color: var(--muted, #b4c0b9); } .ds-period { margin: 0; font-size: 0.9375rem; font-variant-numeric: tabular-nums; white-space: nowrap; } .ds-stop { position: relative; } .ds-stop::before { content: ''; position: absolute; left: calc(var(--rail) - var(--pad) - 8px); top: 5px; width: 16px; height: 16px; border: 3px solid var(--line); border-radius: 50%; background: var(--bg, #0b1918); box-sizing: border-box; } .ds-stop:hover::before { background: var(--line); } .ds-stop-name { margin: 0; font: 600 1.125rem/1.4 var(--font, 'Barlow', system-ui, sans-serif); } .ds-stop-sum { max-width: 70ch; margin: 6px 0 0; color: var(--muted, #b4c0b9); } .ds-l1 { --line: var(--line-1, #5bb8f2); --on-line: var(--on-line-1, #0b1918); } .ds-l2 { --line: var(--line-2, #f2c14e); --on-line: var(--on-line-2, #0b1918); } .ds-l3 { --line: var(--line-3, #ff7d5c); --on-line: var(--on-line-3, #0b1918); }"
     }
   ],
   "narrative": {
     "northStar": "The Night Network Map",
-    "overview": "The site is drawn as a schematic transit map at night. A career is a network: each employer is a coloured line, numbered by start date; each project is a station on its line; every technology used at two employers or more is an interchange where their lines meet, and all lines converge on a shared terminus labelled \"Now\". These relationships are computed from the experience data, and the build stops when a hand-placed map no longer matches that data, so the drawing is a record, not an illustration. Map language (lines, stations, end bars, legend, \"not to scale\") reaches every block, from the route of the experience section to the CV sheet and the 404 page.\n\nThe material is flat navy with 1px rules. Colour is scarce and semantic: three line colours, each owned by one job, with the current line doubling as the interface accent. Type is split into signs and text: condensed capitals for the name, section signs and station labels; a plain sans for anything a person reads; mono only for code. Density is moderate and reading-first: a recruiter must find role, stack and contact without decoding the map, and every map has a plain equivalent (accessible SVG title and description, the route list, the interchange table).\n\nMotion is one quiet loop: small data packets running along the hero map's lines, paused off screen, paused by a button, and absent under reduced motion. The world rejects the generic dark developer portfolio: no gradient name, frosted stat tiles, comment-style labels, numbered sections, glows or blobs.",
+    "overview": "The site is drawn as a schematic transit map at night. A career is a network: each employer is a coloured line, numbered by start date; each project is a station on its line; every technology used at two employers or more is an interchange where their lines meet, and all lines converge on a shared terminus labelled \"Now\". These relationships are computed from the experience data, and the build stops when a hand-placed map no longer matches that data, so the drawing is a record, not an illustration. Map language (lines, stations, end bars, legend, \"not to scale\") reaches every block, from the route of the experience section to the CV sheet and the 404 page.\n\nThe material is flat night-green ink with 1px rules. Colour is scarce and semantic: three line colours, each owned by one job and used for nothing else; actions are drawn in ink, the text colour of the theme. Type is split into signs and text: condensed capitals for the name, section signs and station labels; a plain sans for anything a person reads; mono only for code. Density is moderate and reading-first: a recruiter must find role, stack and contact without decoding the map, and every map has a plain equivalent (accessible SVG title and description, the route list, the interchange table).\n\nMotion is one quiet loop: small data packets running along the hero map's lines, paused off screen, paused by a button, and absent under reduced motion. The world rejects the generic dark developer portfolio: no gradient name, frosted stat tiles, comment-style labels, numbered sections, glows or blobs.",
     "keyCharacteristics": [
-      "Three line colours are the only hues; the current line (line 3) is the accent.",
+      "Three line colours (sky, gold, coral) belong to the lines only; actions are ink, never a line colour.",
       "Tracks run only horizontally, vertically or at 45°, with rounded bends and square end bars.",
       "Stations are rings on the page background; interchanges are light capsules with an ink edge.",
       "Barlow Condensed for signs, Barlow for text, JetBrains Mono for code only.",
@@ -701,12 +516,17 @@
     "rules": [
       {
         "name": "The Three Lines Rule",
-        "body": "The line colours are the only hues on the page, and each belongs to one job in start order (line 1 = first job). A line colour may appear only where that line is meant (track, station, bullet, band stretch, its chip dots) or, for line 3, as the accent. Status colours reuse lines (ok = line 1, in progress = line 3); only danger adds a hue.",
+        "body": "The line colours belong to the lines and to nothing else. Each belongs to one job in start order (line 1 = first job) and appears only where that line is meant: track, station, bullet, band stretch, its chip dots, and the 404 line. Status, actions and diagrams that belong to no job have colours of their own.",
+        "section": "colors"
+      },
+      {
+        "name": "The Action Ink Rule",
+        "body": "Every action is drawn in ink (`--accent` / `--accent-text`): the primary button, links, the \"Show n more\" fold, the current nav underline, the palette ring and underline, the brand mark. Ivory with dark text in dark, dark green with light text in light; never a line colour.",
         "section": "colors"
       },
       {
         "name": "The Ink-on-Line Rule",
-        "body": "Text on a line colour is always `--on-line`: ink #0a1120 in dark, white in light. Body text never takes a line colour unless it passes 4.5:1 on its surface (JSON tokens are set on the solid surface for that reason).",
+        "body": "Text on a line colour takes the `--on-line-N` of that line: ink #0b1918 on all three in dark; white on Sky and Coral, ink #0f1f1d on Gold in light. Body text never takes a line colour unless it passes 4.5:1 on its surface (JSON tokens sit on the dark code panel for that reason).",
         "section": "colors"
       },
       {
@@ -741,12 +561,12 @@
       }
     ],
     "dos": [
-      "**Do** draw every new diagram with the map parts (Track, Station, Interchange, Terminal) and the 45-Degree Rule: 7px tracks, 3px station rings on the page background, capsules with a 2px ink edge, square end bars.",
+      "**Do** draw every new diagram with the map parts (Track, Station, Interchange, Terminal) and the 45-Degree Rule: 7px tracks, 3px station rings on the page background, capsules with a 2px ink edge, square end bars; a diagram that belongs to no job leaves out the route number and draws in `--line-neutral`.",
       "**Do** take a line's colour from its route number (`--line-1`, `--line-2`, `--line-3`), and derive any new interchange or relationship from the experience data, never by hand.",
-      "**Do** put `--on-line` text on any line-colour fill, and check every new text pair for 4.5:1 in both themes (3:1 for large text).",
+      "**Do** put the `--on-line-N` text of the line on any line-colour fill, draw every action in ink (`--accent` / `--accent-text`), and check every new text pair for 4.5:1 in both themes (3:1 for large text, tracks and stations).",
       "**Do** open each home block with the section sign: condensed uppercase headline and the 6px band of related line colours.",
       "**Do** keep touch targets at least 44px, extending a smaller visual (32px chip) with an invisible `::after` rather than enlarging it.",
-      "**Do** keep interaction feedback to colour and border changes at 150ms ease-out, with the 2px text-colour focus outline at 3px offset; a pressed filter control inverts to text-colour fill.",
+      "**Do** keep interaction feedback to colour and border changes at 150ms ease-out, with the 2px text-colour focus outline at 3px offset; a pressed filter control inverts to text-colour fill; where the ink equals the text colour, hover underlines instead.",
       "**Do** keep dark as the default theme regardless of OS preference, and give every block a black-on-white print state.",
       "**Do** use Barlow at 400, 500 and 600 only; 700 belongs to the condensed face."
     ],
@@ -754,7 +574,7 @@
       "**Don't** use gradients, frosted glass, backdrop blur, glows, coloured shadows, blobs, noise or background grids.",
       "**Don't** put a kicker or eyebrow label above a heading, number sections (01–04), or use comment-style labels such as `// about`.",
       "**Don't** set dates, names, labels or footers in mono; mono is for code.",
-      "**Don't** add a fourth accent hue or use a line colour for something that is not its line (line 3 as accent excepted).",
+      "**Don't** add another hue or use a line colour for something that is not its line: actions are ink, status is mint or pink, unowned diagrams are sage.",
       "**Don't** add scroll reveals, count-ups, typing effects or looping decoration; content is visible on load, and the packet loop stays the only ambient motion.",
       "**Don't** nest cards inside cards or box content that reads as a list; use rules and bands.",
       "**Don't** draw a track segment at any angle other than 0°, 45° or 90°, or label a map relationship the data does not contain."

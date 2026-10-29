@@ -162,17 +162,25 @@ const codeStyle = `--gutter: ${String(lines.length).length}; --step: ${lineStep}
     color: var(--muted);
   }
 
-  /* Response body on the solid surface, so every token colour keeps its contrast in both themes. On phones the lines
-     do not wrap: the block scrolls sideways inside the panel, the page never does. */
+  /* Response body on the code background, dark in both themes, so every token colour keeps its contrast. On phones
+     the lines do not wrap: the block scrolls sideways inside the panel, the page never does. */
   .api-code {
     overflow-x: auto;
     overscroll-behavior-x: contain;
-    background: var(--surface);
+    background: var(--term-bg);
+    color: var(--term-text);
     font: 12.5px/1.7 var(--mono);
   }
 
+  /* Focus ring and selection in the code colours, so they also show on the dark body in the light theme. */
   .api-code:focus-visible {
+    outline-color: var(--term-text);
     outline-offset: -2px;
+  }
+
+  .api-lines span::selection {
+    background: var(--term-text);
+    color: var(--term-bg);
   }
 
   .api-lines {
@@ -203,9 +211,9 @@ const codeStyle = `--gutter: ${String(lines.length).length}; --step: ${lineStep}
     width: calc(var(--gutter) * 1ch);
     margin-right: 14px;
     padding: 0 12px 0 14px;
-    border-right: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--faint);
+    border-right: 1px solid var(--term-border);
+    background: var(--term-bg);
+    color: var(--term-muted);
     text-align: right;
   }
 
@@ -214,23 +222,23 @@ const codeStyle = `--gutter: ${String(lines.length).length}; --step: ${lineStep}
   }
 
   .j-key {
-    color: var(--accent);
+    color: var(--term-key);
   }
 
   .j-string {
-    color: var(--ok);
+    color: var(--term-string);
   }
 
   .j-number {
-    color: var(--progress);
+    color: var(--term-number);
   }
 
   .j-literal {
-    color: var(--accent-3);
+    color: var(--term-number);
   }
 
   .j-punct {
-    color: var(--muted);
+    color: var(--term-muted);
   }
 
   /* Opening: the lines come in one after another, as if the response were streamed (the script sets .streaming). */

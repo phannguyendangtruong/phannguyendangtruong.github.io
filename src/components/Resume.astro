@@ -583,8 +583,9 @@ const compactProjectsInPrint = false;
       font-size: 1rem;
     }
 
+    /* The ink fill is also the text colour, so hover mixes in the page background, as on .button.primary. */
     .cv-actions .cv-print:hover {
-      background: color-mix(in srgb, var(--btn-bg) 85%, var(--text));
+      background: color-mix(in srgb, var(--btn-bg) 85%, var(--bg));
     }
 
     .print-hint {

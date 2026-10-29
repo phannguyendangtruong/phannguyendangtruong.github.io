@@ -123,7 +123,7 @@ const initials = `${nameWords[0].charAt(0)}${nameWords[nameWords.length - 1].cha
     text-overflow: ellipsis;
   }
 
-  /* Route bullet of the brand: line 3 colour, initials in the sign face. */
+  /* Brand mark: a route bullet in the ink of the actions, not a line colour; initials in the sign face. */
   .brand-mark {
     flex: none;
     display: inline-grid;
@@ -131,8 +131,8 @@ const initials = `${nameWords[0].charAt(0)}${nameWords[nameWords.length - 1].cha
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: var(--line-3);
-    color: var(--on-line);
+    background: var(--accent);
+    color: var(--accent-text);
     font: 700 0.875rem/1 var(--font-display);
     letter-spacing: 0.02em;
   }
