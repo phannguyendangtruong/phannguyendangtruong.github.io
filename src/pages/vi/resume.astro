@@ -1,5 +1,22 @@
 ---
-import Resume from '../../components/Resume.astro';
+import { localePath, tr } from '../../i18n/ui';
+
+/** Old address of the CV, kept so existing links still work: sends the visitor to /vi/cv/. */
+const target = localePath('vi', '/cv/');
+const canonical = new URL(target, Astro.site);
 ---
 
-<Resume lang="vi" />
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tr('navResume', 'vi')}</title>
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={canonical} />
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+  </head>
+  <body>
+    <a href={target}>{tr('navResume', 'vi')}</a>
+  </body>
+</html>

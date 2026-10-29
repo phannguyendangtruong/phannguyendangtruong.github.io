@@ -6,7 +6,7 @@ import { apiLabels, keyLabels, localePath, tr, type Lang, type UiKey } from '../
 
 interface Props {
   lang: Lang;
-  /** Path of this page without the language prefix, e.g. "/resume/". */
+  /** Path of this page without the language prefix, e.g. "/cv/". */
   path: string;
 }
 
@@ -73,9 +73,9 @@ const goCommands: Command[] = [
   {
     id: 'go-resume',
     name: tr('navResume', lang),
-    hint: shown(localePath(lang, '/resume/')),
-    terms: [tr('navResume', lang), tr('navResume', other), shown(localePath(lang, '/resume/'))],
-    href: localePath(lang, '/resume/'),
+    hint: shown(localePath(lang, '/cv/')),
+    terms: [tr('navResume', lang), tr('navResume', other), shown(localePath(lang, '/cv/')), 'resume', 'résumé'],
+    href: localePath(lang, '/cv/'),
   },
 ];
 

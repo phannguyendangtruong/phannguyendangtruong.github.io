@@ -22,7 +22,7 @@ const allNavItems: NavItem[] = [
   { key: 'projects', label: 'navProjects', target: '/#projects' },
   { key: 'experience', label: 'navExperience', target: '/#experience' },
   { key: 'skills', label: 'navSkills', target: '/#skills' },
-  { key: 'resume', label: 'navResume', target: '/resume/' },
+  { key: 'resume', label: 'navResume', target: '/cv/' },
 ];
 
 /** Nav items in display order; the full target is `localePath(lang, target)`. Projects only while the home page has that block. */

@@ -25,11 +25,11 @@ const shown = projects
   }));
 const title = `${tr('navResume', lang)} — ${profile.name[lang]}`;
 const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '');
-/** Set to true when the printed résumé runs past two A4 pages: projects then print without their points. */
+/** Set to true when the printed CV runs past two A4 pages: projects then print without their points. */
 const compactProjectsInPrint = false;
 ---
 
-<Base lang={lang} title={title} description={tr('resumeDescription', lang)} path="/resume/" current="resume">
+<Base lang={lang} title={title} description={tr('resumeDescription', lang)} path="/cv/" current="resume">
   <div class="cv-page">
     <div class="cv-bg no-print" aria-hidden="true"></div>
     <div class="container">
@@ -81,6 +81,11 @@ const compactProjectsInPrint = false;
             <h2 id="cv-summary-title" class="cv-h2">{tr('summaryTitle', lang)}</h2>
             <p class="cv-lead">{profile.tagline[lang]}</p>
             <p class="cv-about">{profile.about[lang][0]}</p>
+          </section>
+
+          <section class="cv-section" aria-labelledby="cv-skills-title">
+            <h2 id="cv-skills-title" class="cv-h2">{tr('skillsTitle', lang)}</h2>
+            <SkillsList lang={lang} />
           </section>
 
           <section class="cv-section" aria-labelledby="cv-exp-title">
@@ -135,11 +140,6 @@ const compactProjectsInPrint = false;
             )
           }
 
-          <section class="cv-section" aria-labelledby="cv-skills-title">
-            <h2 id="cv-skills-title" class="cv-h2">{tr('skillsTitle', lang)}</h2>
-            <SkillsList lang={lang} />
-          </section>
-
           <section class="cv-section" aria-labelledby="cv-edu-title">
             <h2 id="cv-edu-title" class="cv-h2">{tr('educationTitle', lang)}</h2>
             <p class="cv-edu">{education.school[lang]}</p>
@@ -151,7 +151,7 @@ const compactProjectsInPrint = false;
 </Base>
 
 <style>
-  /* A4 for the résumé only: Astro does not scope @page, and this CSS ships with the two résumé pages alone. */
+  /* A4 for the CV only: Astro does not scope @page, and this CSS ships with the two CV pages alone. */
   @page {
     size: A4 portrait;
     margin: 15mm;
@@ -883,6 +883,12 @@ const compactProjectsInPrint = false;
     .sheet :global(.cv-skills),
     .sheet :global(.cv-skill) {
       border: 0;
+    }
+
+    /* The skills list is never split across two pages. */
+    .sheet :global(.cv-skills) {
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
 
     .sheet :global(.cv-skill) {

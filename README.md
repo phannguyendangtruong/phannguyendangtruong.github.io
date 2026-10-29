@@ -7,7 +7,8 @@ Static, bilingual (English at `/`, Vietnamese at `/vi/`) portfolio built with [A
 | Path | Content |
 |---|---|
 | `/` and `/vi/` | Intro, about, focus areas, projects (when any is shown), experience, skills, education, contact |
-| `/resume/` and `/vi/resume/` | Printable résumé (no phone number or email; "Print or save as PDF") |
+| `/cv/` and `/vi/cv/` | Printable CV (no phone number or email; "Print or save as PDF") |
+| `/resume/` and `/vi/resume/` | Old address: redirects to `/cv/` and `/vi/cv/` (not in the sitemap) |
 
 ## Editing content
 

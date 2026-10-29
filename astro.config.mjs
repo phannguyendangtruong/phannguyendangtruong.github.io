@@ -37,15 +37,22 @@ function basePath(value) {
   return `/${parts.join('/')}`;
 }
 
+const base = basePath(process.env.BASE_PATH);
+/** Old CV paths under the base: pages that only redirect to /cv/, left out of the sitemap. */
+const redirectPaths = ['/resume/', '/vi/resume/'].map((path) => `${base.replace(/\/$/, '')}${path}`);
+
 // Set SITE_URL (and BASE_PATH for a GitHub Pages project site) when deploying.
 export default defineConfig({
   site: siteUrl(process.env.SITE_URL),
-  base: basePath(process.env.BASE_PATH),
+  base,
   trailingSlash: 'always',
   integrations: [
     sitemap({
       i18n: { defaultLocale: 'en', locales: { en: 'en', vi: 'vi' } },
-      filter: (page) => !/\/404\/?$/.test(new URL(page).pathname),
+      filter: (page) => {
+        const { pathname } = new URL(page);
+        return !/\/404\/?$/.test(pathname) && !redirectPaths.includes(pathname.replace(/\/?$/, '/'));
+      },
     }),
   ],
 });
