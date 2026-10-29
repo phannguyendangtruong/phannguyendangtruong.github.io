@@ -1,171 +1,195 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-29T15:58:06Z",
+  "generatedAt": "2026-10-30T09:00:00Z",
   "title": "Design System: Transit Network Portfolio",
   "extensions": {
     "colorMeta": {
       "bg": {
         "role": "neutral",
-        "displayName": "Night Ink",
-        "canonical": "#0b1918",
-        "oklch": "oklch(20.0% 0.020 190)",
+        "displayName": "Graphite",
+        "canonical": "#0e1013",
+        "oklch": "oklch(17.2% 0.007 258)",
         "note": "Page background (--bg), dark theme default; also --header-bg, the text on every line colour (--on-line-1/2/3) and on the action ink (--accent-text)."
       },
       "surface": {
         "role": "neutral",
-        "displayName": "Map Panel",
-        "canonical": "#112421",
-        "oklch": "oklch(24.3% 0.026 183)"
+        "displayName": "Panel",
+        "canonical": "#16191e",
+        "oklch": "oklch(21.2% 0.011 261)"
       },
       "surface-2": {
         "role": "neutral",
         "displayName": "Raised Panel",
-        "canonical": "#162d29",
-        "oklch": "oklch(27.7% 0.030 182)"
+        "canonical": "#1c2026",
+        "oklch": "oklch(24.2% 0.013 258)"
       },
       "text": {
         "role": "neutral",
-        "displayName": "Signal Ivory",
-        "canonical": "#f1eee6",
-        "oklch": "oklch(94.9% 0.011 90)",
+        "displayName": "Signal White",
+        "canonical": "#f3f4f6",
+        "oklch": "oklch(96.7% 0.003 265)",
         "note": "Also --focus and the action ink (--accent)."
       },
       "muted": {
         "role": "neutral",
-        "displayName": "Platform Grey",
-        "canonical": "#b4c0b9",
-        "oklch": "oklch(79.6% 0.016 161)",
+        "displayName": "Steel Grey",
+        "canonical": "#aeb4bd",
+        "oklch": "oklch(76.8% 0.014 258)",
         "note": "Also --planned."
       },
       "faint": {
         "role": "neutral",
-        "displayName": "Tunnel Grey",
-        "canonical": "#93a39d",
-        "oklch": "oklch(70.1% 0.020 171)",
+        "displayName": "Slate Grey",
+        "canonical": "#959ca6",
+        "oklch": "oklch(69.0% 0.017 257)",
         "note": "Also --term-muted on the code panel."
       },
       "border": {
         "role": "neutral",
-        "displayName": "Rule Green",
-        "canonical": "#22403b",
-        "oklch": "oklch(34.6% 0.037 182)",
+        "displayName": "Rule",
+        "canonical": "#2a2f37",
+        "oklch": "oklch(30.4% 0.016 260)",
         "note": "Also --term-border on the code panel."
       },
       "border-strong": {
         "role": "neutral",
-        "displayName": "Edge Green",
-        "canonical": "#345a53",
-        "oklch": "oklch(43.7% 0.045 181)",
+        "displayName": "Edge",
+        "canonical": "#3b424d",
+        "oklch": "oklch(37.7% 0.021 259)",
         "note": "Also --chip-border."
       },
       "line-1": {
         "role": "secondary",
-        "displayName": "Sky Line 1",
-        "canonical": "#5bb8f2",
-        "oklch": "oklch(74.9% 0.122 239)",
+        "displayName": "Cyan Line 1",
+        "canonical": "#00a7db",
+        "oklch": "oklch(68.2% 0.135 229)",
         "note": "Line 1 only: track, stations, bullet, band stretch, chip dots. Also --term-key on the code panel."
       },
       "line-2": {
         "role": "secondary",
-        "displayName": "Gold Line 2",
-        "canonical": "#f2c14e",
-        "oklch": "oklch(83.4% 0.141 85)",
+        "displayName": "Orange Line 2",
+        "canonical": "#f39700",
+        "oklch": "oklch(75.4% 0.166 67)",
         "note": "Line 2 only: track, stations, bullet, band stretch, chip dots. Also --term-number on the code panel."
       },
       "line-3": {
         "role": "secondary",
-        "displayName": "Coral Line 3",
-        "canonical": "#ff7d5c",
-        "oklch": "oklch(73.4% 0.166 35)",
+        "displayName": "Magenta Line 3",
+        "canonical": "#e85298",
+        "oklch": "oklch(66.0% 0.196 355)",
         "note": "Line 3 only: track, stations, bullet, band stretch, chip dots, and the 404 line."
       },
       "on-line-1": {
         "role": "neutral",
-        "displayName": "Ink on Sky",
-        "canonical": "#0b1918",
-        "oklch": "oklch(20.0% 0.020 190)",
+        "displayName": "Ink on Cyan",
+        "canonical": "#0e1013",
+        "oklch": "oklch(17.2% 0.007 258)",
         "note": "Text on line 1 (--on-line-1)."
       },
       "on-line-2": {
         "role": "neutral",
-        "displayName": "Ink on Gold",
-        "canonical": "#0b1918",
-        "oklch": "oklch(20.0% 0.020 190)",
+        "displayName": "Ink on Orange",
+        "canonical": "#0e1013",
+        "oklch": "oklch(17.2% 0.007 258)",
         "note": "Text on line 2 (--on-line-2)."
       },
       "on-line-3": {
         "role": "neutral",
-        "displayName": "Ink on Coral",
-        "canonical": "#0b1918",
-        "oklch": "oklch(20.0% 0.020 190)",
+        "displayName": "Ink on Magenta",
+        "canonical": "#0e1013",
+        "oklch": "oklch(17.2% 0.007 258)",
         "note": "Text on line 3 (--on-line-3)."
       },
       "line-neutral": {
         "role": "neutral",
-        "displayName": "Sage Line",
-        "canonical": "#7f9c95",
-        "oklch": "oklch(66.9% 0.034 179)",
-        "note": "--line-neutral: track, stations and end bars of the diagrams that belong to no job; their stations are filled with --line-neutral-fill (#f1eee6)."
+        "displayName": "Neutral Line",
+        "canonical": "#7a828f",
+        "oklch": "oklch(60.4% 0.022 260)",
+        "note": "--line-neutral: track, stations and end bars of the diagrams that belong to no job; their stations are filled with --line-neutral-fill (#f3f4f6). They never glow."
       },
       "interchange-fill": {
         "role": "neutral",
-        "displayName": "Capsule Ivory",
-        "canonical": "#f1eee6",
-        "oklch": "oklch(94.9% 0.011 90)",
-        "note": "Interchange capsule fill and data packet colour."
+        "displayName": "Capsule White",
+        "canonical": "#f3f4f6",
+        "oklch": "oklch(96.7% 0.003 265)",
+        "note": "Interchange capsule fill."
       },
       "interchange-stroke": {
         "role": "neutral",
         "displayName": "Capsule Ink",
-        "canonical": "#0b1918",
-        "oklch": "oklch(20.0% 0.020 190)"
+        "canonical": "#0e1013",
+        "oklch": "oklch(17.2% 0.007 258)"
       },
       "accent": {
         "role": "primary",
         "displayName": "Action Ink",
-        "canonical": "#f1eee6",
-        "oklch": "oklch(94.9% 0.011 90)",
-        "note": "--accent, --btn-bg, --progress: primary button, links, nav underline, palette ring, brand mark. Text on it is --accent-text (#0b1918)."
+        "canonical": "#f3f4f6",
+        "oklch": "oklch(96.7% 0.003 265)",
+        "note": "--accent, --btn-bg, --progress: primary button, links, nav underline, palette ring, brand mark. Text on it is --accent-text (#0e1013)."
       },
       "ok": {
         "role": "tertiary",
-        "displayName": "Signal Mint",
-        "canonical": "#7ad9a6",
-        "oklch": "oklch(81.3% 0.117 159)",
+        "displayName": "Signal Green",
+        "canonical": "#5fd39a",
+        "oklch": "oklch(78.5% 0.135 160)",
         "note": "--ok: the 200 OK chip and done dots. Also --term-string on the code panel."
       },
       "danger": {
         "role": "tertiary",
-        "displayName": "Signal Pink",
-        "canonical": "#ff8fb0",
-        "oklch": "oklch(77.9% 0.139 2)",
-        "note": "--danger: error states only, apart from Coral Line 3."
+        "displayName": "Signal Red",
+        "canonical": "#ff7b8a",
+        "oklch": "oklch(74.0% 0.161 15)",
+        "note": "--danger: error states only, apart from Magenta Line 3."
+      },
+      "grid-dot": {
+        "role": "neutral",
+        "displayName": "Dot Grid",
+        "canonical": "#f3f4f61a",
+        "oklch": "oklch(96.7% 0.003 265 / 0.1)",
+        "note": "--grid-dot: a 1px dot every 22px behind the page, fixed while it scrolls; the only background texture."
+      },
+      "packet": {
+        "role": "neutral",
+        "displayName": "Packet",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#808080",
+          "#a4a4a4",
+          "#cacaca",
+          "#eeeeee"
+        ],
+        "note": "--packet: the data packets of the hero map; --packet-halo (#ffffff40) draws their small halo in the dark theme only."
       },
       "scrim": {
         "role": "neutral",
         "displayName": "Scrim",
-        "canonical": "#030807b3",
-        "oklch": "oklch(12.6% 0.012 183 / 0.7)"
+        "canonical": "#050608b3",
+        "oklch": "oklch(12.2% 0.006 262 / 0.7)"
       },
       "term-bg": {
         "role": "neutral",
-        "displayName": "Code Night",
-        "canonical": "#081311",
-        "oklch": "oklch(17.5% 0.017 182)",
+        "displayName": "Code Black",
+        "canonical": "#0a0b0e",
+        "oklch": "oklch(15.0% 0.007 254)",
         "note": "JSON code panel (--term-bg), dark in both themes."
       },
       "term-text": {
         "role": "neutral",
         "displayName": "Code Text",
-        "canonical": "#dfe3da",
-        "oklch": "oklch(91.0% 0.013 126)",
-        "note": "Code text (--term-text); keys Sky #5bb8f2, strings Mint #7ad9a6, numbers and literals Gold #f2c14e, punctuation #93a39d."
+        "canonical": "#dfe2e7",
+        "oklch": "oklch(91.2% 0.008 261)",
+        "note": "Code text (--term-text); keys Cyan #00a7db, strings Green #5fd39a, numbers and literals Orange #f39700, punctuation #959ca6."
       },
       "bg-light": {
         "role": "neutral",
         "displayName": "Day Paper",
-        "canonical": "#f4f7f5",
-        "oklch": "oklch(97.3% 0.004 157)",
+        "canonical": "#f5f6f8",
+        "oklch": "oklch(97.3% 0.003 265)",
         "note": "Also the text on the light action ink (--accent-text)."
       },
       "surface-light": {
@@ -188,61 +212,61 @@
       "surface-2-light": {
         "role": "neutral",
         "displayName": "Day Raised Panel",
-        "canonical": "#e9efec",
-        "oklch": "oklch(94.7% 0.008 165)"
+        "canonical": "#eceef1",
+        "oklch": "oklch(94.8% 0.005 258)"
       },
       "text-light": {
         "role": "neutral",
         "displayName": "Day Ink",
-        "canonical": "#0f1f1d",
-        "oklch": "oklch(22.4% 0.022 186)",
-        "note": "Also the light --focus, interchange stroke, action ink and the text on Gold Line 2."
+        "canonical": "#111318",
+        "oklch": "oklch(18.7% 0.011 268)",
+        "note": "Also the light --focus, interchange stroke and action ink."
       },
       "muted-light": {
         "role": "neutral",
-        "displayName": "Day Platform Grey",
-        "canonical": "#44564f",
-        "oklch": "oklch(43.6% 0.025 169)"
+        "displayName": "Day Steel Grey",
+        "canonical": "#4a5059",
+        "oklch": "oklch(42.9% 0.017 258)"
       },
       "faint-light": {
         "role": "neutral",
-        "displayName": "Day Tunnel Grey",
-        "canonical": "#4f625b",
-        "oklch": "oklch(47.8% 0.026 171)"
+        "displayName": "Day Slate Grey",
+        "canonical": "#545b65",
+        "oklch": "oklch(46.9% 0.018 257)"
       },
       "border-light": {
         "role": "neutral",
         "displayName": "Day Rule",
-        "canonical": "#d3ddd8",
-        "oklch": "oklch(88.8% 0.013 165)"
+        "canonical": "#d9dce1",
+        "oklch": "oklch(89.4% 0.008 261)"
       },
       "border-strong-light": {
         "role": "neutral",
         "displayName": "Day Edge",
-        "canonical": "#a3b5ae",
-        "oklch": "oklch(75.7% 0.022 170)"
+        "canonical": "#a9afb8",
+        "oklch": "oklch(75.2% 0.015 258)"
       },
       "line-1-light": {
         "role": "secondary",
-        "displayName": "Sky Line 1 (light)",
-        "canonical": "#1a6fa8",
-        "oklch": "oklch(52.2% 0.118 244)"
+        "displayName": "Cyan Line 1 (light)",
+        "canonical": "#00729f",
+        "oklch": "oklch(52.1% 0.110 235)"
       },
       "line-2-light": {
         "role": "secondary",
-        "displayName": "Gold Line 2 (light)",
-        "canonical": "#b07d00",
-        "oklch": "oklch(62.5% 0.129 80)"
+        "displayName": "Orange Line 2 (light)",
+        "canonical": "#a86400",
+        "oklch": "oklch(56.7% 0.127 65)"
       },
       "line-3-light": {
         "role": "secondary",
-        "displayName": "Coral Line 3 (light)",
-        "canonical": "#b8462a",
-        "oklch": "oklch(54.5% 0.154 35)"
+        "displayName": "Magenta Line 3 (light)",
+        "canonical": "#c2306f",
+        "oklch": "oklch(55.3% 0.188 359)"
       },
       "on-line-1-light": {
         "role": "neutral",
-        "displayName": "White on Sky",
+        "displayName": "White on Cyan",
         "canonical": "#ffffff",
         "oklch": "oklch(100% 0 0)",
         "tonalRamp": [
@@ -258,13 +282,23 @@
       },
       "on-line-2-light": {
         "role": "neutral",
-        "displayName": "Ink on Gold (light)",
-        "canonical": "#0f1f1d",
-        "oklch": "oklch(22.4% 0.022 186)"
+        "displayName": "White on Orange",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#808080",
+          "#a4a4a4",
+          "#cacaca",
+          "#eeeeee"
+        ]
       },
       "on-line-3-light": {
         "role": "neutral",
-        "displayName": "White on Coral",
+        "displayName": "White on Magenta",
         "canonical": "#ffffff",
         "oklch": "oklch(100% 0 0)",
         "tonalRamp": [
@@ -280,34 +314,40 @@
       },
       "line-neutral-light": {
         "role": "neutral",
-        "displayName": "Sage Line (light)",
-        "canonical": "#6b8a82",
-        "oklch": "oklch(60.7% 0.037 177)"
+        "displayName": "Neutral Line (light)",
+        "canonical": "#6b7380",
+        "oklch": "oklch(55.3% 0.022 260)"
       },
       "accent-light": {
         "role": "primary",
         "displayName": "Action Ink (light)",
-        "canonical": "#0f1f1d",
-        "oklch": "oklch(22.4% 0.022 186)",
-        "note": "Text on it is #f4f7f5."
+        "canonical": "#111318",
+        "oklch": "oklch(18.7% 0.011 268)",
+        "note": "Text on it is #f5f6f8."
       },
       "ok-light": {
         "role": "tertiary",
-        "displayName": "Signal Mint (light)",
-        "canonical": "#1d7a52",
-        "oklch": "oklch(51.6% 0.106 160)"
+        "displayName": "Signal Green (light)",
+        "canonical": "#156b43",
+        "oklch": "oklch(46.8% 0.102 157)"
       },
       "danger-light": {
         "role": "tertiary",
-        "displayName": "Signal Pink (light)",
-        "canonical": "#c2185b",
-        "oklch": "oklch(53.1% 0.202 6)"
+        "displayName": "Signal Red (light)",
+        "canonical": "#c0263c",
+        "oklch": "oklch(52.9% 0.188 20)"
+      },
+      "grid-dot-light": {
+        "role": "neutral",
+        "displayName": "Day Dot Grid",
+        "canonical": "#11131814",
+        "oklch": "oklch(18.7% 0.011 268 / 0.08)"
       },
       "scrim-light": {
         "role": "neutral",
         "displayName": "Day Scrim",
-        "canonical": "#0f1f1d66",
-        "oklch": "oklch(22.4% 0.022 186 / 0.4)"
+        "canonical": "#11131866",
+        "oklch": "oklch(18.7% 0.011 268 / 0.4)"
       }
     },
     "typographyMeta": {
@@ -333,7 +373,7 @@
       },
       "body-sm": {
         "displayName": "Body Small",
-        "purpose": "Periods, points, legend entries, palette rows; nav links at 500."
+        "purpose": "Points, legend entries, palette rows; nav links at 500."
       },
       "button": {
         "displayName": "Button",
@@ -341,19 +381,23 @@
       },
       "chip": {
         "displayName": "Chip",
-        "purpose": "Technology chips and filter chips."
+        "purpose": "Technology chips and filter chips, in the mono face: technologies are data."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "Periods on the route and the screen CV, project counts, shortcut keys; JetBrains Mono. The printed CV keeps Barlow."
       },
       "label": {
         "displayName": "Label",
         "purpose": "Uppercase group labels in the command palette."
       },
       "map-sign": {
-        "displayName": "Map Sign",
-        "purpose": "Station labels in SVG viewBox units; hubs 700 16px, NOW 700 22px."
+        "displayName": "Map Label",
+        "purpose": "Station and interchange labels in SVG viewBox units, JetBrains Mono; hubs 700 13px, NOW 700 18px, years 12px; larger on the compact map. Placed for 0.6 em a character."
       },
       "mono": {
         "displayName": "Code",
-        "purpose": "JSON view, request bar, palette target paths. Code only."
+        "purpose": "JSON view, request bar, palette target paths."
       }
     },
     "shadows": [
@@ -384,7 +428,7 @@
       {
         "name": "packet-run",
         "value": "linear infinite, 8s-14s per run (track length / 80 units per second)",
-        "purpose": "The single ambient loop: one data packet per line on the hero map, staggered, paused off screen, pausable, removed under reduced motion."
+        "purpose": "The single ambient loop: one white data packet per line on the hero map, with a small halo in the dark theme, staggered, paused off screen, pausable, removed under reduced motion; the static glow of the tracks stays."
       },
       {
         "name": "json-line",
@@ -425,17 +469,17 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Solid action ink: ivory with dark text in dark, dark green with light text in light; the one main action of a block.",
+      "description": "Solid action ink: a light fill with graphite text in dark, near-black with light text in light; the one main action of a block.",
       "html": "<a class=\"ds-btn-primary\" href=\"#\">Follow the route <svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5v14M6 13l6 6 6-6\"/></svg></a>",
-      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px; border: 1px solid transparent; border-radius: var(--radius, 8px); background: var(--btn-bg, #f1eee6); color: var(--accent-text, #0b1918); font: 600 1rem/1 var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; white-space: nowrap; cursor: pointer; transition: background-color 150ms ease-out; } .ds-btn-primary:hover { background: color-mix(in srgb, var(--btn-bg, #f1eee6) 85%, var(--bg, #0b1918)); } .ds-btn-primary:focus-visible { outline: 2px solid var(--focus, #f1eee6); outline-offset: 3px; } .ds-btn-primary svg { width: 16px; height: 16px; }"
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px; border: 1px solid transparent; border-radius: var(--radius, 8px); background: var(--btn-bg, #f3f4f6); color: var(--accent-text, #0e1013); font: 600 1rem/1 var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; white-space: nowrap; cursor: pointer; transition: background-color 150ms ease-out; } .ds-btn-primary:hover { background: color-mix(in srgb, var(--btn-bg, #f3f4f6) 85%, var(--bg, #0e1013)); } .ds-btn-primary:focus-visible { outline: 2px solid var(--focus, #f3f4f6); outline-offset: 3px; } .ds-btn-primary svg { width: 16px; height: 16px; }"
     },
     {
       "name": "Secondary Button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "Transparent with an Edge Green border; the alternative action beside a primary.",
+      "description": "Transparent with an Edge border; the alternative action beside a primary.",
       "html": "<a class=\"ds-btn-secondary\" href=\"#\">View CV</a>",
-      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; border: 1px solid var(--border-strong, #345a53); border-radius: var(--radius, 8px); background: transparent; color: var(--text, #f1eee6); font: 600 1rem/1 var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; white-space: nowrap; cursor: pointer; transition: border-color 150ms ease-out, color 150ms ease-out; } .ds-btn-secondary:hover { border-color: var(--text, #f1eee6); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--focus, #f1eee6); outline-offset: 3px; }"
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; border: 1px solid var(--border-strong, #3b424d); border-radius: var(--radius, 8px); background: transparent; color: var(--text, #f3f4f6); font: 600 1rem/1 var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; white-space: nowrap; cursor: pointer; transition: border-color 150ms ease-out, color 150ms ease-out; } .ds-btn-secondary:hover { border-color: var(--text, #f3f4f6); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--focus, #f3f4f6); outline-offset: 3px; }"
     },
     {
       "name": "Route Bullet",
@@ -443,15 +487,15 @@
       "refersTo": "route-bullet",
       "description": "Filled circle in a line colour with its route number in the condensed face, in the text colour of that line; 28px heads, 20px tables and legends.",
       "html": "<div class=\"ds-bullets\"><span class=\"ds-rb ds-l1\">1</span><span class=\"ds-rb ds-l2\">2</span><span class=\"ds-rb ds-l3\">3</span><span class=\"ds-rb sm ds-l1\">1</span><span class=\"ds-rb sm ds-l2\">2</span><span class=\"ds-rb sm ds-l3\">3</span></div>",
-      "css": ".ds-bullets { display: flex; align-items: center; gap: 8px; } .ds-rb { --size: 28px; display: inline-grid; place-items: center; flex: none; width: var(--size); height: var(--size); border-radius: 50%; background: var(--line); color: var(--on-line, #0b1918); font: 700 calc(var(--size) * 0.6) / 1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); font-variant-numeric: tabular-nums; } .ds-rb.sm { --size: 20px; } .ds-l1 { --line: var(--line-1, #5bb8f2); --on-line: var(--on-line-1, #0b1918); } .ds-l2 { --line: var(--line-2, #f2c14e); --on-line: var(--on-line-2, #0b1918); } .ds-l3 { --line: var(--line-3, #ff7d5c); --on-line: var(--on-line-3, #0b1918); }"
+      "css": ".ds-bullets { display: flex; align-items: center; gap: 8px; } .ds-rb { --size: 28px; display: inline-grid; place-items: center; flex: none; width: var(--size); height: var(--size); border-radius: 50%; background: var(--line); color: var(--on-line, #0e1013); font: 700 calc(var(--size) * 0.6) / 1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); font-variant-numeric: tabular-nums; } .ds-rb.sm { --size: 20px; } .ds-l1 { --line: var(--line-1, #00a7db); --on-line: var(--on-line-1, #0e1013); } .ds-l2 { --line: var(--line-2, #f39700); --on-line: var(--on-line-2, #0e1013); } .ds-l3 { --line: var(--line-3, #e85298); --on-line: var(--on-line-3, #0e1013); }"
     },
     {
       "name": "Technology Chip",
       "kind": "chip",
       "refersTo": "chip-tech",
-      "description": "32px capsule filter button (44px touch area); interchanges carry dots of the lines through them; pressed inverts.",
+      "description": "32px mono capsule filter button (44px touch area); interchanges carry dots of the lines through them; pressed inverts.",
       "html": "<div class=\"ds-chips\"><button type=\"button\" class=\"ds-chip\" aria-pressed=\"false\"><span class=\"ds-dots\" aria-hidden=\"true\"><i class=\"ds-l1\"></i><i class=\"ds-l2\"></i><i class=\"ds-l3\"></i></span>Spring Boot</button><button type=\"button\" class=\"ds-chip\" aria-pressed=\"true\"><span class=\"ds-dots\" aria-hidden=\"true\"><i class=\"ds-l1\"></i><i class=\"ds-l2\"></i><i class=\"ds-l3\"></i></span>Redis</button><button type=\"button\" class=\"ds-chip\" aria-pressed=\"false\">Kafka</button><button type=\"button\" class=\"ds-chip ds-chip-more\" aria-expanded=\"false\">+3</button></div>",
-      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 12px 8px; } .ds-chip { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 44px; min-height: 32px; padding: 0 12px; border: 1px solid var(--border-strong, #345a53); border-radius: 999px; background: transparent; color: var(--text, #f1eee6); font: 500 0.875rem/1 var(--font, 'Barlow', system-ui, sans-serif); cursor: pointer; transition: border-color 150ms ease-out, background-color 150ms ease-out, color 150ms ease-out; } .ds-chip::after { content: ''; position: absolute; inset: -6px -4px; } .ds-chip:hover { border-color: var(--text, #f1eee6); } .ds-chip:focus-visible { outline: 2px solid var(--focus, #f1eee6); outline-offset: 3px; } .ds-chip[aria-pressed='true'] { border-color: var(--text, #f1eee6); background: var(--text, #f1eee6); color: var(--bg, #0b1918); } .ds-chip-more { border-style: dashed; } .ds-dots { display: inline-flex; gap: 3px; } .ds-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); } .ds-l1 { --line: var(--line-1, #5bb8f2); } .ds-l2 { --line: var(--line-2, #f2c14e); } .ds-l3 { --line: var(--line-3, #ff7d5c); }"
+      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 12px 8px; } .ds-chip { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 44px; min-height: 32px; padding: 0 12px; border: 1px solid var(--border-strong, #3b424d); border-radius: 999px; background: transparent; color: var(--text, #f3f4f6); font: 500 0.8125rem/1 var(--mono, 'JetBrains Mono', ui-monospace, monospace); cursor: pointer; transition: border-color 150ms ease-out, background-color 150ms ease-out, color 150ms ease-out; } .ds-chip::after { content: ''; position: absolute; inset: -6px -4px; } .ds-chip:hover { border-color: var(--text, #f3f4f6); } .ds-chip:focus-visible { outline: 2px solid var(--focus, #f3f4f6); outline-offset: 3px; } .ds-chip[aria-pressed='true'] { border-color: var(--text, #f3f4f6); background: var(--text, #f3f4f6); color: var(--bg, #0e1013); } .ds-chip-more { border-style: dashed; } .ds-dots { display: inline-flex; gap: 3px; } .ds-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); } .ds-l1 { --line: var(--line-1, #00a7db); } .ds-l2 { --line: var(--line-2, #f39700); } .ds-l3 { --line: var(--line-3, #e85298); }"
     },
     {
       "name": "Section Sign",
@@ -459,7 +503,7 @@
       "refersTo": "headline",
       "description": "Condensed uppercase headline over a band of 6px stretches in the related line colours, route order; no kicker, no number.",
       "html": "<div class=\"ds-sign\"><h2 class=\"ds-sign-title\">Experience</h2><span class=\"ds-band\" aria-hidden=\"true\"><span class=\"ds-l1\"></span><span class=\"ds-l2\"></span><span class=\"ds-l3\"></span></span><p class=\"ds-sign-intro\">Each company is a line; each project is a station on it.</p></div>",
-      "css": ".ds-sign-title { margin: 0; font: 700 clamp(2rem, 5vw, 2.75rem) / 1.05 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.01em; text-transform: uppercase; color: var(--text, #f1eee6); text-wrap: balance; } .ds-band { display: flex; width: fit-content; margin-top: 12px; } .ds-band span { width: 40px; height: 6px; background: var(--line); } .ds-sign-intro { max-width: 70ch; margin: 16px 0 0; font: 400 1.0625rem/1.6 var(--font, 'Barlow', system-ui, sans-serif); color: var(--muted, #b4c0b9); } .ds-l1 { --line: var(--line-1, #5bb8f2); } .ds-l2 { --line: var(--line-2, #f2c14e); } .ds-l3 { --line: var(--line-3, #ff7d5c); }"
+      "css": ".ds-sign-title { margin: 0; font: 700 clamp(2rem, 5vw, 2.75rem) / 1.05 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.01em; text-transform: uppercase; color: var(--text, #f3f4f6); text-wrap: balance; } .ds-band { display: flex; width: fit-content; margin-top: 12px; } .ds-band span { width: 40px; height: 6px; background: var(--line); } .ds-sign-intro { max-width: 70ch; margin: 16px 0 0; font: 400 1.0625rem/1.6 var(--font, 'Barlow', system-ui, sans-serif); color: var(--muted, #aeb4bd); } .ds-l1 { --line: var(--line-1, #00a7db); } .ds-l2 { --line: var(--line-2, #f39700); } .ds-l3 { --line: var(--line-3, #e85298); }"
     },
     {
       "name": "Header Navigation",
@@ -467,7 +511,7 @@
       "refersTo": "nav-link",
       "description": "Solid header with an ink route-bullet brand mark; muted links, the current one in text colour over a 3px ink bar.",
       "html": "<nav class=\"ds-nav\" aria-label=\"Main\"><a class=\"ds-brand\" href=\"#\"><span class=\"ds-brand-mark\">PT</span><span>Portfolio</span></a><ul class=\"ds-nav-list\"><li><a class=\"ds-nav-link\" href=\"#\">About</a></li><li><a class=\"ds-nav-link\" href=\"#\" aria-current=\"location\">Experience</a></li><li><a class=\"ds-nav-link\" href=\"#\">Skills</a></li><li><a class=\"ds-nav-link\" href=\"#\">CV</a></li></ul></nav>",
-      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; padding: 0 20px; background: var(--header-bg, #0b1918); border-bottom: 1px solid var(--border, #22403b); } .ds-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--text, #f1eee6); font: 600 1rem var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; } .ds-brand-mark { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent, #f1eee6); color: var(--accent-text, #0b1918); font: 700 0.875rem/1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.02em; } .ds-nav-list { display: flex; align-items: center; gap: 2px; margin: 0; padding: 0; list-style: none; } .ds-nav-link { position: relative; display: inline-flex; align-items: center; height: 44px; padding: 0 12px; color: var(--muted, #b4c0b9); font: 500 0.9375rem var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; transition: color 150ms ease-out; } .ds-nav-link:hover, .ds-nav-link[aria-current] { color: var(--text, #f1eee6); } .ds-nav-link[aria-current]::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 4px; height: 3px; background: var(--accent, #f1eee6); } .ds-nav-link:focus-visible, .ds-brand:focus-visible { outline: 2px solid var(--focus, #f1eee6); outline-offset: 3px; }"
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; padding: 0 20px; background: var(--header-bg, #0e1013); border-bottom: 1px solid var(--border, #2a2f37); } .ds-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--text, #f3f4f6); font: 600 1rem var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; } .ds-brand-mark { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent, #f3f4f6); color: var(--accent-text, #0e1013); font: 700 0.875rem/1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.02em; } .ds-nav-list { display: flex; align-items: center; gap: 2px; margin: 0; padding: 0; list-style: none; } .ds-nav-link { position: relative; display: inline-flex; align-items: center; height: 44px; padding: 0 12px; color: var(--muted, #aeb4bd); font: 500 0.9375rem var(--font, 'Barlow', system-ui, sans-serif); text-decoration: none; transition: color 150ms ease-out; } .ds-nav-link:hover, .ds-nav-link[aria-current] { color: var(--text, #f3f4f6); } .ds-nav-link[aria-current]::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 4px; height: 3px; background: var(--accent, #f3f4f6); } .ds-nav-link:focus-visible, .ds-brand:focus-visible { outline: 2px solid var(--focus, #f3f4f6); outline-offset: 3px; }"
     },
     {
       "name": "Palette Field",
@@ -475,42 +519,42 @@
       "refersTo": "command-palette",
       "description": "Borderless field in a 56px row of the command palette; focus draws a 2px inset ink underline instead of an outline.",
       "html": "<div class=\"ds-palette\"><div class=\"ds-palette-row\"><input class=\"ds-palette-input\" type=\"text\" placeholder=\"Type a command or section…\" aria-label=\"Command\"></div><div class=\"ds-palette-opt\" aria-selected=\"true\">Experience</div><div class=\"ds-palette-opt\">Skills</div></div>",
-      "css": ".ds-palette { width: min(560px, 100%); overflow: hidden; border: 1px solid var(--border-strong, #345a53); border-radius: var(--radius, 8px); background: var(--surface, #112421); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5); } .ds-palette-row { display: flex; align-items: center; height: 56px; padding: 0 16px; border-bottom: 1px solid var(--border, #22403b); } .ds-palette-row:focus-within { box-shadow: inset 0 -2px 0 var(--accent, #f1eee6); } .ds-palette-input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: var(--text, #f1eee6); font: 400 16px var(--font, 'Barlow', system-ui, sans-serif); } .ds-palette-input::placeholder { color: var(--faint, #93a39d); } .ds-palette-opt { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 6px 8px; padding: 8px 10px; border-radius: 6px; font: 400 0.9375rem var(--font, 'Barlow', system-ui, sans-serif); color: var(--text, #f1eee6); cursor: pointer; } .ds-palette-opt::before { content: ''; flex: none; width: 12px; height: 12px; border: 3px solid transparent; border-radius: 50%; } .ds-palette-opt:hover, .ds-palette-opt[aria-selected='true'] { background: var(--surface-2, #162d29); } .ds-palette-opt[aria-selected='true']::before { border-color: var(--accent, #f1eee6); background: var(--bg, #0b1918); }"
+      "css": ".ds-palette { width: min(560px, 100%); overflow: hidden; border: 1px solid var(--border-strong, #3b424d); border-radius: var(--radius, 8px); background: var(--surface, #16191e); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5); } .ds-palette-row { display: flex; align-items: center; height: 56px; padding: 0 16px; border-bottom: 1px solid var(--border, #2a2f37); } .ds-palette-row:focus-within { box-shadow: inset 0 -2px 0 var(--accent, #f3f4f6); } .ds-palette-input { flex: 1; min-width: 0; height: 100%; border: 0; outline: none; background: transparent; color: var(--text, #f3f4f6); font: 400 16px var(--font, 'Barlow', system-ui, sans-serif); } .ds-palette-input::placeholder { color: var(--faint, #959ca6); } .ds-palette-opt { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 6px 8px; padding: 8px 10px; border-radius: 6px; font: 400 0.9375rem var(--font, 'Barlow', system-ui, sans-serif); color: var(--text, #f3f4f6); cursor: pointer; } .ds-palette-opt::before { content: ''; flex: none; width: 12px; height: 12px; border: 3px solid transparent; border-radius: 50%; } .ds-palette-opt:hover, .ds-palette-opt[aria-selected='true'] { background: var(--surface-2, #1c2026); } .ds-palette-opt[aria-selected='true']::before { border-color: var(--accent, #f3f4f6); background: var(--bg, #0e1013); }"
     },
     {
       "name": "Interchange Table Row",
       "kind": "custom",
       "refersTo": "interchange-row",
-      "description": "Ruled 44px rows: technology, one 20px slot per line, project count; rows with projects filter the route and invert when pressed.",
+      "description": "Ruled 44px rows: technology, one 20px slot per line, project count in mono; rows with projects filter the route and invert when pressed.",
       "html": "<ul class=\"ds-xt\"><li><button type=\"button\" class=\"ds-xt-row\" aria-pressed=\"false\"><span>Spring Boot</span><span class=\"ds-xt-lines\"><span class=\"ds-rb ds-l1\">1</span><span class=\"ds-rb ds-l2\">2</span><span class=\"ds-rb ds-l3\">3</span></span><span class=\"ds-xt-count\">4 projects</span></button></li><li><button type=\"button\" class=\"ds-xt-row\" aria-pressed=\"true\"><span>Redis</span><span class=\"ds-xt-lines\"><span class=\"ds-rb ds-l1\">1</span><span class=\"ds-rb ds-l2\">2</span><span class=\"ds-rb ds-l3\">3</span></span><span class=\"ds-xt-count\">3 projects</span></button></li><li><button type=\"button\" class=\"ds-xt-row\" aria-pressed=\"false\"><span>Docker</span><span class=\"ds-xt-lines\"><span class=\"ds-xt-slot\"></span><span class=\"ds-rb ds-l2\">2</span><span class=\"ds-rb ds-l3\">3</span></span><span class=\"ds-xt-count\">2 projects</span></button></li></ul>",
-      "css": ".ds-xt { max-width: 360px; margin: 0; padding: 0; list-style: none; } .ds-xt li { border-bottom: 1px solid var(--border, #22403b); } .ds-xt-row { display: grid; grid-template-columns: minmax(0, 1fr) auto 5rem; align-items: center; column-gap: 12px; width: 100%; min-height: 44px; padding: 6px 8px; border: 0; border-radius: 0; background: transparent; color: var(--text, #f1eee6); font: 500 1rem/1.3 var(--font, 'Barlow', system-ui, sans-serif); text-align: left; cursor: pointer; transition: background-color 150ms ease-out, color 150ms ease-out; } .ds-xt-row:hover, .ds-xt-row:focus-visible { background: var(--surface-2, #162d29); } .ds-xt-row:focus-visible { outline: 2px solid var(--focus, #f1eee6); outline-offset: -2px; } .ds-xt-row[aria-pressed='true'] { background: var(--text, #f1eee6); color: var(--bg, #0b1918); } .ds-xt-lines { display: inline-flex; gap: 4px; } .ds-xt-slot { width: 20px; height: 20px; } .ds-xt-count { font-size: 0.875rem; font-variant-numeric: tabular-nums; text-align: right; color: var(--muted, #b4c0b9); } .ds-xt-row[aria-pressed='true'] .ds-xt-count { color: inherit; } .ds-rb { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--line); color: var(--on-line, #0b1918); font: 700 12px/1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); } .ds-l1 { --line: var(--line-1, #5bb8f2); --on-line: var(--on-line-1, #0b1918); } .ds-l2 { --line: var(--line-2, #f2c14e); --on-line: var(--on-line-2, #0b1918); } .ds-l3 { --line: var(--line-3, #ff7d5c); --on-line: var(--on-line-3, #0b1918); }"
+      "css": ".ds-xt { max-width: 360px; margin: 0; padding: 0; list-style: none; } .ds-xt li { border-bottom: 1px solid var(--border, #2a2f37); } .ds-xt-row { display: grid; grid-template-columns: minmax(0, 1fr) auto 5rem; align-items: center; column-gap: 12px; width: 100%; min-height: 44px; padding: 6px 8px; border: 0; border-radius: 0; background: transparent; color: var(--text, #f3f4f6); font: 500 1rem/1.3 var(--font, 'Barlow', system-ui, sans-serif); text-align: left; cursor: pointer; transition: background-color 150ms ease-out, color 150ms ease-out; } .ds-xt-row:hover, .ds-xt-row:focus-visible { background: var(--surface-2, #1c2026); } .ds-xt-row:focus-visible { outline: 2px solid var(--focus, #f3f4f6); outline-offset: -2px; } .ds-xt-row[aria-pressed='true'] { background: var(--text, #f3f4f6); color: var(--bg, #0e1013); } .ds-xt-lines { display: inline-flex; gap: 4px; } .ds-xt-slot { width: 20px; height: 20px; } .ds-xt-count { font-family: var(--mono, 'JetBrains Mono', ui-monospace, monospace); font-size: 0.8125rem; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; color: var(--muted, #aeb4bd); } .ds-xt-row[aria-pressed='true'] .ds-xt-count { color: inherit; } .ds-rb { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--line); color: var(--on-line, #0e1013); font: 700 12px/1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); } .ds-l1 { --line: var(--line-1, #00a7db); --on-line: var(--on-line-1, #0e1013); } .ds-l2 { --line: var(--line-2, #f39700); --on-line: var(--on-line-2, #0e1013); } .ds-l3 { --line: var(--line-3, #e85298); --on-line: var(--on-line-3, #0e1013); }"
     },
     {
       "name": "Map Grammar",
       "kind": "custom",
       "refersTo": "map-sign",
-      "description": "Tracks at 0/45/90 degrees 12px apart, station rings, an interchange capsule, square end bars, a condensed label and one data packet.",
-      "html": "<svg class=\"ds-map\" viewBox=\"0 0 320 96\" role=\"img\" aria-label=\"Two lines with stations, an interchange and end bars\"><path class=\"ds-track ds-l2\" d=\"M10 34L304 34\"/><path class=\"ds-track ds-l3\" d=\"M10 70L40 70L64 46L304 46\"/><path class=\"ds-packet\" d=\"M10 70L40 70L64 46L304 46\" pathLength=\"100\"/><line class=\"ds-terminal ds-l2\" x1=\"304\" y1=\"28\" x2=\"304\" y2=\"40\"/><line class=\"ds-terminal ds-l3\" x1=\"304\" y1=\"40\" x2=\"304\" y2=\"52\"/><circle class=\"ds-station ds-l2\" cx=\"96\" cy=\"34\" r=\"7\"/><circle class=\"ds-station ds-l3\" cx=\"22\" cy=\"70\" r=\"7\"/><rect class=\"ds-interchange\" x=\"194\" y=\"28\" width=\"12\" height=\"24\" rx=\"6\"/><text class=\"ds-map-label\" x=\"200\" y=\"18\" text-anchor=\"middle\">Redis</text><text class=\"ds-map-now\" x=\"298\" y=\"80\" text-anchor=\"end\">NOW</text></svg>",
-      "css": ".ds-map { display: block; width: 100%; max-width: 360px; height: auto; background: var(--bg, #0b1918); } .ds-track { fill: none; stroke: var(--line); stroke-width: 7; stroke-linejoin: round; stroke-linecap: butt; } .ds-terminal { stroke: var(--line); stroke-width: 6; stroke-linecap: butt; } .ds-station { fill: var(--bg, #0b1918); stroke: var(--line); stroke-width: 3; } .ds-interchange { fill: var(--interchange-fill, #f1eee6); stroke: var(--interchange-stroke, #0b1918); stroke-width: 2; } .ds-map-label { font: 700 16px var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); fill: var(--text, #f1eee6); } .ds-map-now { font: 700 22px var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.04em; fill: var(--text, #f1eee6); } .ds-packet { fill: none; stroke: var(--interchange-fill, #f1eee6); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 0.1 99.9; animation: ds-run 8s linear infinite; } @keyframes ds-run { to { stroke-dashoffset: -100; } } @media (prefers-reduced-motion: reduce) { .ds-packet { display: none; } } .ds-l1 { --line: var(--line-1, #5bb8f2); } .ds-l2 { --line: var(--line-2, #f2c14e); } .ds-l3 { --line: var(--line-3, #ff7d5c); }"
+      "description": "Tracks at 0/45/90 degrees 12px apart, glowing in the dark theme, station rings, an interchange capsule, square end bars, mono labels and one white data packet.",
+      "html": "<svg class=\"ds-map\" viewBox=\"0 0 320 96\" role=\"img\" aria-label=\"Two lines with stations, an interchange and end bars\"><defs><filter id=\"ds-led\" filterUnits=\"userSpaceOnUse\" x=\"-10%\" y=\"-25%\" width=\"120%\" height=\"150%\" color-interpolation-filters=\"sRGB\"><feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"5\" result=\"far\"/><feComponentTransfer in=\"far\" result=\"haze\"><feFuncA type=\"linear\" slope=\"0.45\"/></feComponentTransfer><feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"2\" result=\"near\"/><feMerge><feMergeNode in=\"haze\"/><feMergeNode in=\"near\"/><feMergeNode in=\"SourceGraphic\"/></feMerge></filter></defs><path class=\"ds-track ds-l2\" d=\"M10 34L304 34\"/><path class=\"ds-track ds-l3\" d=\"M10 70L40 70L64 46L304 46\"/><path class=\"ds-packet\" d=\"M10 70L40 70L64 46L304 46\" pathLength=\"100\"/><line class=\"ds-terminal ds-l2\" x1=\"304\" y1=\"28\" x2=\"304\" y2=\"40\"/><line class=\"ds-terminal ds-l3\" x1=\"304\" y1=\"40\" x2=\"304\" y2=\"52\"/><circle class=\"ds-station ds-l2\" cx=\"96\" cy=\"34\" r=\"7\"/><circle class=\"ds-station ds-l3\" cx=\"22\" cy=\"70\" r=\"7\"/><rect class=\"ds-interchange\" x=\"194\" y=\"28\" width=\"12\" height=\"24\" rx=\"6\"/><text class=\"ds-map-label\" x=\"200\" y=\"18\" text-anchor=\"middle\">Redis</text><text class=\"ds-map-now\" x=\"298\" y=\"80\" text-anchor=\"end\">NOW</text></svg>",
+      "css": ".ds-map { display: block; width: 100%; max-width: 360px; height: auto; overflow: visible; background: var(--bg, #0e1013); } .ds-track { fill: none; stroke: var(--line); stroke-width: 7; stroke-linejoin: round; stroke-linecap: butt; filter: url(#ds-led); } .ds-terminal { stroke: var(--line); stroke-width: 6; stroke-linecap: butt; filter: url(#ds-led); } :root[data-theme='light'] .ds-track, :root[data-theme='light'] .ds-terminal { filter: none; } .ds-station { fill: var(--bg, #0e1013); stroke: var(--line); stroke-width: 3; } .ds-interchange { fill: var(--interchange-fill, #f3f4f6); stroke: var(--interchange-stroke, #0e1013); stroke-width: 2; } .ds-map-label { font: 700 13px var(--mono, 'JetBrains Mono', ui-monospace, monospace); fill: var(--text, #f3f4f6); } .ds-map-now { font: 700 18px var(--mono, 'JetBrains Mono', ui-monospace, monospace); fill: var(--text, #f3f4f6); } .ds-packet { fill: none; stroke: var(--packet, #ffffff); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 0.1 99.9; animation: ds-run 8s linear infinite; } @keyframes ds-run { to { stroke-dashoffset: -100; } } @media (prefers-reduced-motion: reduce) { .ds-packet { display: none; } } .ds-l1 { --line: var(--line-1, #00a7db); } .ds-l2 { --line: var(--line-2, #f39700); } .ds-l3 { --line: var(--line-3, #e85298); }"
     },
     {
       "name": "Route Leg",
       "kind": "custom",
       "refersTo": "route-bullet",
-      "description": "A stretch of the vertical route: 6px track in the line colour, route bullet on the track, project stations as rings.",
+      "description": "A stretch of the vertical route: 6px track in the line colour, route bullet on the track, period in mono, project stations as rings.",
       "html": "<div class=\"ds-route\"><div class=\"ds-leg ds-l3\"><p class=\"ds-now\"><span class=\"ds-now-bar\"></span>Now</p><div class=\"ds-leg-head\"><span class=\"ds-leg-bullet\">3</span><div><h3 class=\"ds-company\">Current employer</h3><p class=\"ds-role\">Backend Developer</p></div><p class=\"ds-period\">2026 – Now</p></div><div class=\"ds-stop\"><h4 class=\"ds-stop-name\">Platform project</h4><p class=\"ds-stop-sum\">Report ingestion, approval workflow and scheduled jobs.</p></div></div></div>",
-      "css": ".ds-route { --rail: 14px; --pad: 44px; font: 400 1.0625rem/1.6 var(--font, 'Barlow', system-ui, sans-serif); color: var(--text, #f1eee6); } .ds-leg { position: relative; padding: 0 0 8px var(--pad); } .ds-leg::before { content: ''; position: absolute; left: calc(var(--rail) - 3px); top: 10px; bottom: 0; width: 6px; background: var(--line); } .ds-now { position: relative; margin: 0 0 20px; font: 700 1rem/20px var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.06em; text-transform: uppercase; } .ds-now-bar { position: absolute; left: calc(var(--rail) - var(--pad) - 14px); top: 7px; width: 28px; height: 6px; background: var(--line); } .ds-leg-head { position: relative; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 20px; } .ds-leg-bullet { position: absolute; left: calc(var(--rail) - var(--pad) - 14px); top: -1px; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--line); color: var(--on-line, #0b1918); font: 700 16.8px/1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); } .ds-company { margin: 0; font: 600 1.375rem/1.2 var(--font, 'Barlow', system-ui, sans-serif); } .ds-role, .ds-period { margin: 2px 0 0; color: var(--muted, #b4c0b9); } .ds-period { margin: 0; font-size: 0.9375rem; font-variant-numeric: tabular-nums; white-space: nowrap; } .ds-stop { position: relative; } .ds-stop::before { content: ''; position: absolute; left: calc(var(--rail) - var(--pad) - 8px); top: 5px; width: 16px; height: 16px; border: 3px solid var(--line); border-radius: 50%; background: var(--bg, #0b1918); box-sizing: border-box; } .ds-stop:hover::before { background: var(--line); } .ds-stop-name { margin: 0; font: 600 1.125rem/1.4 var(--font, 'Barlow', system-ui, sans-serif); } .ds-stop-sum { max-width: 70ch; margin: 6px 0 0; color: var(--muted, #b4c0b9); } .ds-l1 { --line: var(--line-1, #5bb8f2); --on-line: var(--on-line-1, #0b1918); } .ds-l2 { --line: var(--line-2, #f2c14e); --on-line: var(--on-line-2, #0b1918); } .ds-l3 { --line: var(--line-3, #ff7d5c); --on-line: var(--on-line-3, #0b1918); }"
+      "css": ".ds-route { --rail: 14px; --pad: 44px; font: 400 1.0625rem/1.6 var(--font, 'Barlow', system-ui, sans-serif); color: var(--text, #f3f4f6); } .ds-leg { position: relative; padding: 0 0 8px var(--pad); } .ds-leg::before { content: ''; position: absolute; left: calc(var(--rail) - 3px); top: 10px; bottom: 0; width: 6px; background: var(--line); } .ds-now { position: relative; margin: 0 0 20px; font: 700 1rem/20px var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.06em; text-transform: uppercase; } .ds-now-bar { position: absolute; left: calc(var(--rail) - var(--pad) - 14px); top: 7px; width: 28px; height: 6px; background: var(--line); } .ds-leg-head { position: relative; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 20px; } .ds-leg-bullet { position: absolute; left: calc(var(--rail) - var(--pad) - 14px); top: -1px; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--line); color: var(--on-line, #0e1013); font: 700 16.8px/1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); } .ds-company { margin: 0; font: 600 1.375rem/1.2 var(--font, 'Barlow', system-ui, sans-serif); } .ds-role, .ds-period { margin: 2px 0 0; color: var(--muted, #aeb4bd); } .ds-period { margin: 0; font-family: var(--mono, 'JetBrains Mono', ui-monospace, monospace); font-size: 0.875rem; font-variant-numeric: tabular-nums; white-space: nowrap; } .ds-stop { position: relative; } .ds-stop::before { content: ''; position: absolute; left: calc(var(--rail) - var(--pad) - 8px); top: 5px; width: 16px; height: 16px; border: 3px solid var(--line); border-radius: 50%; background: var(--bg, #0e1013); box-sizing: border-box; } .ds-stop:hover::before { background: var(--line); } .ds-stop-name { margin: 0; font: 600 1.125rem/1.4 var(--font, 'Barlow', system-ui, sans-serif); } .ds-stop-sum { max-width: 70ch; margin: 6px 0 0; color: var(--muted, #aeb4bd); } .ds-l1 { --line: var(--line-1, #00a7db); --on-line: var(--on-line-1, #0e1013); } .ds-l2 { --line: var(--line-2, #f39700); --on-line: var(--on-line-2, #0e1013); } .ds-l3 { --line: var(--line-3, #e85298); --on-line: var(--on-line-3, #0e1013); }"
     }
   ],
   "narrative": {
     "northStar": "The Night Network Map",
-    "overview": "The site is drawn as a schematic transit map at night. A career is a network: each employer is a coloured line, numbered by start date; each project is a station on its line; every technology used at two employers or more is an interchange where their lines meet, and all lines converge on a shared terminus labelled \"Now\". These relationships are computed from the experience data, and the build stops when a hand-placed map no longer matches that data, so the drawing is a record, not an illustration. Map language (lines, stations, end bars, legend, \"not to scale\") reaches every block, from the route of the experience section to the CV sheet and the 404 page.\n\nThe material is flat night-green ink with 1px rules. Colour is scarce and semantic: three line colours, each owned by one job and used for nothing else; actions are drawn in ink, the text colour of the theme. Type is split into signs and text: condensed capitals for the name, section signs and station labels; a plain sans for anything a person reads; mono only for code. Density is moderate and reading-first: a recruiter must find role, stack and contact without decoding the map, and every map has a plain equivalent (accessible SVG title and description, the route list, the interchange table).\n\nMotion is one quiet loop: small data packets running along the hero map's lines, paused off screen, paused by a button, and absent under reduced motion. The world rejects the generic dark developer portfolio: no gradient name, frosted stat tiles, comment-style labels, numbered sections, glows or blobs.",
+    "overview": "The site is drawn as a schematic transit map at night. A career is a network: each employer is a coloured line, numbered by start date; each project is a station on its line; every technology used at two employers or more is an interchange where their lines meet, and all lines converge on a shared terminus labelled \"Now\". These relationships are computed from the experience data, and the build stops when a hand-placed map no longer matches that data, so the drawing is a record, not an illustration. Map language (lines, stations, end bars, legend, \"not to scale\") reaches every block, from the route of the experience section to the CV sheet and the 404 page.\n\nThe material is a graphite signal board: flat graphite panels with 1px rules over a fine dot grid fixed behind the page, and, in the dark theme only, tracks lit like the lamps of a dispatch board. Colour is scarce and semantic: three line colours, each owned by one job and used for nothing else; actions are drawn in ink, the text colour of the theme. Type is split into signs, text and data: condensed capitals for the name and section signs; a plain sans for anything a person reads; JetBrains Mono for data (map labels, dates, counts, technology chips, shortcut keys) and code. Density is moderate and reading-first: a recruiter must find role, stack and contact without decoding the map, and every map has a plain equivalent (accessible SVG title and description, the route list, the interchange table).\n\nMotion is one quiet loop: small white data packets running along the hero map's lines, paused off screen, paused by a button, and absent under reduced motion. The world rejects the generic dark developer portfolio: no gradient name, frosted stat tiles, comment-style labels, numbered sections, blobs or glowing text; light belongs to the tracks alone.",
     "keyCharacteristics": [
-      "Three line colours (sky, gold, coral) belong to the lines only; actions are ink, never a line colour.",
-      "Tracks run only horizontally, vertically or at 45°, with rounded bends and square end bars.",
+      "Three line colours (cyan, orange, magenta) belong to the lines only; actions are ink, never a line colour.",
+      "Tracks run only horizontally, vertically or at 45°, with rounded bends and square end bars; in the dark theme they glow.",
       "Stations are rings on the page background; interchanges are light capsules with an ink edge.",
-      "Barlow Condensed for signs, Barlow for text, JetBrains Mono for code only.",
-      "Flat surfaces with 1px edges; soft black shadow only on layers that float over content.",
+      "Barlow Condensed for signs, Barlow for text, JetBrains Mono for data and code.",
+      "Flat graphite surfaces with 1px edges over a fixed dot grid; soft black shadow only on layers that float over content.",
       "Dark is the default theme; light is an explicit visitor choice; print is pure black on white."
     ],
     "rules": [
@@ -521,32 +565,37 @@
       },
       {
         "name": "The Action Ink Rule",
-        "body": "Every action is drawn in ink (`--accent` / `--accent-text`): the primary button, links, the \"Show n more\" fold, the current nav underline, the palette ring and underline, the brand mark. Ivory with dark text in dark, dark green with light text in light; never a line colour.",
+        "body": "Every action is drawn in ink (`--accent` / `--accent-text`): the primary button, links, the \"Show n more\" fold, the current nav underline, the palette ring and underline, the brand mark. Signal White with graphite text in dark, near-black with light text in light; never a line colour.",
         "section": "colors"
       },
       {
         "name": "The Ink-on-Line Rule",
-        "body": "Text on a line colour takes the `--on-line-N` of that line: ink #0b1918 on all three in dark; white on Sky and Coral, ink #0f1f1d on Gold in light. Body text never takes a line colour unless it passes 4.5:1 on its surface (JSON tokens sit on the dark code panel for that reason).",
+        "body": "Text on a line colour takes the `--on-line-N` of that line: ink #0e1013 on all three in dark; white on all three in light. Body text never takes a line colour unless it passes 4.5:1 on its surface (JSON tokens sit on the dark code panel for that reason).",
         "section": "colors"
       },
       {
-        "name": "The Flat Night Rule",
-        "body": "No gradients, frosted glass, backdrop blur, glows or coloured shadows. The older tokens (`--grad`, `--glass`, `--glow*`, `--hero-glow*`, `--grad-rail`, `--accent-2/3`) resolve to a flat colour, transparent or none; they must never be re-inflated.",
+        "name": "The Lit Tracks Rule",
+        "body": "Light belongs to the tracks. In the dark theme only, the tracks and end bars of a job's line glow like the lamps of a dispatch board on the hero map, the terminus sign and the 404 map: two blurred copies of the track under it, about 4px and 10px, the outer one at 45% (class `.led`, filter `#led` in `src/components/metro/LedGlow.astro`). Data packets are white with a small halo. Text, buttons, cards and the neutral diagrams never glow, nor does anything in the light theme or in print. No gradients, frosted glass, backdrop blur or coloured shadows; the older tokens (`--grad`, `--glass`, `--glow*`, `--grid-line`, `--hero-glow*`, `--grad-rail`, `--accent-2/3`) resolve to a flat colour, transparent or none and must never be re-inflated.",
+        "section": "colors"
+      },
+      {
+        "name": "The Dot Grid Rule",
+        "body": "One background texture only: a 1px dot every 22px in `--grid-dot`, fixed behind the page while it scrolls. No square grid, no noise; every block with a background of its own covers it.",
         "section": "colors"
       },
       {
         "name": "The Sign Face Rule",
-        "body": "Barlow Condensed is for signs only: the name, section signs (uppercase), station and line names on maps, route numerals, the \"Now\" sign. Body headings from h3 down, UI controls and running text stay in Barlow.",
+        "body": "Barlow Condensed is for signs only: the name, section signs (uppercase), company names at line starts, route numerals, the \"Now\" sign of the route, diagram labels. Body headings from h3 down, UI controls and running text stay in Barlow.",
         "section": "typography"
       },
       {
-        "name": "The Code-Only Mono Rule",
-        "body": "Mono marks code and nothing else: no mono dates, company names, labels or footers.",
+        "name": "The Data Mono Rule",
+        "body": "JetBrains Mono marks data and code: map labels and years, \"You are here\", dates and periods, project counts, technology chips, shortcut keys, the JSON view. Names, titles, running text and company names never take it, and the printed CV keeps Barlow. Map labels are placed for 0.6 em a mono character; an interchange name too long for the map takes a shorter label there (\"JPA / Hibernate\"), its link keeps the full name.",
         "section": "typography"
       },
       {
         "name": "The Tabular Figures Rule",
-        "body": "Dates, periods, years, counts and kbd keys use `font-variant-numeric: tabular-nums`. Headings use `text-wrap: balance`, paragraphs `text-wrap: pretty`.",
+        "body": "Dates, periods, years, counts and kbd keys use `font-variant-numeric: tabular-nums` (mono figures are tabular already). Headings use `text-wrap: balance`, paragraphs `text-wrap: pretty`.",
         "section": "typography"
       },
       {
@@ -561,9 +610,10 @@
       }
     ],
     "dos": [
-      "**Do** draw every new diagram with the map parts (Track, Station, Interchange, Terminal) and the 45-Degree Rule: 7px tracks, 3px station rings on the page background, capsules with a 2px ink edge, square end bars; a diagram that belongs to no job leaves out the route number and draws in `--line-neutral`.",
+      "**Do** draw every new diagram with the map parts (Track, Station, Interchange, Terminal) and the 45-Degree Rule: 7px tracks, 3px station rings on the page background, capsules with a 2px ink edge, square end bars; a diagram that belongs to no job leaves out the route number and draws in `--line-neutral`, so it does not glow.",
       "**Do** take a line's colour from its route number (`--line-1`, `--line-2`, `--line-3`), and derive any new interchange or relationship from the experience data, never by hand.",
       "**Do** put the `--on-line-N` text of the line on any line-colour fill, draw every action in ink (`--accent` / `--accent-text`), and check every new text pair for 4.5:1 in both themes (3:1 for large text, tracks and stations).",
+      "**Do** set data in JetBrains Mono (map labels, dates, counts, chips, keys) and place map labels for 0.6 em a character, clear of the tracks, of each other and of the map frame.",
       "**Do** open each home block with the section sign: condensed uppercase headline and the 6px band of related line colours.",
       "**Do** keep touch targets at least 44px, extending a smaller visual (32px chip) with an invisible `::after` rather than enlarging it.",
       "**Do** keep interaction feedback to colour and border changes at 150ms ease-out, with the 2px text-colour focus outline at 3px offset; a pressed filter control inverts to text-colour fill; where the ink equals the text colour, hover underlines instead.",
@@ -571,10 +621,11 @@
       "**Do** use Barlow at 400, 500 and 600 only; 700 belongs to the condensed face."
     ],
     "donts": [
-      "**Don't** use gradients, frosted glass, backdrop blur, glows, coloured shadows, blobs, noise or background grids.",
+      "**Don't** use gradients, frosted glass, backdrop blur, coloured shadows, blobs, noise or a square background grid; the dot grid is the only texture.",
+      "**Don't** put a glow on text, buttons, cards or the neutral diagrams, or anywhere in the light theme or in print.",
       "**Don't** put a kicker or eyebrow label above a heading, number sections (01–04), or use comment-style labels such as `// about`.",
-      "**Don't** set dates, names, labels or footers in mono; mono is for code.",
-      "**Don't** add another hue or use a line colour for something that is not its line: actions are ink, status is mint or pink, unowned diagrams are sage.",
+      "**Don't** set names, titles, running text or company names in mono; mono is for data and code.",
+      "**Don't** add another hue or use a line colour for something that is not its line: actions are ink, status is green or red, unowned diagrams are neutral grey.",
       "**Don't** add scroll reveals, count-ups, typing effects or looping decoration; content is visible on load, and the packet loop stays the only ambient motion.",
       "**Don't** nest cards inside cards or box content that reads as a list; use rules and bands.",
       "**Don't** draw a track segment at any angle other than 0°, 45° or 90°, or label a map relationship the data does not contain."

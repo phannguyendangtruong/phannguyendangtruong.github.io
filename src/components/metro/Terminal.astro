@@ -5,7 +5,10 @@ interface Props {
   /** End of the track, in the units of the parent SVG. */
   x: number;
   y: number;
-  /** Route number of the line that ends here; without it the bar takes the neutral colour. */
+  /**
+   * Route number of the line that ends here; without it the bar takes the neutral colour. A bar with a line glows
+   * in the dark theme, as its track does.
+   */
   line?: number;
   /** Direction of the track that ends here; the bar is drawn across it. */
   track?: 'x' | 'y';
@@ -22,7 +25,7 @@ const [x1, y1, x2, y2] = track === 'x' ? [x, y - half, x, y + half] : [x - half,
 ---
 
 <line
-  class:list={['terminal', className]}
+  class:list={['terminal', { led: line !== undefined }, className]}
   x1={x1}
   y1={y1}
   x2={x2}

@@ -2,7 +2,10 @@
 import { checkTrack, lineColor } from '../../data/network';
 
 interface Props {
-  /** Route number of the line; without it the track takes the neutral colour of diagrams that belong to no job. */
+  /**
+   * Route number of the line; without it the track takes the neutral colour of diagrams that belong to no job. A
+   * track with a line glows in the dark theme (.led in src/styles/global.css).
+   */
   line?: number;
   /** Points in order, in the units of the parent SVG; every segment is horizontal, vertical or at 45°. */
   points: [number, number][];
@@ -19,7 +22,7 @@ const d = points.map(([x, y], index) => `${index === 0 ? 'M' : 'L'}${x} ${y}`).j
 ---
 
 <path
-  class:list={['track', { dashed }, className]}
+  class:list={['track', { dashed, led: line !== undefined }, className]}
   d={d}
   stroke-width={width}
   style={`--line: ${lineColor(line)}`}

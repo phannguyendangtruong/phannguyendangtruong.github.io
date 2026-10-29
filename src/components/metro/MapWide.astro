@@ -33,15 +33,18 @@ const points = placeMap(file, wideMap);
 const lineOf = new Map(lines.map((line) => [line.key, line] as const));
 const stationOf = new Map(lines.flatMap((line) => line.stations.map((station) => [station.key, station] as const)));
 const junctionOf = new Map(interchanges.map((item) => [item.key, item] as const));
+/** Font sizes of the interchange labels in viewBox units, as set in NetworkMap.astro (.nm-label, .nm-hub). */
+const labelSize = 12;
+const hubSize = 13;
 
 function labelAt(key: string, label: LabelAt | undefined): LabelAt {
   if (!label) throw new Error(`Sơ đồ tuyến: ${file} chưa có vị trí nhãn cho ga ${key}.`);
   return label;
 }
 
-/** Box behind a link label until the script fits it to the text: about half the font size a character, 6 units around. */
+/** Box behind a link label until the script fits it to the text: 0.6 em a mono character, 6 units around. */
 function hitBox(name: string, size: number, [x, y, anchor]: LabelAt) {
-  const w = Math.ceil(name.length * size * 0.5) + 12;
+  const w = Math.ceil(name.length * size * 0.6) + 12;
   const left = anchor === 'start' ? x - 6 : anchor === 'end' ? x - w + 6 : x - w / 2;
   return { x: left, y: y - size - 3, w, h: size + 10 };
 }
@@ -67,16 +70,18 @@ const junctions = points
     if (!item) return [];
     const hub = item.lines.length === lines.length;
     const label = labelAt(point.key, point.at.label);
+    const text = point.at.short ?? item.name;
     const count = projectCountForSkill(item.key);
     return [
       {
         key: item.key,
         name: item.name,
+        text,
         hub,
         tracks: point.at.crossing ? 1 : item.lines.length,
         xy: point.at.xy,
         label,
-        box: hitBox(item.name, hub ? 16 : 14, label),
+        box: hitBox(text, hub ? hubSize : labelSize, label),
         aria: trCount('skillFilterOne', 'skillFilterMany', count, lang).replace('{name}', item.name),
       },
     ];
@@ -92,11 +97,12 @@ const ends = lines.map((line) => {
   return { line: line.number, xy: last, bar: along(track[track.length - 2], last) };
 });
 
-/** One data packet a line; each starts a share of its run later, so they never move together. */
+/** One data packet a line, drawn over its halo; each starts a share of its run later, so they never move together. */
 const packets = lines.map((line, index) => {
   const track = tracks[line.number];
   const seconds = packetSeconds(track);
-  return { d: pathOf(track), seconds, offset: Math.round((seconds * index * 10) / lines.length) / 10 };
+  const offset = Math.round((seconds * index * 10) / lines.length) / 10;
+  return { d: pathOf(track), style: `--run: ${seconds}s; --from: -${offset}s` };
 });
 ---
 
@@ -108,9 +114,10 @@ const packets = lines.map((line, index) => {
     <g class="nm-packets">
       {
         packets.map((packet) => (
-          <path class="nm-packet" d={packet.d} pathLength="100" style={`--run: ${packet.seconds}s; --from: -${packet.offset}s`} />
+          <path class="nm-packet nm-packet-halo" d={packet.d} pathLength="100" style={packet.style} />
         ))
       }
+      {packets.map((packet) => <path class="nm-packet" d={packet.d} pathLength="100" style={packet.style} />)}
     </g>
     {starts.map((start) => <Terminal x={start.xy[0]} y={start.xy[1]} line={start.line} track={start.bar} />)}
     {ends.map((item) => <Terminal x={item.xy[0]} y={item.xy[1]} line={item.line} track={item.bar} length={trackGap} />)}
@@ -146,7 +153,7 @@ const packets = lines.map((line, index) => {
       junctions.map((item) => (
         <a class="nm-link" href="#experience" data-skill={item.key} data-skill-name={item.name} aria-label={item.aria}>
           <rect class="nm-hit" x={item.box.x} y={item.box.y} width={item.box.w} height={item.box.h} rx="4" />
-          <text class:list={['nm-label', { 'nm-hub': item.hub }]} x={item.label[0]} y={item.label[1]} text-anchor={item.label[2]}>{item.name}</text>
+          <text class:list={['nm-label', { 'nm-hub': item.hub }]} x={item.label[0]} y={item.label[1]} text-anchor={item.label[2]}>{item.text}</text>
         </a>
       ))
     }

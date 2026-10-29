@@ -181,7 +181,8 @@ const chips = project.tech.map((name) => {
     margin-top: 0;
   }
 
-  /* Chips: 32px capsules; each button reaches 44px for touch through its ::after, rows are 12px apart. */
+  /* Chips: 32px capsules with the technology in the mono face (data); each button reaches 44px for touch through its
+     ::after, rows are 12px apart. */
   .stop-tags {
     display: flex;
     flex-wrap: wrap;
@@ -203,7 +204,7 @@ const chips = project.tech.map((name) => {
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-pill);
     background: transparent;
-    font: 500 0.875rem/1 var(--font);
+    font: 500 0.8125rem/1 var(--mono);
     color: var(--text);
     cursor: pointer;
     transition: border-color var(--t-hover), background-color var(--t-hover), color var(--t-hover);

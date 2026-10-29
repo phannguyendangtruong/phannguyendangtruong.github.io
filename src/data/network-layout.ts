@@ -12,6 +12,8 @@ export type MapSpot = {
   xy: XY;
   /** Station, interchange and end: where the label is written. */
   label?: LabelAt;
+  /** Interchange: shorter name written on this map when the full one does not fit; its link keeps the full name. */
+  short?: string;
   /** Line start: centre of the route bullet; the company and the start year follow on its right. */
   bullet?: XY;
   /** End: centre of the "You are here" mark; its text follows on the right. */
@@ -37,13 +39,15 @@ export const capsuleRadius = 6;
  * nothing is drawn there: line 3 starts on the left under that block, passes its station, climbs the gap on the
  * block's right, crosses line 1 at Java along the top and comes back down the right; lines 1 and 2 pass their
  * stations; the three lines then share a trunk of interchanges (pairs on the side of their two tracks, hubs across
- * all three) down to the end bars.
+ * all three) down to the end bars. Labels are set in the mono face, 0.6 of the font size a character (12 units,
+ * hubs 13, the end 18): line 1 runs at x = 626 so that the longest station name on its left (about 152 units) keeps
+ * clear of line 3 at x = 440, and every label stays inside the 960 × 560 frame.
  */
 export const wideMap: MapLayout = {
   width: 960,
   height: 560,
   tracks: {
-    1: [[610, 22], [610, 196], [640, 226], [698, 226], [728, 256], [728, 486]],
+    1: [[626, 22], [626, 196], [656, 226], [698, 226], [728, 256], [728, 486]],
     2: [[740, 110], [740, 486]],
     3: [
       [24, 516], [410, 516], [440, 486], [440, 100], [470, 70], [890, 70], [920, 100], [920, 230], [890, 260],
@@ -51,18 +55,18 @@ export const wideMap: MapLayout = {
     ],
   },
   spots: {
-    'line-1': { xy: [610, 22], bullet: [636, 22] },
+    'line-1': { xy: [626, 22], bullet: [652, 22] },
     'line-2': { xy: [740, 110], bullet: [766, 110] },
     'line-3': { xy: [24, 516], bullet: [34, 542] },
-    'production-operations-management': { xy: [610, 126], label: [596, 131, 'end'] },
-    'data-generation-sub-project': { xy: [610, 176], label: [596, 181, 'end'] },
+    'production-operations-management': { xy: [626, 126], label: [612, 131, 'end'] },
+    'data-generation-sub-project': { xy: [626, 176], label: [612, 181, 'end'] },
     'customer-care-portal': { xy: [740, 160], label: [754, 165, 'start'] },
     'content-information-management-system': { xy: [740, 205], label: [754, 210, 'start'] },
     'reporting-workflow-platform': { xy: [250, 516], label: [250, 547, 'middle'] },
-    java: { xy: [610, 70], label: [622, 94, 'start'], crossing: true },
+    java: { xy: [626, 70], label: [638, 94, 'start'], crossing: true },
     'spring-security': { xy: [734, 272], label: [714, 277, 'end'] },
     'sql-server': { xy: [734, 316], label: [714, 321, 'end'] },
-    jpa: { xy: [746, 342], label: [766, 347, 'start'] },
+    jpa: { xy: [746, 342], label: [766, 347, 'start'], short: 'JPA / Hibernate' },
     'apache-poi': { xy: [746, 368], label: [766, 373, 'start'] },
     docker: { xy: [746, 394], label: [766, 399, 'start'] },
     'spring-boot': { xy: [740, 424], label: [714, 430, 'end'] },
@@ -73,7 +77,8 @@ export const wideMap: MapLayout = {
 
 /**
  * Phone map, read from the top: each line starts on the right, runs left under its label and turns down into the
- * trunk, which goes through the hubs to the end bars.
+ * trunk, which goes through the hubs to the end bars. Its mono labels are larger in viewBox units (hubs 15, the end
+ * 20, "You are here" 14), since the map is drawn from 280px wide; the longest ends at x = 268 of 320.
  */
 export const compactMap: MapLayout = {
   width: 320,

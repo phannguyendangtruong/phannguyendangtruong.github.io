@@ -39,6 +39,20 @@ const map = {
   lineCount: 3,
 };
 
+/**
+ * Glow of the tracks, as on the site in the dark theme (src/components/metro/LedGlow.astro): two blurred copies of
+ * the track under it, the outer one at 45%. The region is in user units, so the straight middle line keeps it.
+ */
+const ledFilter = [
+  '<filter id="led" filterUnits="userSpaceOnUse" x="-10%" y="-10%" width="120%" height="120%"',
+  ' color-interpolation-filters="sRGB">',
+  '<feGaussianBlur in="SourceGraphic" stdDeviation="5" result="far"/>',
+  '<feComponentTransfer in="far" result="haze"><feFuncA type="linear" slope="0.45"/></feComponentTransfer>',
+  '<feGaussianBlur in="SourceGraphic" stdDeviation="2" result="near"/>',
+  '<feMerge><feMergeNode in="haze"/><feMergeNode in="near"/><feMergeNode in="SourceGraphic"/></feMerge>',
+  '</filter>',
+].join('');
+
 /** Font subsets of the site, in the order of the @fontsource CSS (the last matching one is tried first). */
 const subsets = [
   {
@@ -372,7 +386,7 @@ function mapLines() {
   });
 }
 
-/** Map of the share image: tracks, stations, the end capsule and its label, then the route bullets on top. */
+/** Map of the share image: glowing tracks, stations, the end capsule and its label, then the route bullets on top. */
 function mapSvg(lang) {
   const lines = mapLines();
   // Each line carries its colour and the colour of the text on it (the numeral of its bullet).
@@ -398,6 +412,7 @@ function mapSvg(lang) {
     .join('');
   return [
     `<svg class="map" viewBox="0 0 ${map.width} ${map.height}" width="${map.width}" height="${map.height}" aria-hidden="true">`,
+    `<defs>${ledFilter}</defs>`,
     tracks,
     stations,
     end,
@@ -407,11 +422,17 @@ function mapSvg(lang) {
   ].join('');
 }
 
-/** Share image layout: flat page background, name and role on the left, the map on the right; 64px safe margin. */
+/**
+ * Share image layout: the page background with the fine dot grid of the site, name and role on the left, the map on
+ * the right; 64px safe margin.
+ */
 const ogCss = `
 * { box-sizing: border-box; }
 html, body { width: ${og.width}px; height: ${og.height}px; margin: 0; overflow: hidden; }
-body { background: var(--bg); color: var(--text); font-family: var(--font); }
+body {
+  background: var(--bg); color: var(--text); font-family: var(--font);
+  background-image: radial-gradient(circle at 1px 1px, var(--grid-dot) 1px, transparent 0); background-size: 22px 22px;
+}
 .card {
   position: relative; display: grid; grid-template-columns: minmax(0, 1fr) ${map.width}px; gap: 48px;
   align-items: center; height: 100%; padding: 64px;
@@ -421,7 +442,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); }
 .role { margin: 28px 0 0; font: 500 30px/1.35 var(--font); color: var(--muted); }
 .domain { position: absolute; left: 64px; bottom: 56px; margin: 0; font: 500 22px/1 var(--font); color: var(--faint); }
 .map { display: block; overflow: visible; }
-.track { fill: none; stroke: var(--line); stroke-width: 8; stroke-linejoin: round; }
+.track { fill: none; stroke: var(--line); stroke-width: 8; stroke-linejoin: round; filter: url(#led); }
 .station { fill: var(--bg); stroke: var(--line); stroke-width: 4; }
 .end { fill: var(--interchange-fill); stroke: var(--interchange-stroke); stroke-width: 3; }
 .end-label { font: 700 44px var(--font-display); letter-spacing: 0.04em; fill: var(--text); text-anchor: middle; }

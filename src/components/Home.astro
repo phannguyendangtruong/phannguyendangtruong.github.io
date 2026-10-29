@@ -8,6 +8,7 @@ import SectionHead from './SectionHead.astro';
 import SkillsBento from './SkillsBento.astro';
 import ContactTerminus from './home/ContactTerminus.astro';
 import FocusBands from './home/FocusBands.astro';
+import Station3D from './metro/Station3D.astro';
 import { profile, shownProjects } from '../data/profile';
 import { homeSections } from '../i18n/nav';
 import { tr, type Lang } from '../i18n/ui';
@@ -26,8 +27,11 @@ const title = `${profile.name[lang]} — ${profile.role[lang]}`;
 <Base lang={lang} title={title} description={profile.tagline[lang]} path="/">
   <ApiView lang={lang} />
   <HeroSection lang={lang} />
+  {/* The 3D station; data-cam names the shot each block shows while it is in the middle of the window. */}
+  {/* At the full level each block is a panel over the left half of the window, the right half with data-panel. */}
+  <Station3D lang={lang} />
 
-  <section id="about" class="section" aria-labelledby="about-title">
+  <section id="about" class="section" aria-labelledby="about-title" data-cam="start">
     <div class="container">
       <SectionHead lang={lang} id="about-title" title="navAbout" />
       <div class="about-body">
@@ -66,21 +70,21 @@ const title = `${profile.name[lang]} — ${profile.role[lang]}`;
     )
   }
 
-  <section id="experience" class="section" aria-labelledby="experience-title">
+  <section id="experience" class="section" aria-labelledby="experience-title" data-panel="right">
     <div class="container">
       <SectionHead lang={lang} id="experience-title" title="experienceTitle" intro="routeIntro" />
       <ExperienceTimeline lang={lang} />
     </div>
   </section>
 
-  <section id="skills" class="section" aria-labelledby="skills-title">
+  <section id="skills" class="section" aria-labelledby="skills-title" data-cam="hubs">
     <div class="container">
       <SectionHead lang={lang} id="skills-title" title="skillsTitle" intro="skillsIntro" />
       <SkillsBento lang={lang} />
     </div>
   </section>
 
-  <section id="contact" class="section last" aria-labelledby="contact-title">
+  <section id="contact" class="section last" aria-labelledby="contact-title" data-cam="end">
     <div class="container">
       <ContactTerminus lang={lang} id="contact-title" />
     </div>

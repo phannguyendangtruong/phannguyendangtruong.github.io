@@ -84,20 +84,21 @@ const title = tr('mapTitle', lang);
     }
   }
 
-  /* Station signs in the condensed face; font sizes are viewBox units, so they follow the map's scale. */
+  /* Labels are data, in the mono face: station and interchange names, start years, the end and "You are here".
+     Company names and route numerals stay in the condensed sign face. Font sizes are viewBox units, so they follow
+     the map's scale; src/data/network-layout.ts places the labels for these sizes (0.6 em a mono character). */
   .netmap :global(.nm-label) {
-    font: 600 14px var(--font-display);
+    font: 500 12px var(--mono);
     fill: var(--text);
   }
 
   .netmap :global(.nm-hub) {
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 700;
   }
 
   .netmap :global(.nm-now) {
-    font: 700 22px var(--font-display);
-    letter-spacing: 0.04em;
+    font: 700 18px var(--mono);
     fill: var(--text);
   }
 
@@ -116,8 +117,7 @@ const title = tr('mapTitle', lang);
   }
 
   .netmap :global(.nm-year) {
-    font: 500 13px var(--font);
-    font-variant-numeric: tabular-nums;
+    font: 500 12px var(--mono);
     fill: var(--muted);
   }
 
@@ -132,8 +132,25 @@ const title = tr('mapTitle', lang);
   }
 
   .netmap :global(.nm-here-text) {
-    font: 600 13px var(--font);
+    font: 600 12px var(--mono);
     fill: var(--text);
+  }
+
+  /* The compact map is drawn from 280px wide: its labels are larger in viewBox units. */
+  .netmap :global(.nm-compact .nm-hub) {
+    font-size: 15px;
+  }
+
+  .netmap :global(.nm-compact .nm-now) {
+    font-size: 20px;
+  }
+
+  .netmap :global(.nm-compact .nm-year) {
+    font-size: 13px;
+  }
+
+  .netmap :global(.nm-compact .nm-here-text) {
+    font-size: 14px;
   }
 
   /* Interchange label as a filter button: the box shows on hover, focus and while its filter is on. */
@@ -165,16 +182,22 @@ const title = tr('mapTitle', lang);
     fill: var(--bg);
   }
 
-  /* Data packet: a small light dot along each line, shown only with the script; it runs while .is-running is set. */
+  /* Data packet: a small white dot along each line, shown only with the script; it runs while .is-running is set. */
   .netmap :global(.nm-packet) {
     fill: none;
-    stroke: var(--interchange-fill);
+    stroke: var(--packet);
     stroke-width: 4;
     stroke-linecap: round;
     stroke-dasharray: 0.1 99.9;
     visibility: hidden;
     animation: nm-run var(--run) linear var(--from) infinite;
     animation-play-state: paused;
+  }
+
+  /* Its halo: a wider, faint dot under it that runs with it; transparent in the light theme. */
+  .netmap :global(.nm-packet-halo) {
+    stroke: var(--packet-halo);
+    stroke-width: 11;
   }
 
   :global(html.js) .netmap :global(.nm-packet) {

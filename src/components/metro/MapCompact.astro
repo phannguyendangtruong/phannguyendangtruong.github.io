@@ -42,7 +42,7 @@ const hubs = points.flatMap((point) => {
   const item = point.kind === 'interchange' ? junctionOf.get(point.key) : undefined;
   const label = point.at.label;
   if (!item || !label) return [];
-  return [{ name: item.name, tracks: item.lines.length, xy: point.at.xy, label }];
+  return [{ name: point.at.short ?? item.name, tracks: item.lines.length, xy: point.at.xy, label }];
 });
 
 const end = points.find((point) => point.kind === 'end');
@@ -54,10 +54,12 @@ const ends = lines.map((line) => {
   return { line: line.number, xy: last, bar: along(track[track.length - 2], last) };
 });
 
+/** One data packet a line, drawn over its halo. */
 const packets = lines.map((line, index) => {
   const track = tracks[line.number];
   const seconds = packetSeconds(track);
-  return { d: pathOf(track), seconds, offset: Math.round((seconds * index * 10) / lines.length) / 10 };
+  const offset = Math.round((seconds * index * 10) / lines.length) / 10;
+  return { d: pathOf(track), style: `--run: ${seconds}s; --from: -${offset}s` };
 });
 ---
 
@@ -75,9 +77,10 @@ const packets = lines.map((line, index) => {
     <g class="nm-packets">
       {
         packets.map((packet) => (
-          <path class="nm-packet" d={packet.d} pathLength="100" style={`--run: ${packet.seconds}s; --from: -${packet.offset}s`} />
+          <path class="nm-packet nm-packet-halo" d={packet.d} pathLength="100" style={packet.style} />
         ))
       }
+      {packets.map((packet) => <path class="nm-packet" d={packet.d} pathLength="100" style={packet.style} />)}
     </g>
     {starts.map((start) => <Terminal x={start.xy[0]} y={start.xy[1]} line={start.line} track={start.bar} />)}
     {ends.map((item) => <Terminal x={item.xy[0]} y={item.xy[1]} line={item.line} track={item.bar} length={trackGap} />)}

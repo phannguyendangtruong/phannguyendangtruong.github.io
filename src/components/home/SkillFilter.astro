@@ -174,7 +174,8 @@ const { lang } = Astro.props;
           const chip = project.querySelector(`.stop-extra [data-skill="${key}"]`);
           if (chip) unfold(chip.closest('ul'));
         });
-        controls.forEach((control) => {
+        // Every control of the page, also those added after it loaded (interchange labels of the 3D station).
+        document.querySelectorAll('[data-skill]').forEach((control) => {
           control.setAttribute('aria-pressed', String(key !== '' && control.dataset.skill === key));
         });
         const template = (count === 1 ? bar.dataset.one : bar.dataset.many) || '';
@@ -233,6 +234,11 @@ const { lang } = Astro.props;
           event.preventDefault();
           toggle(control);
         });
+      });
+      // A control added after the page loaded (interchange label of the 3D station) sends this event instead.
+      document.addEventListener('skillfilter', (event) => {
+        const control = event.target;
+        if (control instanceof HTMLElement && control.dataset.skill) toggle(control);
       });
       clear.addEventListener('click', reset);
       document.addEventListener('keydown', (event) => {

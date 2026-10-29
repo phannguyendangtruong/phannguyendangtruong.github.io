@@ -82,11 +82,13 @@ const unbuilt: Point[] = [built[built.length - 1], unknown];
     max-width: 880px;
   }
 
+  /* The glow of the line in the dark theme may spill past the drawing instead of being cut at its edges. */
   .nf-map {
     display: block;
     width: 100%;
     max-width: 360px;
     height: auto;
+    overflow: visible;
   }
 
   /* Sign of the unknown station, inside its ring. */

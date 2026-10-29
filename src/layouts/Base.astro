@@ -7,6 +7,7 @@ import '@fontsource/barlow-condensed/700.css';
 import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
 import CommandPalette from '../components/CommandPalette.astro';
+import LedGlow from '../components/metro/LedGlow.astro';
 import SeoHead from '../components/SeoHead.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import SiteHeader from '../components/SiteHeader.astro';
@@ -60,7 +61,7 @@ const minimal = variant === 'minimal';
       ogImageAlt={ogImageAlt}
       noindex={noindex}
     />
-    <meta name="theme-color" content="#0b1918" />
+    <meta name="theme-color" content="#0e1013" />
     <script is:inline>
       (() => {
         const root = document.documentElement;
@@ -93,6 +94,7 @@ const minimal = variant === 'minimal';
     </main>
     <SiteFooter lang={lang} variant={variant} />
     {!minimal && <CommandPalette lang={lang} path={path} />}
+    <LedGlow />
     <SiteScripts />
   </body>
 </html>

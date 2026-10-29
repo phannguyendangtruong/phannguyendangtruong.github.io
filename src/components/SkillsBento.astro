@@ -166,10 +166,13 @@ const groups = skills
     height: 20px;
   }
 
+  /* The count is data, in the mono face: "5 projects" (10 characters at 0.6 em) fits the 5rem column on one line. */
   .xt-count {
-    font-size: 0.875rem;
+    font-family: var(--mono);
+    font-size: 0.8125rem;
     font-variant-numeric: tabular-nums;
     text-align: right;
+    white-space: nowrap;
     color: var(--muted);
   }
 
@@ -186,6 +189,19 @@ const groups = skills
   @media (min-width: 1024px) {
     .xt {
       columns: 3;
+    }
+  }
+
+  /* Full 3D level: the table stands in a platform panel about half the window wide (Station3D.astro). Two columns
+     once the panel leaves each name about 100px (from 1280px), one before that. */
+  :global(html[data-scene3d='full']) .xt {
+    columns: 1;
+    column-gap: 24px;
+  }
+
+  @media (min-width: 1280px) {
+    :global(html[data-scene3d='full']) .xt {
+      columns: 2;
     }
   }
 </style>

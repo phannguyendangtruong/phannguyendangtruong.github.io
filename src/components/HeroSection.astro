@@ -15,7 +15,7 @@ const years = tr('heroYears', lang).replace('{n}', String(profile.stats.years));
 const roleLine = [profile.jobTitle, years, profile.city[lang]].join(' · ');
 ---
 
-<section id="top" class="hero" aria-labelledby="hero-name">
+<section id="top" class="hero" aria-labelledby="hero-name" data-cam="overview">
   <div class="container hero-in">
     <div class="hero-text">
       <h1 id="hero-name" class="hero-name">{profile.name[lang]}</h1>

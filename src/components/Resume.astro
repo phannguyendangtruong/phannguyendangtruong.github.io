@@ -390,11 +390,11 @@ const compactProjectsInPrint = false;
     color: var(--muted);
   }
 
-  /* Phone: under the role, lined up with the company name. */
+  /* Phone: under the role, lined up with the company name. Dates are data on screen: the mono face. */
   .sheet :global(.cv-period) {
     margin: 0;
     padding-left: 30px;
-    font: 500 0.9375rem/1.5 var(--font);
+    font: 500 0.875rem/1.5 var(--mono);
     font-variant-numeric: tabular-nums;
     color: var(--muted);
     white-space: nowrap;
@@ -801,8 +801,10 @@ const compactProjectsInPrint = false;
       content: '— ';
     }
 
+    /* Printed dates stay in the text face. */
     .sheet :global(.cv-period) {
       padding-left: 0;
+      font-family: var(--font);
       font-size: 9.5pt;
       text-align: right;
     }

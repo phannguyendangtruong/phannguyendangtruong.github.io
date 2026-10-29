@@ -111,4 +111,27 @@ const { lang } = Astro.props;
       grid-template-rows: auto auto;
     }
   }
+
+  /* Full 3D level: the bands stand in a platform panel about half the window wide (Station3D.astro), so every band
+     stacks its diagram over its title and text, all on the left edge. */
+  :global(html[data-scene3d='full']) .band,
+  :global(html[data-scene3d='full']) .band.flip {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas:
+      'scene'
+      'title'
+      'body';
+    gap: 12px;
+  }
+
+  :global(html[data-scene3d='full']) .band.plain {
+    grid-template-areas:
+      'title'
+      'body';
+  }
+
+  :global(html[data-scene3d='full']) .band-scene {
+    justify-self: start;
+  }
 </style>

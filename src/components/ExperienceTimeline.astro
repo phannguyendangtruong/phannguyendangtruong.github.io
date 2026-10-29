@@ -21,7 +21,7 @@ const educationLine = [education.major?.[lang], education.period?.[lang]].filter
   <ol class="legs">
     {
       legs.map(({ job, line, current }) => (
-        <li class:list={['leg', 'tl-item', { current }]} style={`--line: ${line.color}`}>
+        <li class:list={['leg', 'tl-item', { current }]} style={`--line: ${line.color}`} data-cam={`line-${line.number}`}>
           {current && (
             <p class="leg-now">
               <span class="now-bar" aria-hidden="true" />
@@ -137,9 +137,11 @@ const educationLine = [education.major?.[lang], education.period?.[lang]].filter
     color: var(--muted);
   }
 
+  /* Dates are data: the mono face. */
   .leg-period {
     margin: 0;
-    font-size: 0.9375rem;
+    font-family: var(--mono);
+    font-size: 0.875rem;
     font-variant-numeric: tabular-nums;
     color: var(--muted);
     white-space: nowrap;

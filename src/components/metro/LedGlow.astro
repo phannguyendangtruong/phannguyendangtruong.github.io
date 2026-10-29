@@ -1,0 +1,40 @@
+---
+/**
+ * Glow of the tracks in the dark theme (class .led, see src/styles/global.css), defined once a page: two blurred
+ * copies of the track under it, about 4px and 10px wide, the outer one at 45%. The region is set in user units, so
+ * a straight track, whose box has no width or no height, still gets it.
+ */
+---
+
+<svg class="led-defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <filter
+    id="led"
+    filterUnits="userSpaceOnUse"
+    x="-10%"
+    y="-25%"
+    width="120%"
+    height="150%"
+    color-interpolation-filters="sRGB"
+  >
+    <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="far" />
+    <feComponentTransfer in="far" result="haze">
+      <feFuncA type="linear" slope="0.45" />
+    </feComponentTransfer>
+    <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="near" />
+    <feMerge>
+      <feMergeNode in="haze" />
+      <feMergeNode in="near" />
+      <feMergeNode in="SourceGraphic" />
+    </feMerge>
+  </filter>
+</svg>
+
+<style>
+  /* Holds the filter only: out of the flow and out of sight, but not display: none, which would turn it off. */
+  .led-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+</style>

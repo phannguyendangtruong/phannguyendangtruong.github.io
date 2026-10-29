@@ -81,11 +81,13 @@ const tracks = lines.map((line, index) => {
     margin-bottom: 28px;
   }
 
+  /* The glow of the tracks in the dark theme may spill past the drawing instead of being cut at its edges. */
   .terminus-art {
     display: block;
     flex: none;
     width: 104px;
     height: auto;
+    overflow: visible;
   }
 
   .terminus-sign {
