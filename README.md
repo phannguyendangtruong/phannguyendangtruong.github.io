@@ -6,7 +6,7 @@ Static, bilingual (English at `/`, Vietnamese at `/vi/`) portfolio built with [A
 
 | Path | Content |
 |---|---|
-| `/` and `/vi/` | Intro, about, focus areas, projects (when any is shown), experience, skills, education, contact |
+| `/` and `/vi/` | Intro with the network map, about and focus areas, projects (when any is shown), experience as a route ending at education, skills as an interchange table, contact |
 | `/cv/` and `/vi/cv/` | Printable CV (no phone number or email; "Print or save as PDF") |
 | `/resume/` and `/vi/resume/` | Old address: redirects to `/cv/` and `/vi/cv/` (not in the sitemap) |
 
@@ -14,8 +14,9 @@ Static, bilingual (English at `/`, Vietnamese at `/vi/`) portfolio built with [A
 
 All text lives in these files:
 
-- `src/data/profile.ts` – name, tagline, about, links, hero figures and main technologies, focus areas, skills, experience (start and end months as `MM/YYYY`), education, projects. Set a project's `repoUrl` / `demoUrl` once they are public, change `status` to `done` when it is finished, or set `showPlannedProjects = true` to show planned projects. With no project shown, the home page leaves out its Projects block, the Projects nav item and the command palette entry; the hero button then points to the experience block.
-- `src/data/hero.ts` – nodes, edges, log lines and frame label of the illustration in the home page hero, labels of the small diagrams on the focus area cards, and the command line of the contact panel.
+- `src/data/profile.ts` – name, job title and city of the hero line, tagline, about, links, figures and main technologies, focus areas, skills, experience (start and end months as `MM/YYYY`, an optional short `mapLabel` per project for the map), education, projects. Set a project's `repoUrl` / `demoUrl` once they are public, change `status` to `done` when it is finished, or set `showPlannedProjects = true` to show planned projects. With no project shown, the home page leaves out its Projects block, the Projects nav item and the command palette entry.
+- `src/data/hero.ts` – station names of the small route diagrams of the focus areas.
+- `src/data/network-layout.ts` – coordinates of the home page network map, desktop and phone. Each company is a line, each project a station, a technology used at two companies or more an interchange (computed from `experience`). The build stops when a station or interchange has no coordinates, when coordinates name one that is no longer in the data, or when a track bends at another angle than 45° or 90°: place it there after changing the experience.
 - `src/i18n/ui.ts` – interface labels in both languages.
 
 A project with a `slug` gets a case study page at `/projects/<slug>/` only when `src/data/case-studies/<slug>.ts` and `src/components/CaseStudy.astro` exist. There is none at the moment.
@@ -44,7 +45,7 @@ npm run preview
 
 ## Share images
 
-`public/og/default-en.png` and `public/og/default-vi.png` (1200×630, shown when a link to the site is shared) and `public/apple-touch-icon.png` (180×180, from `public/favicon.svg`) are made by `scripts/make-images.mjs`, which draws them in headless Chrome with the name, role, location and main technologies from `src/data/profile.ts` and the hero diagram from `src/data/hero.ts`. Run it again whenever you change those, then commit the images in `public/`:
+`public/og/default-en.png` and `public/og/default-vi.png` (1200×630, shown when a link to the site is shared) and `public/apple-touch-icon.png` (180×180, from `public/favicon.svg`) are made by `scripts/make-images.mjs`, which draws them in headless Chrome with the name, role, location and jobs from `src/data/profile.ts`. Run it again whenever you change those, then commit the images in `public/`:
 
 ```bash
 SITE_URL=https://<your-domain> npm run images

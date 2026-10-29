@@ -1,0 +1,114 @@
+---
+import FocusScene from '../FocusScene.astro';
+import { focusAreas } from '../../data/profile';
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+---
+
+<ul class="bands">
+  {
+    focusAreas.map((area, index) => (
+      <li class:list={['band', { flip: index % 2 === 1, plain: !area.scene }]}>
+        <h4 class="band-title">{area.title[lang]}</h4>
+        {area.scene && (
+          <div class="band-scene">
+            <FocusScene kind={area.scene} />
+          </div>
+        )}
+        <p class="band-body">{area.body[lang]}</p>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  /* Horizontal bands between thin rules, not cards. Phone: title, diagram, text. */
+  .bands {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .band {
+    display: grid;
+    grid-template-areas:
+      'title'
+      'scene'
+      'body';
+    gap: 12px;
+    padding: 24px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .band-title {
+    grid-area: title;
+    margin: 0;
+    font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.4rem);
+  }
+
+  .band-scene {
+    grid-area: scene;
+    max-width: 480px;
+    padding: 4px 0;
+  }
+
+  .band-body {
+    grid-area: body;
+    max-width: 60ch;
+    margin: 0;
+    color: var(--muted);
+  }
+
+  /* Desktop: the diagram fills one half of the band (about 480px wide), the title and the text the other half,
+     swapping sides from band to band. */
+  @media (min-width: 1024px) {
+    .band {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: 1fr 1fr;
+      grid-template-areas:
+        'scene title'
+        'scene body';
+      column-gap: 56px;
+      row-gap: 10px;
+      padding: 36px 0;
+    }
+
+    .band.flip {
+      grid-template-areas:
+        'title scene'
+        'body scene';
+    }
+
+    .band.plain {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        'title'
+        'body';
+    }
+
+    .band-scene {
+      align-self: center;
+      justify-self: center;
+      width: 100%;
+    }
+
+    /* Title and text meet on the middle line of the band, beside the middle of the diagram. */
+    .band-title {
+      align-self: end;
+    }
+
+    .band-body {
+      align-self: start;
+    }
+
+    .band.plain {
+      grid-template-rows: auto auto;
+    }
+  }
+</style>

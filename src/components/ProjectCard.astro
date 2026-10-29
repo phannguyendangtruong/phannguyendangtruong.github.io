@@ -1,6 +1,5 @@
 ---
 import ExternalLink from './ExternalLink.astro';
-import GlowRing from './GlowRing.astro';
 import Icon from './Icon.astro';
 import { statusLabel, type Project } from '../data/profile';
 import { caseStudyProjects } from '../i18n/nav';
@@ -26,14 +25,10 @@ const repoSoon = featured && project.status === 'in-progress' && !project.repoUr
 const linked = Boolean(caseStudy || demoUrl || repoUrl);
 ---
 
-<article
-  class:list={['card', 'spot', 'project', { linked, featured, 'with-side': hasSide }]}
-  data-tilt={featured ? '' : undefined}
->
-  {featured && <GlowRing spin />}
+<article class:list={['card', 'project', { linked, featured, 'with-side': hasSide }]}>
   <div class="pc-main">
     <span class:list={['badge', project.status]}>{tr(statusLabel[project.status], lang)}</span>
-    <h3 class="pc-name">{featured ? <span class="grad-text">{project.name}</span> : project.name}</h3>
+    <h3 class="pc-name">{project.name}</h3>
     <p class="pc-summary">{project.summary[lang]}</p>
   </div>
   {
@@ -93,12 +88,11 @@ const linked = Boolean(caseStudy || demoUrl || repoUrl);
     gap: 12px;
   }
 
-  /* Glass with a light in the top right corner; the gradient edge comes from GlowRing. */
+  /* Flat surface with its 1px edge (global .card). */
   .featured {
     display: grid;
     gap: 20px;
     padding: 20px;
-    background: radial-gradient(520px 340px at 100% 0%, var(--glow), transparent 70%), var(--glass);
   }
 
   .pc-main {
@@ -110,15 +104,15 @@ const linked = Boolean(caseStudy || demoUrl || repoUrl);
 
   .pc-name {
     margin: 0;
-    font-size: 24px;
-    font-weight: 800;
-    letter-spacing: -0.025em;
+    font-size: 1.5rem;
+    font-weight: 600;
   }
 
   .featured .pc-name {
+    font-family: var(--font-display);
     font-size: clamp(36px, 5vw, 56px);
+    font-weight: 700;
     line-height: 1.04;
-    letter-spacing: -0.035em;
   }
 
   .pc-summary {
@@ -166,12 +160,13 @@ const linked = Boolean(caseStudy || demoUrl || repoUrl);
     flex: none;
     width: 12px;
     height: 12px;
-    color: var(--accent-2);
+    color: var(--muted);
   }
 
+  /* Names of system parts: code, so they keep the code face. */
   .chip {
     padding: 6px 10px;
-    border: 1px solid var(--chip-border);
+    border: 1px solid var(--border-strong);
     border-radius: 6px;
     background: var(--surface-2);
     font: 12px/1 var(--mono);
@@ -200,19 +195,7 @@ const linked = Boolean(caseStudy || demoUrl || repoUrl);
   }
 
   .pc-soon {
-    font: 12px/1.5 var(--mono);
-  }
-
-  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    .project.featured:hover {
-      box-shadow: var(--shadow), 0 0 64px -20px var(--glow);
-    }
-
-    /* Tilt towards the pointer (--rx/--ry set by the home page script, at most 4 degrees). */
-    .project.featured.tilting {
-      transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-3px);
-      transition: transform 0.12s linear, box-shadow 0.2s ease;
-    }
+    font-size: 0.8125rem;
   }
 
   @media (min-width: 640px) {

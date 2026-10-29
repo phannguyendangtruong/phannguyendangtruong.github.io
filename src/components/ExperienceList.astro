@@ -1,4 +1,6 @@
 ---
+import RouteBullet from './metro/RouteBullet.astro';
+import { lineOfJob } from '../data/network';
 import { experienceNewestFirst } from '../data/profile';
 import { formatPeriod, tr, type Lang } from '../i18n/ui';
 
@@ -7,14 +9,17 @@ interface Props {
 }
 
 const { lang } = Astro.props;
+/** Companies newest first, each with its line: the bullet and the track of its projects take the line colour. */
+const jobs = experienceNewestFirst().map((job) => ({ job, line: lineOfJob(job) }));
 ---
 
 <ol class="cv-jobs">
   {
-    experienceNewestFirst().map((job) => (
-      <li class="cv-job">
+    jobs.map(({ job, line }) => (
+      <li class="cv-job" style={`--line: ${line.color}`}>
         <div class="cv-job-head">
           <div class="cv-job-title">
+            <RouteBullet line={line.number} size="sm" />
             <h3>{job.company[lang]}</h3>
             <p class="cv-job-role">{job.role[lang]}</p>
           </div>
@@ -23,7 +28,6 @@ const { lang } = Astro.props;
         {job.projects.map((project) => (
           <div class="cv-proj">
             <h3>{project.name[lang]}</h3>
-            {project.subsystems && <p class="cv-sub">{project.subsystems[lang]}</p>}
             <p class="cv-desc">{project.summary[lang]}</p>
             {project.bullets && project.bullets[lang].length > 0 && (
               <ul class="dash-list cv-bullets">

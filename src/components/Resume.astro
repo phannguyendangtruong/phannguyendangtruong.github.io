@@ -1,8 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
+import CvSectionTitle from './cv/CvSectionTitle.astro';
 import ExperienceList from './ExperienceList.astro';
 import ExternalLink from './ExternalLink.astro';
-import GlowRing from './GlowRing.astro';
 import Icon from './Icon.astro';
 import SkillsList from './SkillsList.astro';
 import { education, profile, projects, statusLabel } from '../data/profile';
@@ -31,11 +31,9 @@ const compactProjectsInPrint = false;
 
 <Base lang={lang} title={title} description={tr('resumeDescription', lang)} path="/cv/" current="resume">
   <div class="cv-page">
-    <div class="cv-bg no-print" aria-hidden="true"></div>
     <div class="container">
       <div class="cv-wrap">
         <div class="cv-toolbar no-print">
-          <p class="eyebrow cv-label" aria-hidden="true">{tr('resumeLabel', lang)}</p>
           <div class="cv-actions">
             <a class="back-link" href={localePath(lang, '/')}>
               <Icon name="arrow-left" size={16} />
@@ -50,9 +48,8 @@ const compactProjectsInPrint = false;
         </div>
 
         <article class="sheet" aria-labelledby="cv-name">
-          <GlowRing />
           <header class="cv-head">
-            <h1 id="cv-name" class="cv-name"><span class="grad-text">{profile.name[lang]}</span></h1>
+            <h1 id="cv-name" class="cv-name">{profile.name[lang]}</h1>
             <p class="cv-role">{profile.role[lang]} · {profile.location[lang]}</p>
             <ul class="cv-links">
               <li>
@@ -78,18 +75,18 @@ const compactProjectsInPrint = false;
           </header>
 
           <section class="cv-section" aria-labelledby="cv-summary-title">
-            <h2 id="cv-summary-title" class="cv-h2">{tr('summaryTitle', lang)}</h2>
+            <CvSectionTitle lang={lang} id="cv-summary-title" title="summaryTitle" />
             <p class="cv-lead">{profile.tagline[lang]}</p>
             <p class="cv-about">{profile.about[lang][0]}</p>
           </section>
 
           <section class="cv-section" aria-labelledby="cv-skills-title">
-            <h2 id="cv-skills-title" class="cv-h2">{tr('skillsTitle', lang)}</h2>
+            <CvSectionTitle lang={lang} id="cv-skills-title" title="skillsTitle" />
             <SkillsList lang={lang} />
           </section>
 
           <section class="cv-section" aria-labelledby="cv-exp-title">
-            <h2 id="cv-exp-title" class="cv-h2">{tr('experienceTitle', lang)}</h2>
+            <CvSectionTitle lang={lang} id="cv-exp-title" title="experienceTitle" />
             <ExperienceList lang={lang} />
           </section>
 
@@ -99,7 +96,7 @@ const compactProjectsInPrint = false;
                 class:list={['cv-section', { 'print-compact': compactProjectsInPrint }]}
                 aria-labelledby="cv-proj-title"
               >
-                <h2 id="cv-proj-title" class="cv-h2">{tr('projectsTitle', lang)}</h2>
+                <CvSectionTitle lang={lang} id="cv-proj-title" title="projectsTitle" />
                 {shown.map(({ project, points, caseStudy }) => (
                   <div class="cv-pproj">
                     <div class="cv-pproj-head">
@@ -141,7 +138,7 @@ const compactProjectsInPrint = false;
           }
 
           <section class="cv-section" aria-labelledby="cv-edu-title">
-            <h2 id="cv-edu-title" class="cv-h2">{tr('educationTitle', lang)}</h2>
+            <CvSectionTitle lang={lang} id="cv-edu-title" title="educationTitle" />
             <p class="cv-edu">{education.school[lang]}</p>
           </section>
         </article>
@@ -157,60 +154,22 @@ const compactProjectsInPrint = false;
     margin: 15mm;
   }
 
-  .cv-page {
-    position: relative;
-    isolation: isolate;
-  }
-
-  /* Grid and glow behind the top of the page; overflow is cut so the glow never scrolls sideways. */
-  .cv-bg {
-    position: absolute;
-    inset: 0 0 auto 0;
-    z-index: -1;
-    height: 420px;
-    overflow: hidden;
-    pointer-events: none;
-    background-image:
-      linear-gradient(var(--grid-line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-    background-size: 40px 40px;
-    -webkit-mask-image: linear-gradient(#000, transparent);
-    mask-image: linear-gradient(#000, transparent);
-  }
-
-  .cv-bg::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: -140px;
-    width: 720px;
-    height: 360px;
-    transform: translateX(-50%);
-    background: radial-gradient(closest-side, var(--glow), transparent);
-    filter: blur(10px);
-  }
-
   .cv-wrap {
     max-width: 800px;
     margin: 0 auto;
   }
 
-  /* Phone: label and back link share the first row; the print button (or the hint) takes the full second row. */
   .cv-toolbar {
+    padding: 20px 0 16px;
+  }
+
+  /* Back link on the left, print button on the right; without JavaScript the hint takes its own row on a phone. */
+  .cv-actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: 8px 16px;
-    padding: 20px 0 16px;
-  }
-
-  .cv-label {
-    margin: 0;
-  }
-
-  .cv-actions {
-    display: contents;
   }
 
   .back-link {
@@ -218,20 +177,33 @@ const compactProjectsInPrint = false;
     align-items: center;
     gap: 8px;
     min-height: 44px;
+    color: var(--text);
+    font-weight: 500;
   }
 
-  .cv-print {
-    flex: 1 1 100%;
-    min-height: 48px;
+  /* Phone: a compact outlined button, so the way back home stays the clearest action; solid from 640px. */
+  .cv-actions .cv-print {
+    min-height: 44px;
+    padding: 0 14px;
+    border-color: var(--border-strong);
+    background: transparent;
+    color: var(--text);
+    font-size: 0.9375rem;
+  }
+
+  .cv-actions .cv-print:hover {
+    border-color: var(--text);
+    background: transparent;
   }
 
   .print-hint {
     flex: 1 1 100%;
     margin: 0;
     padding: 8px 14px;
-    border: 1px dashed var(--border-strong);
-    border-radius: 12px;
-    font: 12.5px/1.5 var(--mono);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    line-height: 1.5;
     color: var(--muted);
   }
 
@@ -239,47 +211,27 @@ const compactProjectsInPrint = false;
     display: none;
   }
 
-  /* Glass sheet: soft gradient edge (GlowRing) and a brighter line on top; no spotlight, no lift, no reveal. */
+  /* Flat sheet on the page: one surface and a 1px edge; no blur, no light, no lift, no reveal. */
   .sheet {
-    position: relative;
     margin-bottom: 40px;
     padding: 24px 18px 28px;
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-lg);
-    background: radial-gradient(640px 280px at 50% 0%, var(--chip-bg), transparent 70%), var(--glass);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    box-shadow: var(--shadow-sheet);
-  }
-
-  .sheet > :global(.glow-ring) {
-    opacity: 0.5;
-  }
-
-  .sheet::before {
-    content: '';
-    position: absolute;
-    z-index: 1;
-    left: 32px;
-    right: 32px;
-    top: -1px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), var(--accent-3), transparent);
-    opacity: 0.75;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
   }
 
   .cv-name {
     margin: 0;
-    font-size: clamp(28px, 4.4vw, 36px);
-    font-weight: 750;
-    letter-spacing: -0.025em;
-    line-height: 1.15;
-    text-wrap: balance;
+    font-size: clamp(2.25rem, 1.75rem + 2.5vw, 3.25rem);
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    color: var(--text);
   }
 
   .cv-role {
-    margin: 8px 0 0;
-    font-size: 16px;
+    margin: 10px 0 0;
+    font-size: 1.0625rem;
+    font-weight: 500;
     color: var(--muted);
   }
 
@@ -304,7 +256,7 @@ const compactProjectsInPrint = false;
     gap: 6px;
     max-width: 100%;
     min-height: 44px;
-    font: 12.5px/1.4 var(--mono);
+    font: 500 0.9375rem/1.4 var(--font);
     color: var(--text);
     text-decoration: none;
     overflow-wrap: anywhere;
@@ -332,7 +284,7 @@ const compactProjectsInPrint = false;
     margin: 12px 0 0;
     padding-left: 12px;
     border-left: 2px solid var(--border-strong);
-    font-size: 13.5px;
+    font-size: 0.875rem;
     color: var(--faint);
   }
 
@@ -340,38 +292,53 @@ const compactProjectsInPrint = false;
     margin-top: 32px;
   }
 
-  .cv-h2 {
+  /* Elements rendered by CvSectionTitle, ExperienceList and SkillsList are styled here, so print sizes live in one
+     place. Section sign: condensed capitals over a thin band of the line colours. */
+  .sheet :global(.cv-h2) {
     display: flex;
-    align-items: center;
-    gap: 14px;
+    flex-direction: column;
+    gap: 10px;
     margin: 0 0 16px;
-    font: 600 12px/1 var(--mono);
-    letter-spacing: 0.16em;
+    font: 700 clamp(1.5rem, 1.25rem + 1vw, 1.875rem) / 1.05 var(--font-display);
+    letter-spacing: 0.02em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--text);
   }
 
-  .cv-h2::after {
+  .sheet :global(.cv-band) {
+    display: flex;
+    align-items: center;
+  }
+
+  .sheet :global(.cv-band span) {
+    width: 24px;
+    height: 4px;
+    background: var(--line);
+  }
+
+  /* A hairline runs on from the band to the edge of the sheet. */
+  .sheet :global(.cv-band::after) {
     content: '';
     flex: 1;
     height: 1px;
-    background: var(--border-strong);
+    background: var(--border);
   }
 
   .cv-lead {
+    max-width: 70ch;
     margin: 0;
-    font-size: 16px;
+    font-size: 1.0625rem;
     line-height: 1.6;
     color: var(--text);
   }
 
   .cv-about {
+    max-width: 70ch;
     margin: 10px 0 0;
-    font-size: 15px;
+    font-size: 0.9375rem;
     color: var(--muted);
   }
 
-  /* Elements rendered by ExperienceList and SkillsList are styled here, so print sizes live in one place. */
   .sheet :global(.cv-jobs) {
     margin: 0;
     padding: 0;
@@ -379,9 +346,9 @@ const compactProjectsInPrint = false;
   }
 
   .sheet :global(.cv-job) {
-    margin-bottom: 22px;
-    padding-bottom: 22px;
-    border-bottom: 1px dashed var(--border-strong);
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
   }
 
   .sheet :global(.cv-job:last-child) {
@@ -396,77 +363,98 @@ const compactProjectsInPrint = false;
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
+    margin-bottom: 14px;
   }
 
+  /* Line bullet before the company name, the role under the name. The name gives the baseline of the block. */
   .sheet :global(.cv-job-title) {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 10px;
     min-width: 0;
   }
 
   .sheet :global(.cv-job-title h3) {
+    align-self: baseline;
     margin: 0;
-    font-size: 18px;
-    font-weight: 650;
-    letter-spacing: -0.01em;
+    font-size: 1.25rem;
+    font-weight: 600;
     line-height: 1.3;
   }
 
   .sheet :global(.cv-job-role) {
+    grid-column: 2;
     margin: 2px 0 0;
-    font-size: 14.5px;
+    font-size: 0.9375rem;
     color: var(--muted);
   }
 
+  /* Phone: under the role, lined up with the company name. */
   .sheet :global(.cv-period) {
     margin: 0;
-    font: 500 13px/1.5 var(--mono);
+    padding-left: 30px;
+    font: 500 0.9375rem/1.5 var(--font);
+    font-variant-numeric: tabular-nums;
     color: var(--muted);
     white-space: nowrap;
   }
 
+  /* Each project is a station on the line of its company: a ring on a track in the line colour, under the bullet. */
   .sheet :global(.cv-proj) {
-    margin-top: 14px;
-    padding-left: 14px;
-    border-left: 1px solid var(--border-strong);
+    position: relative;
+    margin-left: 8.5px;
+    padding: 0 0 20px 18px;
+    border-left: 3px solid var(--line);
+  }
+
+  .sheet :global(.cv-proj:last-child) {
+    padding-bottom: 0;
+  }
+
+  .sheet :global(.cv-proj::before) {
+    content: '';
+    position: absolute;
+    left: -8.5px;
+    top: 5px;
+    width: 14px;
+    height: 14px;
+    border: 3px solid var(--line);
+    border-radius: 50%;
+    background: var(--surface);
   }
 
   .sheet :global(.cv-proj h3) {
     margin: 0;
-    font-size: 15.5px;
+    font-size: 1.0625rem;
     font-weight: 600;
-    letter-spacing: 0;
     line-height: 1.4;
-  }
-
-  .sheet :global(.cv-sub) {
-    margin: 4px 0 0;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--accent);
   }
 
   .sheet :global(.cv-desc) {
     margin: 6px 0 0;
-    font-size: 14.5px;
+    font-size: 0.9375rem;
     color: var(--muted);
   }
 
   .sheet :global(.cv-bullets) {
     gap: 6px;
     margin-top: 10px;
-    font-size: 14.5px;
+    font-size: 0.9375rem;
     line-height: 1.55;
   }
 
   .sheet :global(.cv-tech) {
     margin: 10px 0 0;
-    font: 12.5px/1.7 var(--mono);
+    font-size: 0.875rem;
+    line-height: 1.6;
     color: var(--faint);
   }
 
   .cv-pproj + .cv-pproj {
     margin-top: 24px;
     padding-top: 24px;
-    border-top: 1px dashed var(--border-strong);
+    border-top: 1px solid var(--border);
   }
 
   .cv-pproj-head {
@@ -478,14 +466,14 @@ const compactProjectsInPrint = false;
 
   .cv-pproj-head h3 {
     margin: 0;
-    font-size: 18px;
-    font-weight: 650;
+    font-size: 1.25rem;
+    font-weight: 600;
     line-height: 1.3;
   }
 
   .cv-pproj .cv-desc {
     margin-top: 10px;
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 
   .cv-plinks {
@@ -512,6 +500,24 @@ const compactProjectsInPrint = false;
     height: 16px;
   }
 
+  /* Key of the bullets in the skills list: each line with its company. */
+  .sheet :global(.cv-legend) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sheet :global(.cv-legend li) {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+
   .sheet :global(.cv-skills) {
     margin: 0;
     border-bottom: 1px solid var(--border);
@@ -520,49 +526,69 @@ const compactProjectsInPrint = false;
   /* Phone: group name above, skills below. */
   .sheet :global(.cv-skill) {
     display: grid;
-    gap: 2px;
+    gap: 4px;
     padding: 10px 0;
     border-top: 1px solid var(--border);
   }
 
   .sheet :global(.cv-skill dt) {
-    font-size: 14px;
+    font-size: 0.9375rem;
     font-weight: 600;
     color: var(--text);
   }
 
   .sheet :global(.cv-skill dd) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 8px;
     margin: 0;
-    font: 13px/1.7 var(--mono);
-    color: var(--muted);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+  }
+
+  /* A technology stays in one piece with the bullets of the lines that meet there and its separator. */
+  .sheet :global(.cv-skill-item) {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    color: var(--text);
+  }
+
+  .sheet :global(.cv-skill-lines) {
+    display: inline-flex;
+    gap: 2px;
+  }
+
+  .sheet :global(.cv-sep) {
+    color: var(--faint);
   }
 
   .cv-edu {
     margin: 0;
-    font-size: 15px;
+    font-size: 1rem;
   }
 
   @media (min-width: 640px) {
     .cv-toolbar {
-      gap: 12px 16px;
       padding: 40px 0 20px;
     }
 
-    .cv-actions {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 8px 16px;
+    .cv-actions .cv-print {
+      padding: 0 20px;
+      border-color: transparent;
+      background: var(--btn-bg);
+      color: var(--accent-text);
+      font-size: 1rem;
     }
 
-    .cv-print {
-      flex: none;
-      min-height: 44px;
+    .cv-actions .cv-print:hover {
+      background: color-mix(in srgb, var(--btn-bg) 85%, var(--text));
     }
 
     .print-hint {
       flex: none;
-      border-radius: var(--radius-pill);
     }
 
     .sheet {
@@ -578,7 +604,6 @@ const compactProjectsInPrint = false;
     .cv-links :global(a) {
       gap: 8px;
       min-height: 32px;
-      font-size: 13.5px;
     }
 
     .cv-note {
@@ -589,12 +614,8 @@ const compactProjectsInPrint = false;
       margin-top: 44px;
     }
 
-    .cv-h2 {
+    .sheet :global(.cv-h2) {
       margin-bottom: 20px;
-    }
-
-    .cv-lead {
-      font-size: 16.5px;
     }
 
     .cv-about {
@@ -613,26 +634,14 @@ const compactProjectsInPrint = false;
       gap: 4px 16px;
     }
 
-    .sheet :global(.cv-job-title h3) {
-      font-size: 19px;
-    }
-
     .sheet :global(.cv-period) {
+      padding-left: 0;
       text-align: right;
-    }
-
-    .sheet :global(.cv-proj) {
-      margin-top: 18px;
-      padding-left: 18px;
     }
 
     .cv-pproj + .cv-pproj {
       margin-top: 28px;
       padding-top: 28px;
-    }
-
-    .cv-pproj-head h3 {
-      font-size: 19px;
     }
 
     .cv-case {
@@ -668,17 +677,13 @@ const compactProjectsInPrint = false;
       border: 0;
       border-radius: 0;
       background: none;
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-      box-shadow: none;
       font-size: 10pt;
       line-height: 1.4;
     }
 
-    .sheet::before,
-    .cv-h2::after,
     .badge::before,
-    .cv-links :global(.ext) {
+    .cv-links :global(.ext),
+    .sheet :global(.cv-proj::before) {
       display: none;
     }
 
@@ -725,7 +730,7 @@ const compactProjectsInPrint = false;
       margin-top: 12pt;
     }
 
-    .cv-h2 {
+    .sheet :global(.cv-h2) {
       margin: 0 0 6pt;
       padding-bottom: 2pt;
       border-bottom: 0.75pt solid var(--text);
@@ -740,6 +745,7 @@ const compactProjectsInPrint = false;
     .cv-edu,
     .sheet :global(.cv-desc),
     .sheet :global(.cv-bullets) {
+      max-width: none;
       font-size: 10pt;
       line-height: 1.4;
     }
@@ -769,9 +775,10 @@ const compactProjectsInPrint = false;
       align-items: baseline;
       justify-content: space-between;
       gap: 0 8pt;
+      margin-bottom: 0;
     }
 
-    /* Role on the company line: "Viettel — Java Developer". */
+    /* Bullet ring and role on the company line: "3 Viettel — Java Developer". */
     .sheet :global(.cv-job-title) {
       display: flex;
       flex-wrap: wrap;
@@ -794,12 +801,13 @@ const compactProjectsInPrint = false;
     }
 
     .sheet :global(.cv-period) {
+      padding-left: 0;
       font-size: 9.5pt;
       text-align: right;
     }
 
     .sheet :global(.cv-proj) {
-      margin-top: 5pt;
+      margin: 5pt 0 0;
       padding: 0;
       border: 0;
       break-inside: avoid;
@@ -809,13 +817,6 @@ const compactProjectsInPrint = false;
     .sheet :global(.cv-proj h3) {
       font-size: 10pt;
       font-weight: 700;
-    }
-
-    .sheet :global(.cv-sub) {
-      margin-top: 1pt;
-      font-size: 10pt;
-      font-weight: 400;
-      font-style: italic;
     }
 
     .sheet :global(.cv-bullets) {
@@ -903,9 +904,15 @@ const compactProjectsInPrint = false;
       font-weight: 700;
     }
 
+    /* Plain text again: "Java (8–21) · SQL · JavaScript", without the line bullets. */
     .sheet :global(.cv-skill dd) {
+      display: block;
       font-size: 9.5pt;
       line-height: 1.4;
+    }
+
+    .sheet :global(.cv-skill-item) {
+      display: inline;
     }
 
     .print-compact .cv-points {

@@ -1,5 +1,6 @@
 ---
 import Icon from './Icon.astro';
+import SectionHead from './SectionHead.astro';
 import { jsonLines, profileJsonPath, profileJsonText, sizeInKb } from '../data/api';
 import { apiLabels, localePath, tr, type Lang } from '../i18n/ui';
 
@@ -34,13 +35,12 @@ const codeStyle = `--gutter: ${String(lines.length).length}; --step: ${lineStep}
 >
   <div class="container">
     <div class="api-toolbar">
-      <p class="eyebrow api-label" aria-hidden="true">{tr('apiLabel', lang)}</p>
       <button type="button" class="back-link api-back" data-api-close>
         <Icon name="arrow-left" size={16} />
         <span>{tr('apiBack', lang)}</span>
       </button>
     </div>
-    <h2 class="section-title api-title" id="api-title" tabindex="-1">{tr('apiTitle', lang)}</h2>
+    <SectionHead lang={lang} id="api-title" title="apiTitle" class="api-head" />
     <div class="api-actions">
       <button type="button" class="button primary" data-api-copy>
         <span data-api-copy-label>{tr('apiCopy', lang)}</span>
@@ -85,17 +85,12 @@ const codeStyle = `--gutter: ${String(lines.length).length}; --step: ${lineStep}
     }
   }
 
-  /* Label and back button share the first row, as on the résumé toolbar. */
+  /* Back button on the first row, as on the résumé toolbar. */
   .api-toolbar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
     gap: 4px 16px;
-  }
-
-  .api-label {
-    margin: 0;
   }
 
   .api-back {
@@ -108,7 +103,8 @@ const codeStyle = `--gutter: ${String(lines.length).length}; --step: ${lineStep}
     cursor: pointer;
   }
 
-  .api-title {
+  /* Section sign with the band of the line colours under it, as on the home blocks. */
+  .api-view :global(.api-head) {
     margin: 4px 0 0;
   }
 
@@ -123,7 +119,7 @@ const codeStyle = `--gutter: ${String(lines.length).length}; --step: ${lineStep}
     flex: 1 1 auto;
   }
 
-  /* Request bar of an API client: method, path, status and body size. */
+  /* Request bar of an API client: method, path, status and body size, in the code face. */
   .api-req {
     display: flex;
     flex-wrap: wrap;
@@ -136,11 +132,12 @@ const codeStyle = `--gutter: ${String(lines.length).length}; --step: ${lineStep}
     font: 13px/1.4 var(--mono);
   }
 
+  /* Method and status sit on the plain surface, so their coloured text keeps 4.5:1 in both themes. */
   .api-method {
     padding: 5px 10px;
-    border: 1px solid var(--chip-border);
+    border: 1px solid var(--border-strong);
     border-radius: 8px;
-    background: var(--accent-soft);
+    background: var(--surface);
     color: var(--accent);
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -155,8 +152,9 @@ const codeStyle = `--gutter: ${String(lines.length).length}; --step: ${lineStep}
     overflow-wrap: anywhere;
   }
 
-  .api-status {
+  .api-req .state-chip.api-status {
     height: 28px;
+    background: var(--surface);
   }
 
   .api-type {
@@ -289,8 +287,8 @@ const codeStyle = `--gutter: ${String(lines.length).length}; --step: ${lineStep}
 
 <script is:inline>
   (() => {
-    // JSON view of the profile: opened by the hero toggle or by #api in the address (on load or on hashchange);
-    // closed by "Back to page", Esc or a link to a block of the page.
+    // JSON view of the profile: opened by #api in the address (on load or on hashchange: footer link, command palette)
+    // or by a [data-api-open] link; closed by "Back to page", Esc or a link to a block of the page.
     const root = document.documentElement;
     const view = document.querySelector('[data-api-view]');
     const live = document.querySelector('[data-api-live]');
@@ -342,15 +340,18 @@ const codeStyle = `--gutter: ${String(lines.length).length}; --step: ${lineStep}
       if (title) title.focus({ preventScroll: true });
     };
 
-    // `toToggle`: the focus goes back to the hero toggle; after a link to a block the browser places it.
-    const close = (toToggle) => {
+    // `toOpener`: the focus goes back to the [data-api-open] link, or to the top of the page content when the view was
+    // opened from the address; after a link to a block the browser places it.
+    const close = (toOpener) => {
       if (!isOpen()) return;
       delete root.dataset.view;
       view.classList.remove('streaming');
       if (location.hash === hash) history.replaceState(history.state, '', address(''));
       say(view.dataset.closed);
-      const toggle = document.querySelector('[data-api-open]');
-      if (toToggle && toggle) toggle.focus();
+      if (!toOpener) return;
+      const opener = document.querySelector('[data-api-open]');
+      if (opener) opener.focus();
+      else if (main) main.focus({ preventScroll: true });
     };
 
     const plainClick = (event) =>
@@ -359,7 +360,7 @@ const codeStyle = `--gutter: ${String(lines.length).length}; --step: ${lineStep}
     document.addEventListener('click', (event) => {
       const target = event.target instanceof Element ? event.target : null;
       if (!target || event.defaultPrevented || !plainClick(event)) return;
-      // The hero toggle is a real link to the JSON file; a plain click opens the view instead.
+      // A [data-api-open] link is a real link to the JSON file; a plain click opens the view instead.
       if (target.closest('[data-api-open]')) {
         event.preventDefault();
         open();

@@ -1,0 +1,59 @@
+---
+import { lineByNumber } from '../../data/network';
+import { tr, type Lang } from '../../i18n/ui';
+
+interface Props {
+  /** Route number of the line (1 for the first job). */
+  line: number;
+  /** 'md' is 28px (company heads), 'sm' is 20px (tables, chips, legends). */
+  size?: 'md' | 'sm';
+  /** With `lang` the bullet is read as "Line 2: <company>"; without it, it is decorative. */
+  lang?: Lang;
+  class?: string;
+}
+
+const { line, size = 'md', lang, class: className } = Astro.props;
+const route = lineByNumber(line);
+const label = lang
+  ? tr('lineLabel', lang).replace('{n}', String(route.number)).replace('{company}', route.job.company[lang])
+  : undefined;
+---
+
+<span
+  class:list={['route-bullet', size, className]}
+  style={`--line: ${route.color}`}
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+>
+  {route.number}
+</span>
+
+<style>
+  .route-bullet {
+    --size: 28px;
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    background: var(--line);
+    color: var(--on-line);
+    font: 700 calc(var(--size) * 0.6) / 1 var(--font-display);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sm {
+    --size: 20px;
+  }
+
+  /* Printed: a black ring with the number, no fill. */
+  @media print {
+    .route-bullet {
+      background: none;
+      color: var(--text);
+      border: 1pt solid var(--text);
+    }
+  }
+</style>

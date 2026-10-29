@@ -15,18 +15,10 @@ export const ui = {
   toggleTheme: { en: 'Toggle dark mode', vi: 'Đổi giao diện sáng/tối' },
   skipToContent: { en: 'Skip to content', vi: 'Bỏ qua đến nội dung' },
   newTab: { en: '(opens in a new tab)', vi: '(mở trong tab mới)' },
-  viewProjects: { en: 'View projects', vi: 'Xem dự án' },
-  viewExperience: { en: 'View experience', vi: 'Xem kinh nghiệm' },
+  followRoute: { en: 'Follow the route', vi: 'Đi theo lộ trình' },
   viewResume: { en: 'View CV', vi: 'Xem CV' },
-  statYears: { en: 'years of experience', vi: 'năm kinh nghiệm' },
-  statCompanies: { en: 'companies', vi: 'công ty' },
-  statCompanyProjects: { en: 'company projects', vi: 'dự án tại công ty' },
+  heroYears: { en: '{n} years', vi: '{n} năm' },
   pauseAnimation: { en: 'Pause animation', vi: 'Tạm dừng hiệu ứng' },
-  aboutLabel: { en: '// about', vi: '// giới thiệu' },
-  projectsLabel: { en: '// projects', vi: '// dự án' },
-  experienceLabel: { en: '// experience', vi: '// kinh nghiệm' },
-  skillsLabel: { en: '// skills', vi: '// kỹ năng' },
-  contactLabel: { en: '// contact', vi: '// liên hệ' },
   focusTitle: { en: 'What I work on', vi: 'Tôi làm gì' },
   projectsTitle: { en: 'Projects', vi: 'Dự án' },
   projectsIntro: {
@@ -35,8 +27,16 @@ export const ui = {
   },
   summaryTitle: { en: 'Summary', vi: 'Tóm tắt' },
   experienceTitle: { en: 'Experience', vi: 'Kinh nghiệm' },
+  routeIntro: {
+    en: 'Each company is a line, each project a station. Newest first.',
+    vi: 'Mỗi công ty là một tuyến, mỗi dự án là một ga. Mới nhất ở trên.',
+  },
   periodPresent: { en: 'Present', vi: 'nay' },
   skillsTitle: { en: 'Skills', vi: 'Kỹ năng' },
+  skillsIntro: {
+    en: 'Badges show which lines (companies) used it. Tap one to see its stations on the route.',
+    vi: 'Huy hiệu là tuyến (công ty) đã dùng công nghệ đó. Chạm để xem các ga trên lộ trình.',
+  },
   educationTitle: { en: 'Education', vi: 'Học vấn' },
   techLabel: { en: 'Technologies', vi: 'Công nghệ' },
   showMoreItems: { en: 'Show {n} more', vi: 'Xem thêm {n} ý' },
@@ -51,7 +51,7 @@ export const ui = {
     en: '{name} – used in {n} projects, filter Experience',
     vi: '{name} – dùng trong {n} dự án, lọc Kinh nghiệm',
   },
-  filterStatus: { en: 'Filtering: {name}', vi: 'Đang lọc: {name}' },
+  filterStatus: { en: 'Passing through: {name}', vi: 'Đang đi qua ga: {name}' },
   filterCountOne: { en: '1 project', vi: '1 dự án' },
   filterCountMany: { en: '{n} projects', vi: '{n} dự án' },
   filterClear: { en: 'Clear', vi: 'Bỏ lọc' },
@@ -60,6 +60,7 @@ export const ui = {
     en: 'The best way to reach me is a message on LinkedIn.',
     vi: 'Cách nhanh nhất để liên hệ là nhắn tin qua LinkedIn.',
   },
+  contactTerminus: { en: 'Terminus', vi: 'Ga cuối' },
   readCaseStudy: { en: 'Read the case study', vi: 'Đọc case study' },
   repository: { en: 'Repository', vi: 'Mã nguồn' },
   demo: { en: 'Live demo', vi: 'Demo' },
@@ -69,7 +70,6 @@ export const ui = {
   statusPlanned: { en: 'Planned', vi: 'Dự kiến' },
   statusDone: { en: 'Completed', vi: 'Đã xong' },
   backHome: { en: 'Back to home', vi: 'Về trang chủ' },
-  resumeLabel: { en: '// cv', vi: '// cv' },
   printResume: { en: 'Print or save as PDF', vi: 'In hoặc lưu PDF' },
   printHint: {
     en: 'Press Ctrl + P (⌘ + P on Mac) to print or save as PDF',
@@ -83,8 +83,32 @@ export const ui = {
     en: 'CV of Phan Nguyen Dang Truong, Java Backend Developer in Hanoi: skills, experience, projects. Printable as PDF.',
     vi: 'CV của Phan Nguyễn Đăng Trường, Lập trình viên Java Backend tại Hà Nội: kỹ năng, kinh nghiệm, dự án. In hoặc lưu được thành PDF.',
   },
-  notFoundTitle: { en: 'Page not found', vi: 'Không tìm thấy trang' },
+  notFoundTitle: { en: 'This station isn’t on the map', vi: 'Ga này không có trên bản đồ' },
+  notFoundBody: {
+    en: 'There is no page at this address; the link may be old or mistyped.',
+    vi: 'Không có trang nào ở địa chỉ này; có thể liên kết đã cũ hoặc bị gõ sai.',
+  },
+  notFoundMap: {
+    en: 'A line runs into a dashed, unbuilt section that ends at a station marked with a question mark',
+    vi: 'Một tuyến chạy vào đoạn đứt nét chưa xây, kết thúc ở một ga có dấu hỏi',
+  },
   footer: { en: 'Built with Astro. No trackers.', vi: 'Xây bằng Astro. Không theo dõi người dùng.' },
+  footerScale: { en: 'Diagram not to scale', vi: 'Sơ đồ không theo tỉ lệ' },
+  legendLabel: { en: 'Map legend', vi: 'Chú giải sơ đồ' },
+  lineLabel: { en: 'Line {n}: {company}', vi: 'Tuyến {n}: {company}' },
+  mapNow: { en: 'Now', vi: 'Nay' },
+  mapTitle: { en: 'Career network map', vi: 'Bản đồ mạng lưới sự nghiệp' },
+  mapSummary: {
+    en: '{n} lines, one per company, all running to Now.',
+    vi: '{n} tuyến, mỗi công ty một tuyến, cùng chạy tới ga Nay.',
+  },
+  mapHubs: { en: 'Hubs every line passes through: {names}.', vi: 'Ga đầu mối mọi tuyến đều đi qua: {names}.' },
+  mapOthers: { en: 'Other interchanges: {names}.', vi: 'Các ga đổi tuyến khác: {names}.' },
+  mapLinks: {
+    en: 'Interchanges: filter Experience by technology',
+    vi: 'Ga đổi tuyến: lọc Kinh nghiệm theo công nghệ',
+  },
+  mapHere: { en: 'You are here', vi: 'Bạn đang ở đây' },
   cmdkOpen: { en: 'Open command palette', vi: 'Mở bảng lệnh' },
   cmdkTitle: { en: 'Command palette', vi: 'Bảng lệnh' },
   cmdkPlaceholder: { en: 'Type a command or section…', vi: 'Nhập lệnh hoặc tên mục…' },
@@ -100,7 +124,6 @@ export const ui = {
   cmdkRun: { en: 'run', vi: 'thực hiện' },
   cmdkClose: { en: 'close', vi: 'đóng' },
   apiOpen: { en: 'View profile as JSON', vi: 'Xem hồ sơ dạng JSON' },
-  apiLabel: { en: '// api', vi: '// api' },
   apiTitle: { en: 'Profile as JSON', vi: 'Hồ sơ dạng JSON' },
   apiBody: { en: 'Response body', vi: 'Nội dung phản hồi' },
   apiCopy: { en: 'Copy JSON', vi: 'Sao chép JSON' },
@@ -163,12 +186,12 @@ export const keyLabels = {
 /** Untranslated labels of the 404 page, shown as-is in both languages. */
 export const notFoundLabels = {
   code: '404',
-  status: 'status: 404 · route not found',
+  /** Sign of the station that is not on the map. */
+  unknownStation: '?',
 } as const;
 
-/** Request labels of the JSON view (hero toggle, request bar), shown as-is in both languages. */
+/** Request labels of the JSON view (request bar, command palette), shown as-is in both languages. */
 export const apiLabels = {
-  braces: '{ }',
   method: 'GET',
   path: '/api/me',
   status: '200 OK',

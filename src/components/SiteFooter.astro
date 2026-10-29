@@ -1,7 +1,9 @@
 ---
 import ExternalLink from './ExternalLink.astro';
+import RouteBullet from './metro/RouteBullet.astro';
+import { lines } from '../data/network';
 import { profile } from '../data/profile';
-import { tr, ui, type Lang } from '../i18n/ui';
+import { localePath, tr, ui, type Lang } from '../i18n/ui';
 
 interface Props {
   lang: Lang;
@@ -12,49 +14,69 @@ interface Props {
 const { lang, variant = 'full' } = Astro.props;
 const minimal = variant === 'minimal';
 const name = minimal ? profile.name.en : profile.name[lang];
+const year = new Date().getFullYear();
 ---
 
 <footer class="site-footer no-print">
-  <div class="container footer-row">
-    {
-      !minimal && (
-        <ul class="footer-links">
-          <li>
-            <ExternalLink
-              class="icon-btn lg"
-              href={profile.links.linkedin}
-              lang={lang}
-              label={profile.linkNames.linkedin}
-              icon="linkedin"
-              iconOnly
-            />
-          </li>
-          <li>
-            <ExternalLink
-              class="icon-btn lg"
-              href={profile.links.github}
-              lang={lang}
-              label={profile.linkNames.github}
-              icon="github"
-              iconOnly
-            />
-          </li>
-        </ul>
-      )
-    }
-    <div>
-      <p class="footer-copy">© {new Date().getFullYear()} {name}</p>
-      {
-        minimal ? (
-          <p class="footer-note">
-            {ui.footer.en} · <span lang="vi">{ui.footer.vi}</span>
-          </p>
-        ) : (
+  {
+    minimal ? (
+      <div class="container footer-min">
+        <p class="footer-copy">
+          © {year} {name}
+        </p>
+        <p class="footer-note">
+          {ui.footer.en} · <span lang="vi">{ui.footer.vi}</span>
+        </p>
+      </div>
+    ) : (
+      <div class="container footer-grid">
+        <div class="legend">
+          <ul class="legend-lines" aria-label={tr('legendLabel', lang)}>
+            {lines.map((line) => (
+              <li>
+                <RouteBullet line={line.number} size="sm" />
+                <span>{line.job.company[lang]}</span>
+              </li>
+            ))}
+          </ul>
+          <p class="legend-scale">{tr('footerScale', lang)}</p>
+        </div>
+        <div class="footer-meta">
+          <ul class="footer-links">
+            <li>
+              <a class="text-link footer-json" href={localePath(lang, '/#api')}>
+                {tr('apiTitle', lang)}
+              </a>
+            </li>
+            <li>
+              <ExternalLink
+                class="icon-btn lg"
+                href={profile.links.linkedin}
+                lang={lang}
+                label={profile.linkNames.linkedin}
+                icon="linkedin"
+                iconOnly
+              />
+            </li>
+            <li>
+              <ExternalLink
+                class="icon-btn lg"
+                href={profile.links.github}
+                lang={lang}
+                label={profile.linkNames.github}
+                icon="github"
+                iconOnly
+              />
+            </li>
+          </ul>
           <p class="footer-note">{tr('footer', lang)}</p>
-        )
-      }
-    </div>
-  </div>
+          <p class="footer-copy">
+            © {year} {name}
+          </p>
+        </div>
+      </div>
+    )
+  }
 </footer>
 
 <style>
@@ -62,34 +84,91 @@ const name = minimal ? profile.name.en : profile.name[lang];
     border-top: 1px solid var(--border);
   }
 
-  .footer-row {
+  /* Map legend on the left (lines, scale note), links and credits on the right from 640px. */
+  .footer-grid {
+    display: grid;
+    gap: 24px;
+    padding-top: 32px;
+    padding-bottom: 32px;
+  }
+
+  .legend-lines {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .legend-lines li {
+    display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    font-size: 0.9375rem;
+    color: var(--text);
+  }
+
+  .legend-scale {
+    margin: 12px 0 0;
+    font-size: 0.875rem;
+    color: var(--faint);
+  }
+
+  .footer-meta {
+    display: grid;
+    gap: 6px;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer-json {
+    margin-right: 8px;
+  }
+
+  .footer-note,
+  .footer-copy {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+
+  .footer-note {
+    color: var(--faint);
+  }
+
+  .footer-copy {
+    color: var(--muted);
+  }
+
+  .footer-min {
+    display: grid;
+    gap: 4px;
     padding-top: 32px;
     padding-bottom: 32px;
     text-align: center;
   }
 
-  .footer-copy {
-    margin: 0;
-    font-size: 14px;
-    color: var(--muted);
-  }
+  @media (min-width: 640px) {
+    .footer-grid {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+    }
 
-  .footer-note {
-    margin: 4px 0 0;
-    font: 12px/1.5 var(--mono);
-    color: var(--faint);
-  }
+    .footer-meta {
+      justify-items: end;
+      text-align: right;
+    }
 
-  .footer-links {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    .footer-links {
+      justify-content: flex-end;
+    }
   }
 </style>

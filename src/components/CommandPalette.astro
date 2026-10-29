@@ -13,10 +13,6 @@ interface Props {
 type Command = {
   id: string;
   name: string;
-  /** Muted text after the name. */
-  description?: string;
-  /** The name is a request line, shown in the code font. */
-  code?: boolean;
   hint: string;
   terms: string[];
   href?: string;
@@ -32,7 +28,8 @@ const shown = (href: string) => href.slice(base.length) || '/';
 const caseStudyName = (name: string, value: Lang) => tr('cmdkCaseStudy', value).replace('{name}', name);
 /** JSON view of the home page (ApiView.astro): it opens with #api in the address, on load or on a hash change. */
 const apiHref = localePath(lang, '/#api');
-const apiName = `${apiLabels.method} ${apiLabels.path}`;
+/** Request line of the JSON view, still found by search ("GET /api/me"). */
+const apiRequest = `${apiLabels.method} ${apiLabels.path}`;
 
 const sectionLabels: Record<HomeSection, UiKey> = {
   about: 'navAbout',
@@ -53,11 +50,20 @@ const goCommands: Command[] = [
   })),
   {
     id: 'go-api',
-    name: apiName,
-    description: tr('apiOpen', lang),
-    code: true,
+    name: tr('apiTitle', lang),
     hint: shown(apiHref),
-    terms: [apiName, tr('apiOpen', lang), tr('apiOpen', other), shown(apiHref), 'json', 'api', 'me', 'whoami'],
+    terms: [
+      tr('apiTitle', lang),
+      tr('apiTitle', other),
+      apiRequest,
+      tr('apiOpen', lang),
+      tr('apiOpen', other),
+      shown(apiHref),
+      'json',
+      'api',
+      'me',
+      'whoami',
+    ],
     href: apiHref,
   },
   ...caseStudyProjects().map((project) => {
@@ -138,10 +144,7 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
             data-section={command.section}
             data-terms={command.terms.join('\n')}
           >
-            <span class="cmdk-name">
-              {command.code ? <span class="cmdk-code">{command.name}</span> : command.name}
-              {command.description && <span class="cmdk-desc">{command.description}</span>}
-            </span>
+            <span class="cmdk-name">{command.name}</span>
             <span class="cmdk-hint">{command.hint}</span>
           </div>
         ))
@@ -176,7 +179,7 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
           <span data-when="dark">{tr('cmdkToLight', lang)}</span>
           <span data-when="light">{tr('cmdkToDark', lang)}</span>
         </span>
-        <span class="cmdk-hint">
+        <span class="cmdk-hint plain">
           <span data-when="dark">light</span>
           <span data-when="light">dark</span>
         </span>
@@ -220,11 +223,9 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
     inset: 0;
     z-index: 80;
     background: var(--scrim);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-    animation: cmdk-fade 0.16s linear;
   }
 
+  /* Solid surface with a 1px edge and a soft black shadow. */
   .cmdk {
     position: fixed;
     top: 8vh;
@@ -233,53 +234,10 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
     width: min(560px, calc(100vw - 24px));
     transform: translateX(-50%);
     overflow: hidden;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius);
     border: 1px solid var(--border-strong);
     background: var(--surface);
     box-shadow: var(--shadow-dialog);
-    animation: cmdk-in 0.16s var(--ease);
-  }
-
-  /* Glass surface only where the blur is supported; otherwise the solid surface stays readable. */
-  @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-    .cmdk {
-      background: var(--glass);
-      -webkit-backdrop-filter: saturate(150%) blur(18px);
-      backdrop-filter: saturate(150%) blur(18px);
-    }
-  }
-
-  .cmdk::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 1px;
-    background: var(--grad);
-    opacity: 0.9;
-  }
-
-  @keyframes cmdk-in {
-    from {
-      opacity: 0;
-      transform: translateX(-50%) scale(0.985);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateX(-50%) scale(1);
-    }
-  }
-
-  @keyframes cmdk-fade {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
   }
 
   .cmdk-input-row {
@@ -296,8 +254,8 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
   }
 
   .cmdk-prompt {
-    font: 700 16px var(--mono);
-    color: var(--accent-2);
+    font: 700 1rem var(--font);
+    color: var(--accent);
   }
 
   /* The accent line under the row replaces the focus outline of the field. */
@@ -325,8 +283,8 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
 
   .cmdk-group-label {
     padding: 10px 10px 6px;
-    font: 600 11px var(--mono);
-    letter-spacing: 0.12em;
+    font: 600 0.75rem var(--font);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--faint);
   }
@@ -334,18 +292,31 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
   .cmdk-opt {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    min-height: 42px;
+    gap: 10px;
+    min-height: 44px;
     padding: 8px 10px;
-    border-radius: 10px;
-    font-size: 14px;
+    border-radius: 6px;
+    font-size: 0.9375rem;
     cursor: pointer;
   }
 
+  /* Every row keeps room for a small station ring before its name; the ring shows on the selected row only. */
+  .cmdk-opt::before {
+    content: '';
+    flex: none;
+    width: 12px;
+    height: 12px;
+    border: 3px solid transparent;
+    border-radius: 50%;
+  }
+
   .cmdk-opt[aria-selected='true'] {
-    background: var(--accent-soft);
-    box-shadow: inset 2px 0 0 var(--accent);
+    background: var(--surface-2);
+  }
+
+  .cmdk-opt[aria-selected='true']::before {
+    border-color: var(--accent);
+    background: var(--bg);
   }
 
   .cmdk-name {
@@ -361,29 +332,20 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
     color: var(--muted);
   }
 
-  /* "GET /api/me" in the code font, then what the command does; the description is cut first on narrow screens. */
-  .cmdk-code {
-    flex: none;
-    font: 600 13.5px var(--mono);
-  }
-
-  .cmdk-desc {
-    min-width: 0;
-    margin-left: 4px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 13px;
-    color: var(--muted);
-  }
-
+  /* Targets are paths, so they keep the code face; the theme hint is a plain word. */
   .cmdk-hint {
     max-width: 52%;
+    margin-left: auto;
+    padding-left: 6px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     font: 12px var(--mono);
     color: var(--muted);
+  }
+
+  .cmdk-hint.plain {
+    font: 0.8125rem var(--font);
   }
 
   :global(:root[data-theme='dark']) [data-when='light'],
@@ -395,7 +357,7 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
     margin: 0;
     padding: 28px 16px;
     text-align: center;
-    font-size: 14px;
+    font-size: 0.9375rem;
     color: var(--muted);
   }
 
@@ -406,7 +368,7 @@ const linkCommands: Command[] = (['linkedin', 'github'] as const).map((key) => (
     gap: 6px 16px;
     padding: 10px 16px;
     border-top: 1px solid var(--border);
-    font: 12px var(--mono);
+    font: 0.8125rem var(--font);
     color: var(--muted);
   }
 

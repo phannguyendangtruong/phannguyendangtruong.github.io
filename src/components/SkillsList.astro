@@ -1,4 +1,6 @@
 ---
+import RouteBullet from './metro/RouteBullet.astro';
+import { interchangeOf, lines } from '../data/network';
 import { skills } from '../data/profile';
 import type { Lang } from '../i18n/ui';
 
@@ -7,15 +9,45 @@ interface Props {
 }
 
 const { lang } = Astro.props;
-const groups = skills.filter((skill) => skill.items.length > 0);
+/** Skill groups with their items; a technology used at two companies or more carries the numbers of their lines. */
+const groups = skills
+  .filter((skill) => skill.items.length > 0)
+  .map((skill) => ({
+    group: skill.group,
+    items: skill.items.map((name) => ({ name, routes: interchangeOf(name)?.lines ?? [] })),
+  }));
 ---
 
+<ul class="cv-legend no-print" aria-hidden="true">
+  {
+    lines.map((line) => (
+      <li>
+        <RouteBullet line={line.number} size="sm" />
+        <span>{line.job.company[lang]}</span>
+      </li>
+    ))
+  }
+</ul>
 <dl class="cv-skills">
   {
-    groups.map((skill) => (
+    groups.map(({ group, items }) => (
       <div class="cv-skill">
-        <dt>{skill.group[lang]}</dt>
-        <dd>{skill.items.join(' · ')}</dd>
+        <dt>{group[lang]}</dt>
+        <dd>
+          {items.map(({ name, routes }, index) => (
+            <span class="cv-skill-item">
+              {name}
+              {routes.length > 0 && (
+                <span class="cv-skill-lines no-print" aria-hidden="true">
+                  {routes.map((route) => (
+                    <RouteBullet line={route} size="sm" />
+                  ))}
+                </span>
+              )}
+              {index < items.length - 1 && <span class="cv-sep">{' · '}</span>}
+            </span>
+          ))}
+        </dd>
       </div>
     ))
   }

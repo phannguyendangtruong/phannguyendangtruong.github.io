@@ -1,7 +1,7 @@
 // Share images and the touch icon, drawn as HTML pages and captured by headless Chrome over the DevTools protocol:
 //   public/og/default-en.png, public/og/default-vi.png  1200×630 (paths from shareImages in src/data/profile.ts)
 //   public/apple-touch-icon.png                         180×180, public/favicon.svg on a solid background
-// Run it again after changing the name, role, location or main technologies:
+// Run it again after changing the name, role, location or the jobs:
 //   SITE_URL=https://<your-domain> npm run images
 // SITE_URL gives the domain printed at the bottom of the share images (no line without it). CHROME_PATH points to
 // Chrome, Chromium or Edge when the browser is not in its usual place. Node strips the types of the imported .ts files.
@@ -10,8 +10,8 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { heroDiagram, heroFrame, heroLog, termPrompt } from '../src/data/hero.ts';
-import { profile, shareImages } from '../src/data/profile.ts';
+import { experience, monthIndex, profile, shareImages } from '../src/data/profile.ts';
+import { ui } from '../src/i18n/ui.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const publicDir = join(root, 'public');
@@ -21,13 +21,25 @@ const icon = { size: 180, inset: 8, file: 'apple-touch-icon.png' };
 /** Time limit of each step: Chrome start, page load, one protocol call. */
 const timeoutMs = 30000;
 
-/** Right column of the share image: the diagram frame, its inner padding and the diagram width inside it. */
-const frame = { width: 440, padding: 18 };
-const diagramWidth = frame.width - 2 - frame.padding * 2;
-/** Boxes of the diagram: label size (JetBrains Mono advances 0.6em), height, inner and outer spacing. */
-const box = { font: 15, height: 40, padX: 10, gap: 24, rowStep: 82 };
+/**
+ * Network map on the right of the share image, in px: route bullets at the top, one branch per job that turns at 45°
+ * into a shared trunk, and the end capsule at the bottom. `lineCount` is the number of --line-* colour tokens.
+ */
+const map = {
+  width: 400,
+  height: 502,
+  bulletY: 30,
+  bullet: 22,
+  bend: 120,
+  spread: 110,
+  gap: 18,
+  endY: 400,
+  endR: 13,
+  station: 8,
+  lineCount: 3,
+};
 
-/** Font subsets of the site, in the order of the @fontsource-variable CSS (the last matching one is tried first). */
+/** Font subsets of the site, in the order of the @fontsource CSS (the last matching one is tried first). */
 const subsets = [
   {
     name: 'vietnamese',
@@ -45,9 +57,10 @@ const subsets = [
       'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD',
   },
 ];
+/** Faces used by the images: the role in Barlow 500, the name, bullets and end label in Barlow Condensed 700. */
 const families = [
-  { family: 'Inter Variable', pkg: 'inter', weight: '100 900' },
-  { family: 'JetBrains Mono Variable', pkg: 'jetbrains-mono', weight: '100 800' },
+  { family: 'Barlow', pkg: 'barlow', weights: [500] },
+  { family: 'Barlow Condensed', pkg: 'barlow-condensed', weights: [700] },
 ];
 
 /** Domain printed at the bottom of the share images: SITE_URL without its scheme; empty when it is not set. */
@@ -64,13 +77,15 @@ const escapeHtml = (value) =>
 /** @font-face rules pointing at the woff2 files in node_modules, so the images use the fonts of the site. */
 function fontFaces() {
   return families
-    .flatMap(({ family, pkg, weight }) =>
-      subsets.map(({ name, range }) => {
-        const file = join(root, 'node_modules', '@fontsource-variable', pkg, 'files', `${pkg}-${name}-wght-normal.woff2`);
-        if (!existsSync(file)) throw new Error(`Font file not found: ${relative(root, file)}. Run "npm install" first.`);
-        const src = `url("${pathToFileURL(file).href}") format('woff2-variations')`;
-        return `@font-face { font-family: '${family}'; font-style: normal; font-weight: ${weight}; src: ${src}; unicode-range: ${range}; }`;
-      }),
+    .flatMap(({ family, pkg, weights }) =>
+      weights.flatMap((weight) =>
+        subsets.map(({ name, range }) => {
+          const file = join(root, 'node_modules', '@fontsource', pkg, 'files', `${pkg}-${name}-${weight}-normal.woff2`);
+          if (!existsSync(file)) throw new Error(`Font file not found: ${relative(root, file)}. Run "npm install" first.`);
+          const src = `url("${pathToFileURL(file).href}") format('woff2')`;
+          return `@font-face { font-family: '${family}'; font-style: normal; font-weight: ${weight}; src: ${src}; unicode-range: ${range}; }`;
+        }),
+      ),
     )
     .join('\n');
 }
@@ -260,14 +275,15 @@ const settleScript = `(async () => {
   const text = document.body.textContent.trim();
   if (text) {
     try {
-      await document.fonts.load('800 92px "Inter Variable"', text);
-      await document.fonts.load('500 20px "JetBrains Mono Variable"', text);
+      await document.fonts.load('700 112px "Barlow Condensed"', text);
+      await document.fonts.load('500 30px "Barlow"', text);
       await document.fonts.ready;
     } catch (_) {
       throw new Error('The font files could not be loaded.');
     }
-    const loaded = (name) => [...document.fonts].some((face) => face.family.includes(name) && face.status === 'loaded');
-    if (!loaded('Inter') || !loaded('JetBrains Mono')) throw new Error('The font files could not be loaded.');
+    const loaded = (name) =>
+      [...document.fonts].some((face) => face.family.replace(/["']/g, '') === name && face.status === 'loaded');
+    if (!loaded('Barlow') || !loaded('Barlow Condensed')) throw new Error('The font files could not be loaded.');
   }
   const name = document.querySelector('.name');
   if (name) {
@@ -308,142 +324,114 @@ async function capture(cdp, sessionId, { html, width, height, output, workDir })
   console.log(`Wrote ${relative(root, output)} (${width}×${height})`);
 }
 
-/** Hero diagram drawn again for the image: same rows and order as on the page, boxes sized for larger labels. */
-function diagramSvg(width) {
-  const charWidth = box.font * 0.6;
-  const scale = width / heroDiagram.width;
-  const rows = [...new Set(heroDiagram.nodes.map((item) => item.y))].sort((a, b) => a - b);
-  const placed = new Map();
-  rows.forEach((rowY, row) => {
-    let right = -Infinity;
-    const line = heroDiagram.nodes
-      .filter((item) => item.y === rowY)
-      .sort((a, b) => a.x - b.x)
-      .map((item) => {
-        const w = Math.ceil(item.id.length * charWidth + box.padX * 2);
-        const x = Math.max((item.x + item.w / 2) * scale - w / 2, right + box.gap);
-        right = x + w;
-        return { ...item, x, y: row * box.rowStep + 1, w };
-      });
-    // Keep the row inside the drawing: right if it starts before the edge, otherwise left if it ends past it.
-    const offset = line[0].x < 1 ? 1 - line[0].x : Math.min(0, width - 1 - right);
-    line.forEach((item) => placed.set(item.id, { ...item, x: item.x + offset }));
-  });
-  const height = (rows.length - 1) * box.rowStep + box.height + 2;
-  const middle = (item) => round(item.x + item.w / 2);
-  const links = heroDiagram.edges.flatMap(({ from, to }) => {
-    const a = placed.get(from);
-    const b = placed.get(to);
-    if (!a || !b) return [];
-    if (a.y === b.y) {
-      const y = a.y + box.height / 2;
-      return [{ d: `M${round(a.x + a.w)} ${y}H${round(b.x)}`, dot: [round((a.x + a.w + b.x) / 2), y] }];
+/** Point at the fraction `share` of the length of a polyline. */
+function pointAt(points, share) {
+  const lengths = points.slice(1).map(([x, y], index) => Math.hypot(x - points[index][0], y - points[index][1]));
+  let left = lengths.reduce((sum, length) => sum + length, 0) * share;
+  for (let index = 0; index < lengths.length; index += 1) {
+    if (left <= lengths[index] || index === lengths.length - 1) {
+      const part = lengths[index] ? Math.min(1, left / lengths[index]) : 0;
+      const [x0, y0] = points[index];
+      const [x1, y1] = points[index + 1];
+      return [round(x0 + (x1 - x0) * part), round(y0 + (y1 - y0) * part)];
     }
-    const top = a.y + box.height;
-    const bend = (top + b.y) / 2;
-    const d = `M${middle(a)} ${top}C${middle(a)} ${bend} ${middle(b)} ${bend} ${middle(b)} ${b.y}`;
-    return [{ d, dot: [round((middle(a) + middle(b)) / 2), bend] }];
+    left -= lengths[index];
+  }
+  return points[points.length - 1];
+}
+
+/**
+ * Lines of `experience` for the map, oldest job first as on the site (line 1 on the left): the track from the bullet
+ * down a branch that turns at 45° into the shared trunk, and one station per project spread along the branch.
+ */
+function mapLines() {
+  const jobs = [...experience].sort((a, b) => monthIndex(a.start) - monthIndex(b.start));
+  if (jobs.length > map.lineCount) {
+    throw new Error(`The share image has ${map.lineCount} line colours, but experience lists ${jobs.length} companies.`);
+  }
+  const middle = map.width / 2;
+  const outer = (jobs.length - 1) / 2;
+  const join = map.bend + outer * (map.spread - map.gap);
+  return jobs.map((job, index) => {
+    const shift = index - outer;
+    const x = middle + shift * map.spread;
+    const trunkX = middle + shift * map.gap;
+    const branch =
+      shift === 0
+        ? [[x, map.bulletY], [x, join]]
+        : [[x, map.bulletY], [x, map.bend], [trunkX, map.bend + Math.abs(x - trunkX)]];
+    const free = [[x, map.bulletY + map.bullet + map.station], ...branch.slice(1)];
+    const count = job.projects.length;
+    return {
+      number: index + 1,
+      x,
+      trunkX,
+      track: [...branch, [trunkX, map.endY]],
+      stations: job.projects.map((_, position) => pointAt(free, (position + 0.5) / count)),
+    };
   });
-  const nodes = [...placed.values()].map((item) => {
-    const broker = item.kind === 'broker';
-    const rect = `<rect x="${round(item.x)}" y="${item.y}" width="${item.w}" height="${box.height}" rx="${broker ? box.height / 2 : 9}"/>`;
-    const label = `<text x="${middle(item)}" y="${item.y + box.height / 2}">${escapeHtml(item.id)}</text>`;
-    return `<g${broker ? ' class="broker"' : ''}>${rect}${label}</g>`;
-  });
+}
+
+/** Map of the share image: tracks, stations, the end capsule and its label, then the route bullets on top. */
+function mapSvg(lang) {
+  const lines = mapLines();
+  const colour = (line) => `style="--line: var(--line-${line.number})"`;
+  const path = (points) => points.map(([x, y], index) => `${index ? 'L' : 'M'}${round(x)} ${round(y)}`).join('');
+  const tracks = lines.map((line) => `<path class="track" ${colour(line)} d="${path(line.track)}"/>`).join('');
+  const stations = lines
+    .flatMap((line) =>
+      line.stations.map(([x, y]) => `<circle class="station" ${colour(line)} cx="${x}" cy="${y}" r="${map.station}"/>`),
+    )
+    .join('');
+  const left = Math.min(...lines.map((line) => line.trunkX)) - map.endR;
+  const right = Math.max(...lines.map((line) => line.trunkX)) + map.endR;
+  const end = `<rect class="end" x="${round(left)}" y="${map.endY - map.endR}" width="${round(right - left)}" height="${map.endR * 2}" rx="${map.endR}"/>`;
+  const endLabel = escapeHtml(ui.mapNow[lang].toLocaleUpperCase(lang));
+  const label = `<text class="end-label" x="${map.width / 2}" y="${map.endY + map.endR + 48}">${endLabel}</text>`;
+  const bullets = lines
+    .map(
+      (line) =>
+        `<g class="bullet" ${colour(line)}><circle cx="${round(line.x)}" cy="${map.bulletY}" r="${map.bullet}"/>` +
+        `<text x="${round(line.x)}" y="${map.bulletY}">${line.number}</text></g>`,
+    )
+    .join('');
   return [
-    `<svg class="diagram" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">`,
-    `<g class="edges">${links.map((link) => `<path d="${link.d}"/>`).join('')}</g>`,
-    nodes.join(''),
-    links.map((link) => `<circle cx="${link.dot[0]}" cy="${link.dot[1]}" r="4.5"/>`).join(''),
+    `<svg class="map" viewBox="0 0 ${map.width} ${map.height}" width="${map.width}" height="${map.height}" aria-hidden="true">`,
+    tracks,
+    stations,
+    end,
+    label,
+    bullets,
     '</svg>',
   ].join('');
 }
 
-/** Terminal lines of the hero, with the cursor after the last one. */
-function terminalHtml() {
-  return heroLog
-    .map((line, index) => {
-      const parts = line
-        .map((part) => (part.tone ? `<b class="t-${part.tone}">${escapeHtml(part.text)}</b>` : escapeHtml(part.text)))
-        .join('');
-      const cursor = index === heroLog.length - 1 ? '<span class="cursor"></span>' : '';
-      return `<div class="term-line"><span class="tp">${escapeHtml(termPrompt)}</span> ${parts}${cursor}</div>`;
-    })
-    .join('');
-}
-
-/** Share image layout, in the style of the home page hero; 64px safe margin on every side. */
+/** Share image layout: flat page background, name and role on the left, the map on the right; 64px safe margin. */
 const ogCss = `
 * { box-sizing: border-box; }
 html, body { width: ${og.width}px; height: ${og.height}px; margin: 0; overflow: hidden; }
-body { position: relative; background: var(--bg); color: var(--text); font-family: var(--font); }
-.bg { position: absolute; inset: 0; overflow: hidden; }
-.light { position: absolute; border-radius: 50%; filter: blur(110px); }
-.light-a { left: -180px; top: -240px; width: 680px; height: 680px; background: var(--accent); opacity: 0.34; }
-.light-b { right: -200px; bottom: -280px; width: 720px; height: 720px; background: var(--accent-3); opacity: 0.28; }
-.grid {
-  position: absolute; inset: 0;
-  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 44px 44px;
-  -webkit-mask-image: radial-gradient(ellipse 85% 95% at 35% 30%, #000 40%, transparent 100%);
-  mask-image: radial-gradient(ellipse 85% 95% at 35% 30%, #000 40%, transparent 100%);
-}
-.edge {
-  position: absolute; inset: 20px; padding: 1.5px; border-radius: 24px; background: var(--grad); opacity: 0.55;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-}
+body { background: var(--bg); color: var(--text); font-family: var(--font); }
 .card {
-  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) ${frame.width}px; gap: 40px;
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) ${map.width}px; gap: 48px;
   align-items: center; height: 100%; padding: 64px;
 }
 .intro { min-width: 0; }
-.eyebrow { display: flex; align-items: center; gap: 12px; margin: 0; font: 500 19px/1.4 var(--mono); letter-spacing: 0.01em; color: var(--muted); }
-.eyebrow::before { content: ''; flex: none; width: 28px; height: 2px; background: var(--grad); }
-.name { margin: 22px 0 0; font-size: 92px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.06; text-wrap: balance; }
-.grad { padding: 0.04em 0; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.chips { display: flex; flex-wrap: wrap; gap: 12px; margin: 34px 0 0; padding: 0; list-style: none; }
-.chips li {
-  padding: 10px 16px; border: 1px solid var(--chip-border); border-radius: var(--radius-pill);
-  background: var(--chip-bg); color: var(--text); font: 500 20px/1 var(--mono);
+.name { margin: 0; font: 700 112px/1.05 var(--font-display); letter-spacing: -0.01em; color: var(--text); text-wrap: balance; }
+.role { margin: 28px 0 0; font: 500 30px/1.35 var(--font); color: var(--muted); }
+.domain { position: absolute; left: 64px; bottom: 56px; margin: 0; font: 500 22px/1 var(--font); color: var(--faint); }
+.map { display: block; overflow: visible; }
+.track { fill: none; stroke: var(--line); stroke-width: 8; stroke-linejoin: round; }
+.station { fill: var(--bg); stroke: var(--line); stroke-width: 4; }
+.end { fill: var(--interchange-fill); stroke: var(--interchange-stroke); stroke-width: 3; }
+.end-label { font: 700 44px var(--font-display); letter-spacing: 0.04em; fill: var(--text); text-anchor: middle; }
+.bullet circle { fill: var(--line); }
+.bullet text {
+  font: 700 26px var(--font-display); fill: var(--on-line); text-anchor: middle; dominant-baseline: central;
 }
-.domain { position: absolute; left: 64px; bottom: 60px; margin: 0; font: 500 20px/1 var(--mono); letter-spacing: 0.02em; color: var(--faint); }
-.frame {
-  position: relative; overflow: hidden; border: 1px solid var(--border-strong); border-radius: var(--radius-lg);
-  background: var(--glass); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: var(--shadow-frame);
-}
-.frame::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--grad); opacity: 0.8; }
-.frame-bar { display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 16px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
-.dots { display: flex; gap: 7px; }
-.dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--border-strong); }
-.frame-label { font: 14px/1.4 var(--mono); color: var(--muted); }
-.frame-body {
-  padding: ${frame.padding}px;
-  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 22px 22px;
-}
-.diagram { display: block; overflow: visible; }
-.diagram path { fill: none; stroke: var(--muted); stroke-opacity: 0.5; stroke-width: 1.6; }
-.diagram rect { fill: var(--surface); stroke: var(--muted); stroke-opacity: 0.45; }
-.diagram .broker rect { stroke: var(--accent-2); stroke-opacity: 1; stroke-width: 1.4; }
-.diagram text { font: 500 ${box.font}px var(--mono); fill: var(--text); text-anchor: middle; dominant-baseline: central; }
-.diagram circle { fill: var(--accent-2); filter: drop-shadow(0 0 5px var(--accent-2)); }
-.term {
-  margin-top: 18px; padding: 12px 14px; border: 1px solid var(--border-strong); border-radius: 10px;
-  background: var(--term-bg); color: var(--term-text); font: 14px/1.7 var(--mono);
-}
-.term-line { overflow: hidden; white-space: pre; text-overflow: ellipsis; }
-.tp { color: var(--term-muted); }
-.t-ok, .t-event { font-weight: 500; }
-.t-ok { color: var(--term-ok); }
-.t-event { color: var(--term-event); }
-.cursor { display: inline-block; width: 0.55em; height: 1.1em; margin-left: 3px; vertical-align: -0.18em; background: var(--term-event); opacity: 0.85; }
 `;
 
-/** Share image of one language: role and location, name, main technologies, domain; the hero diagram on the right. */
+/** Share image of one language: name, role and location, domain; the network map on the right. */
 function ogHtml(lang, head) {
-  const chips = profile.coreTech.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
   return `<!doctype html>
 <html lang="${lang}">
 <head>
@@ -454,24 +442,19 @@ ${ogCss}
 </style>
 </head>
 <body>
-<div class="bg"><span class="light light-a"></span><span class="light light-b"></span><span class="grid"></span><span class="edge"></span></div>
 <div class="card">
   <div class="intro">
-    <p class="eyebrow"><span>${escapeHtml(profile.role[lang])} · ${escapeHtml(profile.location[lang])}</span></p>
-    <h1 class="name"><span class="grad">${escapeHtml(profile.name[lang])}</span></h1>
-    <ul class="chips">${chips}</ul>
+    <h1 class="name">${escapeHtml(profile.name[lang])}</h1>
+    <p class="role">${escapeHtml(profile.role[lang])} · ${escapeHtml(profile.location[lang])}</p>
   </div>
-  <div class="frame">
-    <div class="frame-bar"><span class="dots"><i></i><i></i><i></i></span><span class="frame-label">${escapeHtml(heroFrame.label[lang])}</span></div>
-    <div class="frame-body">${diagramSvg(diagramWidth)}<div class="term">${terminalHtml()}</div></div>
-  </div>
+  ${mapSvg(lang)}
   ${domain ? `<p class="domain">${escapeHtml(domain)}</p>` : ''}
 </div>
 </body>
 </html>`;
 }
 
-/** Touch icon: the favicon on the page background, a little inside the edge so the rounded mask of iOS keeps its border. */
+/** Touch icon: the favicon on the page background, a little inside the edge so the rounded mask of iOS keeps it whole. */
 function iconHtml(head) {
   const favicon = pathToFileURL(join(publicDir, 'favicon.svg')).href;
   const size = icon.size - icon.inset * 2;

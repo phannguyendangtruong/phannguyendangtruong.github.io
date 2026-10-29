@@ -5,6 +5,10 @@ export const profile = {
   name: { en: 'Phan Nguyen Dang Truong', vi: 'Phan Nguyễn Đăng Trường' } satisfies Text,
   role: { en: 'Java Backend Developer', vi: 'Lập trình viên Java Backend' } satisfies Text,
   location: { en: 'Hanoi, Vietnam', vi: 'Hà Nội, Việt Nam' } satisfies Text,
+  /** Job title on the line under the name in the hero, written the same in both languages. */
+  jobTitle: 'Java Backend Developer',
+  /** City on the line under the name in the hero. */
+  city: { en: 'Hanoi', vi: 'Hà Nội' } satisfies Text,
   tagline: {
     en: 'I build backend systems where data correctness matters: report ingestion, submission and approval workflows, scheduled jobs and notifications — with Java 21, Spring Boot, Kafka and Keycloak.',
     vi: 'Tôi xây dựng hệ thống backend nơi dữ liệu phải chính xác: tiếp nhận báo cáo, quy trình nộp – duyệt, job định kỳ và thông báo – với Java 21, Spring Boot, Kafka và Keycloak.',
@@ -30,9 +34,9 @@ export const profile = {
     github: 'GitHub',
     linkedin: 'LinkedIn',
   },
-  /** Hero figures, fixed whole numbers (not computed from `experience`). */
+  /** Fixed whole numbers (not computed from `experience`); `years` is shown on the hero line. */
   stats: { years: 3, companies: 3, companyProjects: 6 },
-  /** Main technologies listed under the hero figures. */
+  /** Main technologies, listed in the profile JSON. */
   coreTech: ['Java 21', 'Spring Boot', 'Kafka', 'Keycloak'],
 };
 
@@ -44,7 +48,7 @@ export const shareImages: Record<'default', Record<Lang, string | null>> = {
   default: { en: 'og/default-en.png', vi: 'og/default-vi.png' },
 };
 
-/** `scene` draws a small animated diagram at the top of the card (see focusScenes in src/data/hero.ts). */
+/** `scene` draws a small static route diagram beside the text (see focusScenes in src/data/hero.ts). */
 export const focusAreas: { title: Text; body: Text; scene?: FocusScene }[] = [
   {
     title: { en: 'Data ingestion & validation', vi: 'Tiếp nhận & kiểm tra dữ liệu' },
@@ -72,18 +76,16 @@ export const focusAreas: { title: Text; body: Text; scene?: FocusScene }[] = [
   },
 ];
 
-/** `wide` groups span two columns of the home page skills grid. */
-export const skills: { group: Text; items: string[]; wide?: boolean }[] = [
+/** Groups of the interchange table on the home page and of the CV, in display order. */
+export const skills: { group: Text; items: string[] }[] = [
   { group: { en: 'Languages', vi: 'Ngôn ngữ' }, items: ['Java (8–21)', 'SQL', 'JavaScript'] },
   {
     group: { en: 'Backend', vi: 'Backend' },
     items: ['Spring Boot', 'Spring MVC', 'Spring Security', 'Spring Data JPA / Hibernate', 'MapStruct', 'REST APIs', 'Microservices'],
-    wide: true,
   },
   {
     group: { en: 'Data', vi: 'Dữ liệu' },
     items: ['Oracle', 'PostgreSQL', 'SQL Server', 'MySQL', 'MongoDB', 'Redis', 'Liquibase'],
-    wide: true,
   },
   { group: { en: 'Messaging & storage', vi: 'Messaging & lưu trữ' }, items: ['Apache Kafka', 'MinIO (S3)'] },
   { group: { en: 'Security', vi: 'Bảo mật' }, items: ['Keycloak', 'OAuth2 / OIDC', 'JWT'] },
@@ -101,7 +103,8 @@ export type Job = {
   start: string;
   /** End month as MM/YYYY; missing for the current job. */
   end?: string;
-  projects: { name: Text; subsystems?: Text; summary: Text; bullets?: TextList; tech: string[] }[];
+  /** `mapLabel`: short station name on the home page map; the map falls back to `name`. */
+  projects: { name: Text; mapLabel?: Text; subsystems?: Text; summary: Text; bullets?: TextList; tech: string[] }[];
 };
 
 export const experience: Job[] = [
@@ -112,26 +115,23 @@ export const experience: Job[] = [
     projects: [
       {
         name: { en: 'Reporting & workflow platform', vi: 'Nền tảng báo cáo & quy trình nghiệp vụ' },
-        subsystems: {
-          en: '2 subsystems: internal statistics; reporting obligations and monitoring',
-          vi: '2 phân hệ: thống kê nội bộ; quản lý nghĩa vụ báo cáo và theo dõi',
-        },
+        mapLabel: { en: 'Reporting & workflow', vi: 'Báo cáo & quy trình' },
         summary: {
           en: 'Backend microservices for a large-scale platform that collects, validates and monitors periodic reports from many organizations.',
           vi: 'Microservices backend cho nền tảng quy mô lớn thu thập, kiểm tra và theo dõi báo cáo định kỳ từ nhiều đơn vị.',
         },
         bullets: {
           en: [
-            'Internal statistics subsystem: input/output report templates, report submission and validation, indicator management, permission groups and audit logging.',
+            'Reporting module: input/output report templates, report submission and validation, indicator management, permission groups and audit logging.',
             'Report data ingestion pipelines that parse Excel/CSV submissions and normalize them into structured fact storage for report generation.',
-            'Obligations and monitoring subsystem: reporting obligations, the submission lifecycle (submit, resubmit, approval), evaluation and scoring criteria, alert scanning.',
+            'Workflow module: the submission lifecycle (submit, resubmit, approval), evaluation and scoring rules, alert scanning.',
             'Scheduled jobs and async processing with ShedLock for deadline reminders, overdue warnings, evaluation workflows and Excel exports; email notifications with Thymeleaf templates.',
             'Redis caching, Kafka messaging, MinIO object storage and Keycloak (OAuth2) across internal service calls.',
           ],
           vi: [
-            'Phân hệ thống kê nội bộ: biểu mẫu báo cáo đầu vào/đầu ra, nộp và kiểm tra báo cáo, quản lý chỉ tiêu, nhóm quyền, nhật ký kiểm toán.',
+            'Phân hệ báo cáo: biểu mẫu báo cáo đầu vào/đầu ra, nộp và kiểm tra báo cáo, quản lý chỉ tiêu, nhóm quyền, nhật ký kiểm toán.',
             'Pipeline tiếp nhận dữ liệu báo cáo: đọc file Excel/CSV và chuẩn hoá thành dữ liệu có cấu trúc để sinh báo cáo.',
-            'Phân hệ quản lý nghĩa vụ và theo dõi: nghĩa vụ báo cáo, vòng đời nộp (nộp, nộp lại, phê duyệt), tiêu chí đánh giá và chấm điểm, quét cảnh báo.',
+            'Phân hệ quy trình: vòng đời nộp (nộp, nộp lại, phê duyệt), tiêu chí đánh giá và chấm điểm, quét cảnh báo.',
             'Job định kỳ và xử lý bất đồng bộ với ShedLock cho nhắc hạn, cảnh báo quá hạn, quy trình đánh giá, xuất Excel; thông báo email theo template Thymeleaf.',
             'Redis cache, Kafka, MinIO và Keycloak (OAuth2) giữa các service nội bộ.',
           ],
@@ -148,14 +148,16 @@ export const experience: Job[] = [
     projects: [
       {
         name: { en: 'Customer care portal (team of 2)', vi: 'Cổng chăm sóc khách hàng (nhóm 2 người)' },
+        mapLabel: { en: 'Customer portal', vi: 'Cổng khách hàng' },
         summary: {
-          en: 'Online self-service portal for a large customer base: account management, bill inquiry, online payment, e-service registration, service status lookup, request progress tracking and e-invoice verification. Bilingual, with Redis caching and integrations with internal systems, external partner platforms and payment gateways.',
-          vi: 'Cổng dịch vụ trực tuyến cho lượng lớn khách hàng: quản lý tài khoản, tra cứu hoá đơn, thanh toán trực tuyến, đăng ký dịch vụ điện tử, tra cứu tình trạng dịch vụ, theo dõi tiến độ yêu cầu, xác thực hoá đơn điện tử. Song ngữ, có Redis cache và tích hợp với hệ thống nội bộ, nền tảng đối tác bên ngoài và cổng thanh toán.',
+          en: 'Online self-service portal for a large customer base: account management, online payment, service requests with progress tracking, and document verification. Bilingual, with Redis caching and integrations with internal systems, partner platforms and payment gateways.',
+          vi: 'Cổng dịch vụ trực tuyến cho lượng lớn khách hàng: quản lý tài khoản, thanh toán trực tuyến, gửi yêu cầu dịch vụ và theo dõi tiến độ, xác thực chứng từ. Song ngữ, có Redis cache và tích hợp với hệ thống nội bộ, nền tảng đối tác và cổng thanh toán.',
         },
         tech: ['Spring Boot', 'Spring MVC', 'Spring Security', 'Hibernate/JPA', 'Redis', 'WebSocket', 'SQL Server'],
       },
       {
         name: { en: 'Content & information management system (team of 3)', vi: 'Hệ thống quản lý nội dung & thông tin (nhóm 3 người)' },
+        mapLabel: { en: 'Content management', vi: 'Quản lý nội dung' },
         summary: {
           en: 'Fullstack platform for content, documents, news, a digital library and specialised reference data: role-based access with JWT, Q&A, statistics and reporting, Excel import/export.',
           vi: 'Nền tảng fullstack quản lý nội dung, văn bản, tin tức, thư viện số và dữ liệu chuyên ngành: phân quyền với JWT, hỏi đáp, thống kê báo cáo, nhập/xuất Excel.',
@@ -172,6 +174,7 @@ export const experience: Job[] = [
     projects: [
       {
         name: { en: 'Production operations management (team of 10)', vi: 'Quản lý vận hành sản xuất (nhóm 10 người)' },
+        mapLabel: { en: 'Production operations', vi: 'Vận hành sản xuất' },
         summary: {
           en: 'Backend for human resources, work assignment, progress evaluation and worker task-status updates.',
           vi: 'Backend cho nhân sự, giao việc, đánh giá tiến độ và cập nhật trạng thái công việc của công nhân.',
@@ -180,6 +183,7 @@ export const experience: Job[] = [
       },
       {
         name: { en: 'Data generation sub-project (team of 4)', vi: 'Dự án con sinh dữ liệu (nhóm 4 người)' },
+        mapLabel: { en: 'Data generation', vi: 'Sinh dữ liệu' },
         summary: {
           en: 'Backend handling client input and data-generation requests for the parent project.',
           vi: 'Backend xử lý dữ liệu đầu vào và yêu cầu sinh dữ liệu từ phía client cho dự án mẹ.',

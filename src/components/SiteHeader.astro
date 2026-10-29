@@ -19,12 +19,15 @@ interface Props {
 const { lang, path, current, variant = 'full' } = Astro.props;
 const minimal = variant === 'minimal';
 const brandLang: Lang = minimal ? 'en' : lang;
+/** First letters of the first and last word of the name, drawn as a route bullet ("PT"). */
+const nameWords = profile.name.en.trim().split(/\s+/);
+const initials = `${nameWords[0].charAt(0)}${nameWords[nameWords.length - 1].charAt(0)}`.toUpperCase();
 ---
 
 <header class="site-header no-print">
   <div class:list={['container', 'nav-row', { minimal }]}>
     <a class="brand" href={localePath(brandLang, '/')}>
-      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-mark" aria-hidden="true">{initials}</span>
       <span class="brand-name">{profile.name[brandLang]}</span>
     </a>
     {
@@ -72,18 +75,17 @@ const brandLang: Lang = minimal ? 'en' : lang;
 </header>
 
 <style>
+  /* Solid page background with a 1px rule; the mobile menu opens on the surface colour. */
   .site-header {
     position: sticky;
     top: 0;
     z-index: 50;
     height: var(--nav-h);
     background: var(--header-bg);
-    -webkit-backdrop-filter: saturate(150%) blur(14px);
-    backdrop-filter: saturate(150%) blur(14px);
     border-bottom: 1px solid var(--border);
   }
 
-  /* Solid header while the mobile menu is open; the class is the fallback for browsers without :has(). */
+  /* Surface colour while the mobile menu is open; the class is the fallback for browsers without :has(). */
   .site-header.menu-open {
     background: var(--surface);
   }
@@ -108,10 +110,10 @@ const brandLang: Lang = minimal ? 'en' : lang;
     gap: 10px;
     min-width: 0;
     max-width: 100%;
+    min-height: 44px;
     color: var(--text);
-    font-size: 15px;
-    font-weight: 650;
-    letter-spacing: -0.01em;
+    font-size: 1rem;
+    font-weight: 600;
     text-decoration: none;
   }
 
@@ -121,14 +123,18 @@ const brandLang: Lang = minimal ? 'en' : lang;
     text-overflow: ellipsis;
   }
 
+  /* Route bullet of the brand: line 3 colour, initials in the sign face. */
   .brand-mark {
     flex: none;
-    width: 9px;
-    height: 9px;
-    border-radius: 2px;
-    background: var(--grad);
-    box-shadow: 0 0 12px var(--glow);
-    transform: rotate(45deg);
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--line-3);
+    color: var(--on-line);
+    font: 700 0.875rem/1 var(--font-display);
+    letter-spacing: 0.02em;
   }
 
   .site-nav,
@@ -149,13 +155,13 @@ const brandLang: Lang = minimal ? 'en' : lang;
     position: relative;
     display: inline-flex;
     align-items: center;
-    height: 40px;
+    height: 44px;
     padding: 0 12px;
-    border-radius: 8px;
     color: var(--muted);
-    font-size: 14px;
+    font-size: 0.9375rem;
     font-weight: 500;
     text-decoration: none;
+    transition: color var(--t-hover);
   }
 
   .nav-link:hover,
@@ -168,10 +174,9 @@ const brandLang: Lang = minimal ? 'en' : lang;
     position: absolute;
     left: 12px;
     right: 12px;
-    bottom: 5px;
-    height: 2px;
-    border-radius: 2px;
-    background: var(--grad);
+    bottom: 4px;
+    height: 3px;
+    background: var(--accent);
   }
 
   .nav-actions,

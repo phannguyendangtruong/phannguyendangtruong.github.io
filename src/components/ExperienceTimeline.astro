@@ -1,872 +1,195 @@
 ---
-import Icon from './Icon.astro';
-import { experienceNewestFirst, isCurrentJob, type Job } from '../data/profile';
-import { projectCountForSkill, skillKey, skillKeys, skillName } from '../data/skill-keys';
-import { formatPeriod, tr, trCount, type Lang } from '../i18n/ui';
+import RouteBullet from './metro/RouteBullet.astro';
+import RouteStop from './home/RouteStop.astro';
+import SkillFilter from './home/SkillFilter.astro';
+import { lineOfJob } from '../data/network';
+import { education, experienceNewestFirst, isCurrentJob } from '../data/profile';
+import { formatPeriod, tr, type Lang } from '../i18n/ui';
 
 interface Props {
   lang: Lang;
 }
 
 const { lang } = Astro.props;
-const jobs = experienceNewestFirst();
-/** Bullets shown before the "Show n more" fold, and technology chips shown before the "+n" button. */
-const bulletsShown = 2;
-const techShown = 6;
-/** The chips fold only when that hides at least two of them: a "+1" button would take the room of the chip itself. */
-const techFoldMin = 2;
-
-/** Technology chip of a project: a button that filters the list by its shared key (see src/data/skill-keys.ts). */
-const techChip = (name: string) => {
-  const key = skillKey(name);
-  const label = trCount('skillFilterOne', 'skillFilterMany', projectCountForSkill(key), lang).replace('{name}', name);
-  return { name, key, label, filterName: skillName(key, name) };
-};
-
-/** What a project card shows: the first bullets, the folded rest, the technology keys and chips. */
-const projectView = (project: Job['projects'][number]) => {
-  const bullets = project.bullets?.[lang] ?? [];
-  const extraTech = project.tech.length - techShown;
-  const hiddenTech = extraTech >= techFoldMin ? extraTech : 0;
-  return {
-    project,
-    shown: bullets.slice(0, bulletsShown),
-    more: bullets.slice(bulletsShown),
-    keys: skillKeys(project.tech).join(' '),
-    chips: project.tech.map(techChip),
-    /** Chips before the "+n" button: all of them when the list does not fold. */
-    visibleTech: project.tech.length - hiddenTech,
-    hiddenTech,
-    moreTechLabel: trCount('showMoreTechOne', 'showMoreTechMany', hiddenTech, lang),
-  };
-};
-/** Delay step of a chip in the entrance animation; chips past the fold restart at 0 when they are shown. */
-const chipStep = (position: number, visible: number) => (position < visible ? position : position - visible);
+/** Newest company first: each one is a leg of its own line, the current one runs up to the "Now" station. */
+const legs = experienceNewestFirst().map((job) => ({ job, line: lineOfJob(job), current: isCurrentJob(job) }));
+const educationLine = [education.major?.[lang], education.period?.[lang]].filter(Boolean).join(' · ');
 ---
 
-<div
-  class="tl-filter sr-only no-print"
-  data-filter-bar
-  data-label={tr('filterStatus', lang)}
-  data-one={tr('filterCountOne', lang)}
-  data-many={tr('filterCountMany', lang)}
-  hidden
->
-  <p class="tl-filter-text" role="status" aria-live="polite" aria-atomic="true" data-filter-status>
-    <span class="tl-filter-name" data-filter-name></span><span class="tl-filter-sep" data-filter-sep hidden> · </span><span class="tl-filter-count" data-filter-count></span>
-  </p>
-  <button type="button" class="chip-btn tl-filter-clear" data-filter-clear hidden>
-    <Icon name="close" size={14} />
-    {tr('filterClear', lang)}
-  </button>
-</div>
-<div class="tl-wrap" data-timeline>
-  <div class="tl-rail" aria-hidden="true"><span class="tl-fill"></span><span class="tl-spark"></span></div>
-  <ol class="timeline">
+<SkillFilter lang={lang} />
+<div class="route" data-timeline>
+  <ol class="legs">
     {
-      jobs.map((job) => (
-        <li class:list={['tl-item', { current: isCurrentJob(job) }, 'reveal']}>
-          <span class="tl-dot" aria-hidden="true"></span>
-          <div class="tl-head">
+      legs.map(({ job, line, current }) => (
+        <li class:list={['leg', 'tl-item', { current }]} style={`--line: ${line.color}`}>
+          {current && (
+            <p class="leg-now">
+              <span class="now-bar" aria-hidden="true" />
+              {tr('mapNow', lang)}
+            </p>
+          )}
+          <div class="leg-head tl-head">
+            <RouteBullet line={line.number} class="leg-bullet" />
             <div>
-              <h3 class="tl-company">{job.company[lang]}</h3>
-              <p class="tl-role">{job.role[lang]}</p>
+              <h3 class="leg-company">{job.company[lang]}</h3>
+              <p class="leg-role">{job.role[lang]}</p>
             </div>
-            <p class="tl-period">{formatPeriod(job.start, job.end, lang)}</p>
+            <p class="leg-period">{formatPeriod(job.start, job.end, lang)}</p>
           </div>
-          <div class="tl-projects">
-            {job.projects.map(projectView).map((view) => (
-              <div class="card spot tl-proj" data-skills={view.keys}>
-                <span class="tl-glow" aria-hidden="true"></span>
-                <h4>{view.project.name[lang]}</h4>
-                {view.project.subsystems && <p class="tl-sub">{view.project.subsystems[lang]}</p>}
-                <p class="tl-sum">{view.project.summary[lang]}</p>
-                {view.shown.length > 0 && (
-                  <ul class="dash-list tl-bullets">
-                    {view.shown.map((bullet) => (
-                      <li>{bullet}</li>
-                    ))}
-                  </ul>
-                )}
-                {view.more.length > 0 && (
-                  <details class="tl-more">
-                    <summary>
-                      <span class="tl-more-show">{tr('showMoreItems', lang).replace('{n}', String(view.more.length))}</span>
-                      <span class="tl-more-hide">{tr('showLess', lang)}</span>
-                      <Icon name="arrow-right" size={14} class="tl-more-arrow" />
-                    </summary>
-                    <ul class="dash-list tl-bullets">
-                      {view.more.map((bullet) => (
-                        <li>{bullet}</li>
-                      ))}
-                    </ul>
-                  </details>
-                )}
-                <ul class="tags tl-tags" aria-label={tr('techLabel', lang)} data-fx>
-                  {view.chips.map((chip, position) => (
-                    <li
-                      class:list={{ 'tl-extra': position >= view.visibleTech }}
-                      style={`--i: ${chipStep(position, view.visibleTech)}`}
-                    >
-                      <button
-                        type="button"
-                        class="tl-chip"
-                        data-skill={chip.key}
-                        data-skill-name={chip.filterName}
-                        aria-pressed="false"
-                        aria-label={chip.label}
-                        disabled
-                      >
-                        {chip.name}
-                      </button>
-                    </li>
-                  ))}
-                  {view.hiddenTech > 0 && (
-                    <li class="tl-plus js-only no-print" style={`--i: ${techShown}`}>
-                      <button
-                        type="button"
-                        class="tl-chip tl-plus-btn"
-                        aria-expanded="false"
-                        aria-label={view.moreTechLabel}
-                        data-tech-more
-                      >
-                        +{view.hiddenTech}
-                      </button>
-                    </li>
-                  )}
-                </ul>
-              </div>
+          <ol class="stops">
+            {job.projects.map((project) => (
+              <RouteStop project={project} lang={lang} />
             ))}
-          </div>
+          </ol>
         </li>
       ))
     }
   </ol>
+  <div class="origin">
+    <h3 class="leg-company">{education.school[lang]}</h3>
+    <p class="leg-role">{tr('educationTitle', lang)}</p>
+    {educationLine && <p class="origin-line">{educationLine}</p>}
+  </div>
 </div>
 
 <style>
-  /* Filter bar: on screen only while a technology filter is on (the script drops .sr-only); it stays under the site
-     header while the list scrolls, so the filter can always be cleared. Its background is nearly opaque, so the
-     company rows scrolling under it do not show through. */
-  .tl-filter:not(.sr-only) {
-    position: sticky;
-    top: calc(var(--nav-h) + 8px);
-    z-index: 5;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0 0 20px;
-    padding: 6px 6px 6px 16px;
-    border: 1px solid var(--accent-2);
-    border-radius: var(--radius-pill);
-    background: var(--surface);
-    background: color-mix(in srgb, var(--surface) 92%, transparent);
-    -webkit-backdrop-filter: saturate(150%) blur(14px);
-    backdrop-filter: saturate(150%) blur(14px);
-    box-shadow: 0 0 0 1px var(--chip-bg), 0 12px 32px -20px var(--glow);
+  /* One vertical axis: --rail is the centre of the track from the left edge, --pad where the text starts. */
+  .route {
+    --rail: 14px;
+    --pad: 44px;
   }
 
-  /* Phone: the technology on the first line, the project count on the second, never cut; the separator is only
-     read out. */
-  .tl-filter-text {
-    flex: 1;
-    min-width: 0;
-    margin: 0;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1.35;
-  }
-
-  .tl-filter-name,
-  .tl-filter-count {
-    display: block;
-  }
-
-  .tl-filter-sep {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-  }
-
-  .tl-filter-clear {
-    flex: none;
-  }
-
-  /* Phone: the rail sits in a 12px column on the left edge, the company rows and project cards start 12px after it.
-     The dot is centred on the first line of the company name (line height 1.15). */
-  .tl-wrap {
-    --rail-x: 5px;
-    --dot: 12px;
-    --company: 22px;
-    --dot-top: calc(var(--company) * 0.575 - var(--dot) / 2);
-    position: relative;
-  }
-
-  .tl-rail {
-    position: absolute;
-    left: var(--rail-x);
-    top: calc(var(--dot-top) + var(--dot) / 2);
-    bottom: 24px;
-    width: 2px;
-    border-radius: 2px;
-    background: var(--border);
-  }
-
-  /* Filled part of the rail; the script scales it with the scroll position, otherwise it is full. */
-  .tl-fill {
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: var(--grad-rail);
-    box-shadow: 0 0 10px var(--glow);
-    transform-origin: top;
-    transform: scaleY(var(--tl-progress, 1));
-  }
-
-  /* Glowing packet at the head of the filled part: a box as tall as the rail, moved up by the part still to fill,
-     with the packet on its bottom edge. Only shown while the script follows the scroll. */
-  .tl-spark {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    transform: translateY(calc((var(--tl-progress, 1) - 1) * 100%));
-    pointer-events: none;
-  }
-
-  .tl-spark::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    width: 8px;
-    height: 8px;
-    margin: 0 0 -4px -4px;
-    border-radius: 50%;
-    background: var(--accent-2);
-    box-shadow: 0 0 6px 1px var(--accent-2), 0 0 16px var(--glow);
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .tl-wrap.scrub .tl-spark {
-      opacity: 1;
-      transition: opacity 0.3s;
-    }
-  }
-
-  .timeline {
-    display: grid;
-    gap: 32px;
+  .legs {
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .tl-item {
+  /* A company is a stretch of its line: a 6px track in the line colour down the whole block. */
+  .leg {
     position: relative;
-    padding-left: calc(var(--dot) + 12px);
+    padding: 0 0 40px var(--pad);
   }
 
-  .tl-dot {
-    position: absolute;
-    left: calc(var(--rail-x) + 1px - var(--dot) / 2);
-    top: var(--dot-top);
-    z-index: 1;
-    width: var(--dot);
-    height: var(--dot);
-    border-radius: 50%;
-    background: var(--bg);
-    border: 2px solid var(--accent);
-    box-shadow: 0 0 0 4px var(--chip-bg), 0 0 14px var(--glow);
-    transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
-  }
-
-  .current .tl-dot {
-    background: var(--ok);
-    border-color: var(--ok);
-    box-shadow: 0 0 0 5px var(--ok-soft), 0 0 16px var(--ok);
-  }
-
-  /* Not reached yet by the filled rail. */
-  .tl-wrap.scrub .tl-item:not(.reached) .tl-dot {
-    background: var(--bg);
-    border-color: var(--border-strong);
-    box-shadow: 0 0 0 4px var(--chip-bg);
-  }
-
-  .current .tl-dot::after {
+  .leg::before {
     content: '';
     position: absolute;
-    inset: -2px;
-    border-radius: 50%;
-    border: 2px solid var(--ok);
-    opacity: 0;
+    left: calc(var(--rail) - 3px);
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: var(--line);
   }
 
-  .tl-wrap.lit .current .tl-dot::after {
-    animation: tl-beat 1.4s ease-out 3;
+  /* The current stretch starts at the "Now" station: an end bar across the track. */
+  .leg.current::before {
+    top: 10px;
   }
 
-  /* One pulse when the filled rail first reaches a company (.hit, set by the script). */
-  .tl-dot::before {
-    content: '';
+  /* The last stretch reaches under the ring of the education station. */
+  .leg:last-child::before {
+    bottom: -8px;
+  }
+
+  .leg-now {
+    position: relative;
+    margin: 0 0 20px;
+    font: 700 1rem/20px var(--font-display);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .now-bar {
     position: absolute;
-    inset: -2px;
-    border-radius: 50%;
-    border: 2px solid var(--accent-2);
-    opacity: 0;
+    left: calc(var(--rail) - var(--pad) - 14px);
+    top: 7px;
+    width: 28px;
+    height: 6px;
+    background: var(--line);
   }
 
-  /* Light edge of the project cards at the same moment; it fades out again. */
-  .tl-glow {
-    position: absolute;
-    inset: -1px;
-    z-index: 0;
-    border-radius: inherit;
-    border: 1px solid var(--accent-2);
-    box-shadow: 0 0 24px -6px var(--accent-2);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .hit .tl-dot::before {
-      animation: tl-beat 1.2s ease-out 1;
-    }
-
-    .hit .tl-glow {
-      animation: tl-glow 1.8s ease-out 1;
-    }
-  }
-
-  /* Company row beside the rail, without a frame: the projects below are the only cards. */
-  .tl-head {
+  /* Company row: the route bullet sits on the track, centred on the first line of the name. */
+  .leg-head {
+    position: relative;
     display: flex;
     flex-wrap: wrap;
+    align-items: baseline;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: 8px 16px;
-    margin-bottom: 14px;
+    gap: 4px 16px;
+    margin-bottom: 20px;
   }
 
-  .tl-company {
-    width: fit-content;
+  .leg-head :global(.leg-bullet) {
+    position: absolute;
+    left: calc(var(--rail) - var(--pad) - 14px);
+    top: -1px;
+  }
+
+  /* Station name: the company of a leg, or the school of the education station. */
+  .leg-company {
     margin: 0;
-    font-size: var(--company);
-    font-weight: 800;
-    letter-spacing: -0.025em;
-    line-height: 1.15;
+    font: 600 1.375rem/1.2 var(--font);
   }
 
-  /* Current job: gradient underline under the company name and a lit period badge, with the green dot. */
-  .current .tl-company {
-    padding-bottom: 4px;
-    background: var(--grad) left bottom / 100% 2px no-repeat;
-  }
-
-  .tl-role {
-    margin: 4px 0 0;
-    font-size: 15px;
+  /* Line under the station name: the role, or "Education". */
+  .leg-role {
+    margin: 2px 0 0;
     color: var(--muted);
   }
 
-  .tl-period {
+  .leg-period {
     margin: 0;
-    padding: 5px 12px;
-    border: 1px solid var(--chip-border);
-    border-radius: var(--radius-pill);
-    background: var(--chip-bg);
-    font: 12.5px/1.5 var(--mono);
+    font-size: 0.9375rem;
+    font-variant-numeric: tabular-nums;
     color: var(--muted);
     white-space: nowrap;
   }
 
-  .current .tl-period {
-    color: var(--text);
-    border-color: var(--ok);
-    background: var(--ok-soft);
-    box-shadow: 0 0 0 3px var(--ok-soft), 0 0 16px -4px var(--ok);
-  }
-
-  .tl-projects {
-    display: grid;
-    gap: 12px;
-  }
-
-  .tl-proj {
-    display: grid;
-    gap: 10px;
-    padding: 16px;
-    transition: opacity 0.3s, filter 0.3s, border-color 0.3s, box-shadow 0.3s;
-  }
-
-  .tl-proj h4 {
+  .stops {
     margin: 0;
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-  }
-
-  .tl-proj p {
-    margin: 0;
-  }
-
-  .tl-sub {
-    font: 12.5px/1.5 var(--mono);
-    color: var(--accent);
-  }
-
-  .tl-sum {
-    max-width: 78ch;
-    font-size: 15px;
-    color: var(--muted);
-  }
-
-  .tl-bullets {
-    font-size: 15px;
-  }
-
-  /* Bullets past the second wait in a fold; its label turns into "Show less" and the arrow turns up once open. */
-  .tl-more summary {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    min-height: 32px;
-    font: 600 13px/1.4 var(--mono);
-    color: var(--accent);
-    cursor: pointer;
+    padding: 0;
     list-style: none;
   }
 
-  .tl-more summary::-webkit-details-marker {
-    display: none;
+  /* Where the route starts: education, a station like a company (school as its name, "Education" under it), with a
+     ring in the text colour at the bottom of the track, centred on the first line of the name. */
+  .origin {
+    position: relative;
+    padding-left: var(--pad);
   }
 
-  .tl-more summary:hover {
-    color: var(--text);
+  .origin::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--rail) - 9px);
+    top: 4px;
+    width: 18px;
+    height: 18px;
+    border: 3px solid var(--text);
+    border-radius: 50%;
+    background: var(--bg);
   }
 
-  .tl-more[open] .tl-more-show,
-  .tl-more:not([open]) .tl-more-hide {
-    display: none;
-  }
-
-  .tl-more :global(.tl-more-arrow) {
-    transform: rotate(90deg);
-    transition: transform 0.2s var(--ease);
-  }
-
-  .tl-more[open] :global(.tl-more-arrow) {
-    transform: rotate(-90deg);
-  }
-
-  .tl-more .tl-bullets {
-    margin-top: 8px;
-  }
-
-  .tl-proj .tags {
-    gap: 6px;
-  }
-
-  /* The button inside each item draws the chip, 32px tall to be easy to tap. Disabled, it reads as a plain chip;
-     the script enables it once the filter works. */
-  .tl-tags li {
-    padding: 0;
-    border: 0;
-    background: none;
-    font-size: 11.5px;
-  }
-
-  .tl-chip {
-    display: inline-flex;
-    align-items: center;
-    min-height: 32px;
-    padding: 0 9px;
-    border: 1px solid var(--chip-border);
-    border-radius: var(--radius-pill);
-    background: var(--chip-bg);
-    font: inherit;
-    color: var(--text);
-    cursor: pointer;
-    transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
-  }
-
-  .tl-chip:disabled {
-    cursor: default;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .tl-chip:enabled:hover {
-      border-color: var(--accent-2);
-      background: var(--accent-soft);
-    }
-  }
-
-  /* "+n": the chips past the sixth when there are at least two of them, folded only once the page has its script
-     (html.js); shows them all. */
-  .tl-plus-btn {
-    border-style: dashed;
-    color: var(--accent);
-  }
-
-  .tl-tags.open .tl-plus {
-    display: none;
-  }
-
-  @media screen {
-    :global(html.js) .tl-tags:not(.open) .tl-extra {
-      display: none;
-    }
-  }
-
-  /* Technology filter: projects without the technology fade out, the ones with it light their edge and the chip. */
-  .tl-chip[aria-pressed='true'] {
-    border-color: var(--accent-2);
-    background: var(--accent-soft);
-    box-shadow: 0 0 0 1px var(--accent-2), 0 0 12px var(--glow);
-  }
-
-  @media screen {
-    .tl-proj.dim {
-      opacity: 0.35;
-      filter: saturate(0.3);
-    }
-
-    .tl-proj.match {
-      border-color: var(--accent-2);
-      box-shadow: 0 0 0 1px var(--accent-2), 0 0 32px -10px var(--accent-2);
-    }
-  }
-
-  /* Technology chips come in one after another when the list comes on screen (SiteScripts: .fx-wait, then .fx-run). */
-  @media screen and (prefers-reduced-motion: no-preference) {
-    .tl-tags.fx-wait li {
-      opacity: 0;
-    }
-
-    .tl-tags.fx-run li {
-      animation: tl-chip 0.42s var(--ease) calc(var(--i, 0) * 45ms) 1 both;
-      animation-play-state: paused;
-    }
-
-    .tl-tags.fx-run.fx-on li {
-      animation-play-state: running;
-    }
+  .origin-line {
+    margin: 2px 0 0;
+    color: var(--muted);
   }
 
   @media (min-width: 640px) {
-    /* The filter status fits on one line: "Filtering: name · n projects". */
-    .tl-filter-name,
-    .tl-filter-count {
-      display: inline;
+    .route {
+      --pad: 56px;
     }
 
-    .tl-filter-sep {
-      position: static;
-      width: auto;
-      height: auto;
-      overflow: visible;
-      clip: auto;
-    }
-
-    .tl-wrap {
-      --rail-x: 11px;
-      --dot: 16px;
-      --company: clamp(26px, 3vw, 32px);
-    }
-
-    .timeline {
-      gap: 44px;
-    }
-
-    .tl-item {
-      padding-left: calc(var(--rail-x) + 29px);
-    }
-
-    .tl-proj {
-      padding: 20px;
-    }
-
-    .tl-proj .tags {
-      gap: 8px;
-    }
-
-    .tl-tags li {
-      font-size: 12px;
-    }
-
-    .tl-chip {
-      padding: 0 10px;
+    .leg {
+      padding-bottom: 48px;
     }
   }
 
-  @media (min-width: 1024px) {
-    .tl-proj {
-      padding: 24px;
-    }
-  }
-
-  @keyframes tl-beat {
-    from {
-      transform: scale(1);
-      opacity: 0.75;
-    }
-
-    to {
-      transform: scale(2.4);
-      opacity: 0;
-    }
-  }
-
-  @keyframes tl-glow {
-    0% {
-      opacity: 0;
-    }
-
-    20% {
-      opacity: 0.9;
-    }
-
-    100% {
-      opacity: 0;
-    }
-  }
-
-  @keyframes tl-chip {
-    from {
-      opacity: 0;
-      transform: translateY(6px);
-    }
-
-    to {
-      opacity: 1;
-      transform: none;
+  /* Printed: a thin black rule instead of the coloured track. */
+  @media print {
+    .leg::before {
+      width: 2px;
+      left: calc(var(--rail) - 1px);
     }
   }
 </style>
-
-<script is:inline>
-  (() => {
-    const wrap = document.querySelector('[data-timeline]');
-    if (!wrap) return;
-    const rm = matchMedia('(prefers-reduced-motion: reduce)');
-    const hasObserver = 'IntersectionObserver' in window;
-    const rail = wrap.querySelector('.tl-rail');
-    const items = Array.from(wrap.querySelectorAll('.tl-item'));
-
-    // The rail fills with the gradient as the list passes 60% of the window height; dots light up once reached.
-    // A packet rides the head of the filled part (CSS, from --tl-progress). The first time the list on screen reaches
-    // a company, its dot pulses and the edge of its project cards lights up once (.hit).
-    // Reduced motion or no script: the rail stays full and every dot lit, without packet or pulse.
-    let frame = 0;
-    let listening = false;
-    let visible = !hasObserver;
-    const update = () => {
-      frame = 0;
-      if (!rail || rm.matches) return;
-      const box = rail.getBoundingClientRect();
-      const line = innerHeight * 0.6;
-      const progress = box.height > 0 ? Math.min(1, Math.max(0, (line - box.top) / box.height)) : 1;
-      wrap.style.setProperty('--tl-progress', progress.toFixed(4));
-      items.forEach((item) => {
-        const dot = item.querySelector('.tl-dot');
-        if (!dot) return;
-        const rect = dot.getBoundingClientRect();
-        const reached = rect.top + rect.height / 2 <= line;
-        item.classList.toggle('reached', reached);
-        if (reached && visible && !document.hidden) item.classList.add('hit');
-      });
-    };
-    const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(update);
-    };
-    const listen = (on) => {
-      if (on === listening) return;
-      listening = on;
-      if (on) {
-        addEventListener('scroll', schedule, { passive: true });
-        addEventListener('resize', schedule);
-      } else {
-        removeEventListener('scroll', schedule);
-        removeEventListener('resize', schedule);
-      }
-    };
-    const start = () => {
-      wrap.classList.add('scrub');
-      update();
-      listen(visible);
-    };
-    const stop = () => {
-      listen(false);
-      cancelAnimationFrame(frame);
-      frame = 0;
-      wrap.classList.remove('scrub');
-      wrap.style.removeProperty('--tl-progress');
-      items.forEach((item) => item.classList.remove('reached', 'hit'));
-    };
-    if (hasObserver) {
-      // Follow the scroll only while the list is on screen; one last update settles it when it leaves.
-      new IntersectionObserver((entries) => {
-        visible = entries.some((entry) => entry.isIntersecting);
-        if (rm.matches) return;
-        listen(visible);
-        schedule();
-      }).observe(wrap);
-
-      // Up to three beats on the current job, the first time the list shows.
-      const beat = new IntersectionObserver(
-        (entries) => {
-          if (!entries.some((entry) => entry.isIntersecting)) return;
-          beat.disconnect();
-          if (!rm.matches) wrap.classList.add('lit');
-        },
-        { threshold: 0.15 },
-      );
-      beat.observe(wrap);
-    }
-    if (!rm.matches) start();
-    rm.addEventListener('change', () => {
-      if (rm.matches) stop();
-      else start();
-    });
-  })();
-</script>
-
-<script is:inline>
-  (() => {
-    const wrap = document.querySelector('[data-timeline]');
-    if (!wrap) return;
-
-    // "+n" shows the technology chips folded past the sixth; the first one shown takes the focus.
-    const unfold = (list) => {
-      if (!list || list.classList.contains('open')) return;
-      list.classList.add('open');
-      const more = list.querySelector('[data-tech-more]');
-      if (more) more.setAttribute('aria-expanded', 'true');
-    };
-    wrap.querySelectorAll('[data-tech-more]').forEach((more) => {
-      more.addEventListener('click', () => {
-        const list = more.closest('ul');
-        unfold(list);
-        const first = list && list.querySelector('.tl-extra button');
-        if (first) first.focus();
-      });
-    });
-
-    // Printing shows every bullet; the folds that were closed close again afterwards.
-    let folded = [];
-    addEventListener('beforeprint', () => {
-      folded = Array.from(wrap.querySelectorAll('details.tl-more:not([open])'));
-      folded.forEach((details) => {
-        details.open = true;
-      });
-    });
-    addEventListener('afterprint', () => {
-      folded.forEach((details) => {
-        details.open = false;
-      });
-      folded = [];
-    });
-
-    // Technology filter: a [data-skill] button, here or in the skills grid, marks the projects that use it. One
-    // technology at a time; the same button again, "Clear" or Esc turns it off. Started once the page is parsed,
-    // since the skills grid comes after this list.
-    const startFilter = () => {
-      const root = document.documentElement;
-      const rm = matchMedia('(prefers-reduced-motion: reduce)');
-      const bar = document.querySelector('[data-filter-bar]');
-      const status = bar && bar.querySelector('[data-filter-status]');
-      const clear = bar && bar.querySelector('[data-filter-clear]');
-      const nameText = status && status.querySelector('[data-filter-name]');
-      const countText = status && status.querySelector('[data-filter-count]');
-      const separator = status && status.querySelector('[data-filter-sep]');
-      if (!bar || !status || !clear || !nameText || !countText || !separator) return;
-      const section = bar.closest('section');
-      const heading = section && section.querySelector('h2');
-      const projects = Array.from(wrap.querySelectorAll('[data-skills]'));
-      const buttons = Array.from(document.querySelectorAll('button[data-skill]'));
-      // Part of a project card that stays on screen when the company row above it is shown too.
-      const projectPeek = 120;
-      let active = '';
-
-      const apply = (key, name) => {
-        active = key;
-        let first = null;
-        let count = 0;
-        projects.forEach((project) => {
-          const match = key !== '' && project.dataset.skills.split(' ').includes(key);
-          project.classList.toggle('match', match);
-          project.classList.toggle('dim', key !== '' && !match);
-          if (!match) return;
-          count += 1;
-          if (!first) first = project;
-          // A matching chip folded behind "+n" is shown.
-          const chip = project.querySelector(`.tl-extra [data-skill="${key}"]`);
-          if (chip) unfold(chip.closest('ul'));
-        });
-        buttons.forEach((button) => {
-          button.setAttribute('aria-pressed', String(key !== '' && button.dataset.skill === key));
-        });
-        const template = (count === 1 ? bar.dataset.one : bar.dataset.many) || '';
-        nameText.textContent = key ? (bar.dataset.label || '').replace('{name}', name) : '';
-        countText.textContent = key ? template.replace('{n}', String(count)) : '';
-        separator.hidden = key === '';
-        bar.classList.toggle('sr-only', key === '');
-        clear.hidden = key === '';
-        return first;
-      };
-
-      // Distance of an element from the top of the page; unlike the box on screen, it leaves out the reveal offset.
-      const pageTop = (el) => {
-        let top = 0;
-        for (let node = el; node; node = node.offsetParent) top += node.offsetTop;
-        return top;
-      };
-
-      // Scroll so the project sits below the site header, the stuck filter bar and 16px. Its company row shows too,
-      // unless that would push the project itself off screen.
-      const scrollToMatch = (project) => {
-        const offset = (parseFloat(getComputedStyle(bar).top) || 0) + bar.offsetHeight + 16;
-        const item = project.closest('.tl-item');
-        const head = item && item.querySelector('.tl-head');
-        const projectTop = pageTop(project);
-        const headTop = head ? pageTop(head) : projectTop;
-        const top = projectTop - headTop + projectPeek <= innerHeight - offset ? headTop : projectTop;
-        scrollTo({ top: Math.max(0, top - offset), behavior: rm.matches ? 'auto' : 'smooth' });
-      };
-
-      // The clear button goes away with the filter: if it had the focus, the Experience heading takes it.
-      const reset = () => {
-        const hadFocus = bar.contains(document.activeElement);
-        apply('', '');
-        if (hadFocus && heading) heading.focus({ preventScroll: true });
-      };
-
-      buttons.forEach((button) => {
-        button.disabled = false;
-        button.addEventListener('click', () => {
-          const key = button.dataset.skill || '';
-          if (key === '' || key === active) {
-            reset();
-            return;
-          }
-          const first = apply(key, button.dataset.skillName || button.textContent.trim());
-          // From the skills grid: go to the first matching project, at once with reduced motion.
-          if (first && !wrap.contains(button)) scrollToMatch(first);
-        });
-      });
-      clear.addEventListener('click', reset);
-      document.addEventListener('keydown', (event) => {
-        if (event.key !== 'Escape' || event.defaultPrevented || active === '') return;
-        // Esc closes the command palette or the mobile menu first.
-        if (root.classList.contains('cmdk-lock') || root.classList.contains('menu-lock')) return;
-        reset();
-      });
-      bar.hidden = false;
-    };
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startFilter, { once: true });
-    else startFilter();
-  })();
-</script>

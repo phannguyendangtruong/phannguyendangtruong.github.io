@@ -155,39 +155,6 @@ const sections: readonly string[] = homeSections;
       markCurrent();
     }
 
-    // Reveal on scroll: only elements that start below the fold wait, so content shows if this fails.
-    const reveals = Array.from(document.querySelectorAll('.reveal'));
-    if ('IntersectionObserver' in window && !reduceMotion.matches && reveals.length) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          let order = 0;
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            const el = entry.target;
-            el.style.transitionDelay = `${Math.min(order, 5) * 60}ms`;
-            order += 1;
-            el.addEventListener('transitionend', () => el.style.removeProperty('transition-delay'), { once: true });
-            el.classList.remove('reveal-wait');
-            observer.unobserve(el);
-          });
-        },
-        { threshold: 0.15 },
-      );
-      reveals.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        if (rect.top < innerHeight && rect.bottom > 0) return;
-        el.classList.add('reveal-wait');
-        observer.observe(el);
-      });
-      reduceMotion.addEventListener('change', (event) => {
-        if (!event.matches) return;
-        document.querySelectorAll('.reveal-wait').forEach((el) => {
-          el.classList.remove('reveal-wait');
-          observer.unobserve(el);
-        });
-      });
-    }
-
     // Effects ([data-fx]): wait (.fx-wait) until on screen, then run once (.fx-run); .fx-on while on screen with the tab
     // visible, so the CSS pauses them otherwise. Reduced motion or no observer: no class, the static final state stays.
     const effects = Array.from(document.querySelectorAll('[data-fx]'));
@@ -220,42 +187,6 @@ const sections: readonly string[] = homeSections;
         effects.forEach((el) => el.classList.remove('fx-wait', 'fx-run', 'fx-on'));
       });
     }
-
-    // Spotlight follows the pointer on glass cards.
-    if (matchMedia('(hover: hover) and (pointer: fine)').matches && !reduceMotion.matches) {
-      document.addEventListener(
-        'pointermove',
-        (event) => {
-          const card = event.target instanceof Element ? event.target.closest('.card.spot') : null;
-          if (!card) return;
-          const rect = card.getBoundingClientRect();
-          card.style.setProperty('--mx', `${event.clientX - rect.left}px`);
-          card.style.setProperty('--my', `${event.clientY - rect.top}px`);
-        },
-        { passive: true },
-      );
-    }
-
-    // Page glow of the dark theme follows the pointer: --mx/--my on <html>, at most once per frame.
-    const finePointer = matchMedia('(pointer: fine)');
-    let glowFrame = 0;
-    let glowX = 0;
-    let glowY = 0;
-    const moveGlow = () => {
-      glowFrame = 0;
-      root.style.setProperty('--mx', `${glowX}px`);
-      root.style.setProperty('--my', `${glowY}px`);
-    };
-    document.addEventListener(
-      'pointermove',
-      (event) => {
-        if (!finePointer.matches || reduceMotion.matches || !isDark()) return;
-        glowX = event.clientX;
-        glowY = event.clientY;
-        if (!glowFrame) glowFrame = requestAnimationFrame(moveGlow);
-      },
-      { passive: true },
-    );
 
     window.__site = { toggleTheme, isDark, langTarget, isMenuOpen, closeMenu };
   })();

@@ -1,5 +1,9 @@
 ---
-import '@fontsource-variable/inter';
+import '@fontsource/barlow/400.css';
+import '@fontsource/barlow/500.css';
+import '@fontsource/barlow/600.css';
+import '@fontsource/barlow-condensed/600.css';
+import '@fontsource/barlow-condensed/700.css';
 import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
 import CommandPalette from '../components/CommandPalette.astro';
@@ -56,7 +60,7 @@ const minimal = variant === 'minimal';
       ogImageAlt={ogImageAlt}
       noindex={noindex}
     />
-    <meta name="theme-color" content="#070b14" />
+    <meta name="theme-color" content="#0a1120" />
     <script is:inline>
       (() => {
         const root = document.documentElement;
@@ -67,8 +71,9 @@ const minimal = variant === 'minimal';
         } catch (_) {}
         // Dark unless the visitor picked light before; the OS setting is not followed.
         root.dataset.theme = saved === 'light' ? 'light' : 'dark';
+        // userAgentData reports "macOS", navigator.platform "MacIntel": match without case.
         const platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
-        if (/Mac|iPhone|iPad|iPod/.test(platform)) root.dataset.os = 'mac';
+        if (/mac|iphone|ipad|ipod/i.test(platform)) root.dataset.os = 'mac';
       })();
     </script>
   </head>

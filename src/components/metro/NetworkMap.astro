@@ -1,0 +1,284 @@
+---
+import Icon from '../Icon.astro';
+import MapCompact from './MapCompact.astro';
+import MapWide from './MapWide.astro';
+import { hubs, interchanges, lines } from '../../data/network';
+import { formatPeriod, tr, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  class?: string;
+}
+
+const { lang, class: className } = Astro.props;
+const hubKeys = new Set(hubs().map((hub) => hub.key));
+const others = interchanges.filter((item) => !hubKeys.has(item.key));
+const lineSentence = (line: (typeof lines)[number]) =>
+  `${tr('lineLabel', lang).replace('{n}', String(line.number)).replace('{company}', line.job.company[lang])}, ${formatPeriod(line.job.start, line.job.end, lang)}.`;
+/** Text summary of the map for screen readers: the lines with their periods, then the hubs and other interchanges. */
+const desc = [
+  tr('mapSummary', lang).replace('{n}', String(lines.length)),
+  ...lines.map(lineSentence),
+  hubKeys.size > 0 ? tr('mapHubs', lang).replace('{names}', hubs().map((hub) => hub.name).join(', ')) : '',
+  others.length > 0 ? tr('mapOthers', lang).replace('{names}', others.map((item) => item.name).join(', ')) : '',
+]
+  .filter(Boolean)
+  .join(' ');
+const title = tr('mapTitle', lang);
+---
+
+<div class:list={['netmap', 'no-print', className]} data-netmap>
+  <MapWide lang={lang} title={title} desc={desc} />
+  <MapCompact lang={lang} title={title} desc={desc} />
+  <button
+    type="button"
+    class="icon-btn lg nm-pause js-only"
+    aria-pressed="false"
+    aria-label={tr('pauseAnimation', lang)}
+    data-netmap-pause
+  >
+    <Icon name="pause" size={16} class="ic-pause" />
+    <Icon name="play" size={16} class="ic-play" />
+  </button>
+</div>
+
+<style>
+  /* Phone and tablet: the compact map, at most 440px wide. From 1024px the full map takes the whole width it is
+     given; it leaves its top-left corner to the name block of the hero, so it is only drawn where that block sits
+     over it. */
+  .netmap {
+    position: relative;
+    max-width: 440px;
+  }
+
+  .netmap :global(.nm-wide) {
+    position: relative;
+    display: none;
+  }
+
+  .netmap :global(.nm-svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Interchange labels of the full map: a second drawing with the same viewBox, laid exactly over the first. */
+  .netmap :global(.nm-links) {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+  }
+
+  @media (min-width: 1024px) {
+    .netmap {
+      max-width: none;
+    }
+
+    .netmap :global(.nm-wide) {
+      display: block;
+    }
+
+    .netmap :global(.nm-compact) {
+      display: none;
+    }
+  }
+
+  /* Station signs in the condensed face; font sizes are viewBox units, so they follow the map's scale. */
+  .netmap :global(.nm-label) {
+    font: 600 14px var(--font-display);
+    fill: var(--text);
+  }
+
+  .netmap :global(.nm-hub) {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .netmap :global(.nm-now) {
+    font: 700 22px var(--font-display);
+    letter-spacing: 0.04em;
+    fill: var(--text);
+  }
+
+  .netmap :global(.nm-bullet) {
+    fill: var(--line);
+  }
+
+  .netmap :global(.nm-bullet-n) {
+    font: 700 13px var(--font-display);
+    fill: var(--on-line);
+  }
+
+  .netmap :global(.nm-start-text) {
+    font: 700 15px var(--font-display);
+    fill: var(--text);
+  }
+
+  .netmap :global(.nm-year) {
+    font: 500 13px var(--font);
+    font-variant-numeric: tabular-nums;
+    fill: var(--muted);
+  }
+
+  .netmap :global(.nm-here-ring) {
+    fill: none;
+    stroke: var(--text);
+    stroke-width: 2;
+  }
+
+  .netmap :global(.nm-here-dot) {
+    fill: var(--text);
+  }
+
+  .netmap :global(.nm-here-text) {
+    font: 600 13px var(--font);
+    fill: var(--text);
+  }
+
+  /* Interchange label as a filter button: the box shows on hover, focus and while its filter is on. */
+  .netmap :global(.nm-link) {
+    cursor: pointer;
+    outline: none;
+  }
+
+  .netmap :global(.nm-hit) {
+    fill: transparent;
+    stroke: none;
+    transition: fill var(--t-hover);
+  }
+
+  .netmap :global(.nm-link:hover .nm-hit) {
+    fill: var(--surface-2);
+  }
+
+  .netmap :global(.nm-link:focus-visible .nm-hit) {
+    stroke: var(--focus);
+    stroke-width: 2;
+  }
+
+  .netmap :global(.nm-link[aria-pressed='true'] .nm-hit) {
+    fill: var(--text);
+  }
+
+  .netmap :global(.nm-link[aria-pressed='true'] .nm-label) {
+    fill: var(--bg);
+  }
+
+  /* Data packet: a small light dot along each line, shown only with the script; it runs while .is-running is set. */
+  .netmap :global(.nm-packet) {
+    fill: none;
+    stroke: var(--interchange-fill);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 0.1 99.9;
+    visibility: hidden;
+    animation: nm-run var(--run) linear var(--from) infinite;
+    animation-play-state: paused;
+  }
+
+  :global(html.js) .netmap :global(.nm-packet) {
+    visibility: visible;
+  }
+
+  .netmap.is-running :global(.nm-packet) {
+    animation-play-state: running;
+  }
+
+  @keyframes nm-run {
+    from {
+      stroke-dashoffset: 0;
+    }
+
+    to {
+      stroke-dashoffset: -100;
+    }
+  }
+
+  /* Pause button in the bottom right corner, over the page background so it stays legible on the map. */
+  .nm-pause {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background: var(--bg);
+  }
+
+  .nm-pause[aria-pressed='false'] :global(.ic-play),
+  .nm-pause[aria-pressed='true'] :global(.ic-pause) {
+    display: none;
+  }
+
+  /* Reduced motion: nothing moves, so there is neither packet nor pause button. */
+  @media (prefers-reduced-motion: reduce) {
+    .netmap :global(.nm-packet),
+    .nm-pause {
+      display: none;
+    }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    const map = document.querySelector('[data-netmap]');
+    if (!map) return;
+    const rm = matchMedia('(prefers-reduced-motion: reduce)');
+    const pause = map.querySelector('[data-netmap-pause]');
+    const views = Array.from(map.querySelectorAll('[data-netmap-view]'));
+
+    // Packets run only while nobody paused them, the map is on screen and the tab is visible.
+    let paused = false;
+    let inView = true;
+    let tabVisible = !document.hidden;
+    const sync = () => {
+      map.classList.toggle('is-running', !rm.matches && !paused && inView && tabVisible);
+    };
+    if (pause) {
+      pause.addEventListener('click', () => {
+        paused = !paused;
+        pause.setAttribute('aria-pressed', String(paused));
+        sync();
+      });
+    }
+    if ('IntersectionObserver' in window && views.length) {
+      // Only one of the two maps is displayed at a time (compact under 1024px, full from 1024px).
+      const visible = new Set();
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) visible.add(entry.target);
+          else visible.delete(entry.target);
+        });
+        inView = visible.size > 0;
+        sync();
+      });
+      views.forEach((view) => observer.observe(view));
+    }
+    document.addEventListener('visibilitychange', () => {
+      tabVisible = !document.hidden;
+      sync();
+    });
+    rm.addEventListener('change', sync);
+    sync();
+
+    // The box behind each interchange label follows its text once the fonts are in (hidden maps keep the estimate).
+    const fit = () => {
+      map.querySelectorAll('.nm-link').forEach((link) => {
+        const text = link.querySelector('text');
+        const box = link.querySelector('.nm-hit');
+        if (!text || !box) return;
+        let size = null;
+        try {
+          size = text.getBBox();
+        } catch (_) {
+          return;
+        }
+        if (!size || !size.width) return;
+        box.setAttribute('x', String(size.x - 6));
+        box.setAttribute('y', String(size.y - 3));
+        box.setAttribute('width', String(size.width + 12));
+        box.setAttribute('height', String(size.height + 6));
+      });
+    };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    else fit();
+  })();
+</script>

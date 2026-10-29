@@ -1,415 +1,191 @@
 ---
-import GlowRing from './GlowRing.astro';
-import { education, skills } from '../data/profile';
+import RouteBullet from './metro/RouteBullet.astro';
+import { lines, linesOfTech } from '../data/network';
+import { skills } from '../data/profile';
 import { projectCountForSkill, skillKey } from '../data/skill-keys';
-import { tr, trCount, type Lang } from '../i18n/ui';
+import { trCount, type Lang } from '../i18n/ui';
 
 interface Props {
   lang: Lang;
 }
 
 const { lang } = Astro.props;
-const groups = skills.filter((skill) => skill.items.length > 0);
-/** The shaped layout (wide cards, full-width education) is drawn for exactly seven groups. */
-const shaped = groups.length === 7;
-const educationLine = [education.major?.[lang], education.period?.[lang]].filter(Boolean).join(' · ');
 /**
- * Cards around one gap of the shaped layout (Backend, Data, Messaging), linked by thin lines from 1024px:
- * the top card (row 1, right) down to the two cards below it, the left card (row 2) across to the right one.
+ * Interchange table: the skills by group; each row is a technology, a column of one slot per line (route order, an
+ * empty slot when that company did not use it) and its number of projects. A row with projects is a button that
+ * filters the route (script in home/SkillFilter.astro); the others are plain rows on the same columns.
  */
-const bus = { top: 1, left: 2, right: 3 };
-const onBus = (index: number) => shaped && Object.values(bus).includes(index);
-/** Chips of a group; one used in an Experience project is a button that filters that list (script in ExperienceTimeline). */
-const chipsOf = (items: string[]) =>
-  items.map((name) => {
-    const key = skillKey(name);
-    const count = projectCountForSkill(key);
-    const label = trCount('skillFilterOne', 'skillFilterMany', count, lang).replace('{name}', name);
-    return { name, key, count, label };
-  });
+const groups = skills
+  .filter((skill) => skill.items.length > 0)
+  .map((skill) => ({
+    title: skill.group[lang],
+    rows: skill.items.map((name) => {
+      const key = skillKey(name);
+      const count = projectCountForSkill(key);
+      const used = new Set(linesOfTech(key).map((line) => line.number));
+      return {
+        name,
+        key,
+        count,
+        slots: lines.map((line) => (used.has(line.number) ? line.number : 0)),
+        label: trCount('skillFilterOne', 'skillFilterMany', count, lang).replace('{name}', name),
+        countText: trCount('filterCountOne', 'filterCountMany', count, lang),
+      };
+    }),
+  }));
 ---
 
-<ul class:list={['bento', 'skills', { shaped }]}>
+<div class="xt">
   {
-    groups.map((skill, index) => (
-      <li class:list={['card', 'spot', 'sk', 'reveal', { wide: skill.wide, bus: onBus(index) }]} data-fx>
-        {skill.wide && <GlowRing />}
-        <h3 class="caps-label sk-title">{skill.group[lang]}</h3>
-        <ul class="tags sk-tags" aria-label={tr('techLabel', lang)}>
-          {chipsOf(skill.items).map((chip, position) =>
-            chip.count > 0 ? (
-              <li class="sk-link" style={`--i: ${position}`}>
+    groups.map((group) => (
+      <div class="xt-group">
+        <h3 class="xt-title">{group.title}</h3>
+        <ul class="xt-rows">
+          {group.rows.map((row) => (
+            <li>
+              {row.count > 0 ? (
                 <button
                   type="button"
-                  class="sk-chip"
-                  data-skill={chip.key}
-                  data-skill-name={chip.name}
+                  class="xt-row xt-filter"
+                  data-skill={row.key}
+                  data-skill-name={row.name}
                   aria-pressed="false"
-                  aria-label={chip.label}
+                  aria-label={row.label}
                   disabled
                 >
-                  {chip.name}
-                  <span class="sk-count js-only no-print" aria-hidden="true">
-                    {chip.count}
+                  <span class="xt-name">{row.name}</span>
+                  <span class="xt-lines">
+                    {row.slots.map((line) => (line > 0 ? <RouteBullet line={line} size="sm" /> : <span class="xt-slot" />))}
                   </span>
+                  <span class="xt-count">{row.countText}</span>
                 </button>
-              </li>
-            ) : (
-              <li class="sk-plain" style={`--i: ${position}`}>
-                {chip.name}
-              </li>
-            )
-          )}
+              ) : (
+                <span class="xt-row">
+                  <span class="xt-name">{row.name}</span>
+                  <span class="xt-lines" aria-hidden="true">
+                    {row.slots.map(() => (
+                      <span class="xt-slot" />
+                    ))}
+                  </span>
+                  <span class="xt-count" />
+                </span>
+              )}
+            </li>
+          ))}
         </ul>
-        {shaped && index === bus.top && (
-          <>
-            <span class="bus-link down-a" aria-hidden="true"></span>
-            <span class="bus-link down-b" aria-hidden="true"></span>
-          </>
-        )}
-        {shaped && index === bus.left && <span class="bus-link side" aria-hidden="true"></span>}
-      </li>
+      </div>
     ))
   }
-  <li class="card spot sk edu reveal">
-    <h3 class="caps-label sk-title">{tr('educationTitle', lang)}</h3>
-    <p class="edu-school">{education.school[lang]}</p>
-    {educationLine && <p class="edu-line">{educationLine}</p>}
-  </li>
-</ul>
+</div>
 
 <style>
-  .skills {
-    --sk-gap: 12px;
-    gap: var(--sk-gap);
+  /* Groups flow in columns: one on phones, two from 640px, three from 1024px; a group never splits. */
+  .xt {
+    column-gap: 40px;
   }
 
-  .sk {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    padding: 20px;
+  .xt-group {
+    break-inside: avoid;
+    margin-bottom: 28px;
   }
 
-  .sk h3 {
+  .xt-title {
     margin: 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    font: 600 0.9375rem/1.3 var(--font-display);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
   }
 
-  /* Mono group title with a small glowing marker. */
-  .sk-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .sk-title::before {
-    content: '';
-    flex: none;
-    width: 6px;
-    height: 6px;
-    border-radius: 2px;
-    background: var(--accent-2);
-    box-shadow: 0 0 8px var(--accent-2);
-  }
-
-  /* Backend and Data stand out: gradient edge (GlowRing) and a soft light in the corner. */
-  .wide {
-    background: radial-gradient(420px 220px at 0% 0%, var(--chip-bg), transparent 70%), var(--glass);
-  }
-
-  .wide .sk-title {
-    color: var(--text);
-  }
-
-  .sk-tags {
-    --chip-x: 10px;
-    gap: 6px;
-  }
-
-  /* Every chip is 32px tall, enough to tap; a chip used in a project is drawn by its button (.sk-chip). */
-  .sk-tags li {
-    position: relative;
-    display: flex;
-    align-items: center;
-    min-height: 32px;
-    padding: 0 var(--chip-x);
-    transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s, color 0.2s;
-  }
-
-  .sk-tags .sk-link {
+  /* A ruled table: a thin rule under every row, no box around any of them. */
+  .xt-rows {
+    margin: 0;
     padding: 0;
-    border: 0;
-    background: none;
+    list-style: none;
   }
 
-  /* Disabled, it reads as a plain chip; the script enables it once the filter works. */
-  .sk-chip {
-    display: inline-flex;
+  .xt-rows li {
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Every row is 44px or more, on the same three columns: name, one slot per line, project count. */
+  .xt-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto 5rem;
     align-items: center;
-    gap: 6px;
-    min-height: 32px;
-    padding: 0 var(--chip-x);
-    border: 1px solid var(--chip-border);
-    border-radius: inherit;
-    background: var(--chip-bg);
-    font: inherit;
-    color: inherit;
-    cursor: pointer;
-    transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+    column-gap: 12px;
+    width: 100%;
+    min-height: 44px;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    font: 500 1rem/1.3 var(--font);
+    color: var(--text);
+    text-align: left;
   }
 
-  .sk-chip:disabled {
+  /* A row with projects: background on hover and focus, the colours swapped while its filter is on. */
+  .xt-filter {
+    cursor: pointer;
+    transition: background-color var(--t-hover), color var(--t-hover);
+  }
+
+  .xt-filter:disabled {
     cursor: default;
   }
 
-  /* With the script, a chip without a project is a little dimmer: it filters nothing. */
-  :global(html.js) .sk-plain {
-    border-color: var(--border);
+  .xt-filter:enabled:hover,
+  .xt-filter:focus-visible {
+    background: var(--surface-2);
+  }
+
+  .xt-filter:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .xt-filter[aria-pressed='true'] {
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  .xt-name {
+    min-width: 0;
+  }
+
+  /* Bullets of the same line stand in the same column: an empty slot keeps the place of a line that is not there. */
+  .xt-lines {
+    display: inline-flex;
+    gap: 4px;
+  }
+
+  .xt-slot {
+    width: 20px;
+    height: 20px;
+  }
+
+  .xt-count {
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
     color: var(--muted);
   }
 
-  @media (hover: hover) and (pointer: fine) {
-    .sk-plain:hover,
-    .sk-chip:hover {
-      border-color: var(--accent-2);
-      background: var(--accent-soft);
-      box-shadow: 0 0 12px var(--glow);
-    }
-
-    :global(html.js) .sk-plain:hover {
-      border-color: var(--border);
-      background: var(--chip-bg);
-      box-shadow: none;
-    }
-  }
-
-  /* The skill the Experience list is filtered by. */
-  .sk-chip[aria-pressed='true'] {
-    border-color: var(--accent-2);
-    background: var(--accent-soft);
-    box-shadow: 0 0 0 1px var(--accent-2), 0 0 16px var(--glow);
-  }
-
-  /* Number of Experience projects that use the skill; only with the script, which makes the chip a filter. */
-  .sk-count {
-    min-width: 18px;
-    padding: 0 5px;
-    border-radius: var(--radius-pill);
-    background: var(--accent-soft);
-    font: 600 10.5px/18px var(--mono);
-    color: var(--accent);
-    text-align: center;
-  }
-
-  .sk-chip[aria-pressed='true'] .sk-count {
-    background: var(--accent);
-    color: var(--accent-text);
-  }
-
-  /* Signal scan: each chip lights up briefly in turn, once, when its card comes on screen (SiteScripts adds .fx-run). */
-  .sk-tags li::after {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    border: 1px solid var(--accent-2);
-    background: var(--accent-soft);
-    box-shadow: 0 0 12px var(--glow);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .sk.fx-run .sk-tags li::after {
-      animation: sk-scan 0.8s ease-out calc(var(--i, 0) * 90ms + 0.15s) 1 both;
-      animation-play-state: paused;
-    }
-
-    .sk.fx-run.fx-on .sk-tags li::after {
-      animation-play-state: running;
-    }
-  }
-
-  @keyframes sk-scan {
-    0% {
-      opacity: 0;
-    }
-
-    25% {
-      opacity: 1;
-    }
-
-    100% {
-      opacity: 0;
-    }
-  }
-
-  .edu {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px 24px;
-  }
-
-  .edu-school {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-  }
-
-  .edu-line {
-    margin: 0;
-    font-size: 15px;
-    color: var(--muted);
-  }
-
-  .bus-link {
-    display: none;
+  .xt-filter[aria-pressed='true'] .xt-count {
+    color: inherit;
   }
 
   @media (min-width: 640px) {
-    .skills {
-      --sk-gap: 16px;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .sk {
-      padding: 24px;
-    }
-
-    .sk-tags {
-      gap: 8px;
+    .xt {
+      columns: 2;
     }
   }
 
   @media (min-width: 1024px) {
-    .skills {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .wide .sk-tags {
-      --chip-x: 12px;
-    }
-
-    .wide .sk-tags li {
-      font-size: 13px;
-    }
-
-    .shaped .wide {
-      grid-column: span 2;
-    }
-
-    .shaped .edu {
-      grid-column: 1 / -1;
-    }
-
-    /* Links in the gaps: the top card spans columns 2–3, so its column centres sit at 1/4 and 3/4 of its width
-       less the gap; they meet the centre of column 2 on the left card and the centre of the right card. */
-    .shaped .bus-link {
-      display: block;
-      position: absolute;
-      z-index: 0;
-      background: var(--border-strong);
-      pointer-events: none;
-    }
-
-    .shaped .down-a,
-    .shaped .down-b {
-      top: calc(100% + 1px);
-      width: 1px;
-      height: var(--sk-gap);
-    }
-
-    .shaped .down-a {
-      left: calc((100% - var(--sk-gap)) / 4);
-    }
-
-    .shaped .down-b {
-      left: calc((100% - var(--sk-gap)) * 0.75 + var(--sk-gap));
-    }
-
-    .shaped .side {
-      top: 50%;
-      left: calc(100% + 1px);
-      width: var(--sk-gap);
-      height: 1px;
-    }
-
-    /* Event packet of a link, hidden until the pointer is on one of the three cards. */
-    .shaped .bus-link::after {
-      content: '';
-      position: absolute;
-      left: -2.5px;
-      top: -3px;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent-2);
-      box-shadow: 0 0 8px var(--accent-2);
-      opacity: 0;
-    }
-
-    .shaped .side::after {
-      left: -3px;
-      top: -2.5px;
-    }
-  }
-
-  /* Packets run three times while the pointer stays on Backend, Data or Messaging, then stop. */
-  @media (min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    .shaped:has(.bus:hover) .down-a::after,
-    .shaped:has(.bus:hover) .down-b::after {
-      animation: sk-drop 1.2s ease-in-out 3;
-    }
-
-    .shaped:has(.bus:hover) .side::after {
-      animation: sk-across 1.2s ease-in-out 0.45s 3 backwards;
-    }
-  }
-
-  @keyframes sk-drop {
-    0% {
-      opacity: 0;
-      transform: none;
-    }
-
-    15% {
-      opacity: 1;
-    }
-
-    60% {
-      opacity: 1;
-      transform: translateY(var(--sk-gap));
-    }
-
-    70%,
-    100% {
-      opacity: 0;
-      transform: translateY(var(--sk-gap));
-    }
-  }
-
-  @keyframes sk-across {
-    0% {
-      opacity: 0;
-      transform: none;
-    }
-
-    15% {
-      opacity: 1;
-    }
-
-    60% {
-      opacity: 1;
-      transform: translateX(var(--sk-gap));
-    }
-
-    70%,
-    100% {
-      opacity: 0;
-      transform: translateX(var(--sk-gap));
+    .xt {
+      columns: 3;
     }
   }
 </style>

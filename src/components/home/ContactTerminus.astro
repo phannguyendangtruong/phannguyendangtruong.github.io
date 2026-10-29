@@ -1,0 +1,124 @@
+---
+import ExternalLink from '../ExternalLink.astro';
+import Terminal from '../metro/Terminal.astro';
+import Track from '../metro/Track.astro';
+import { lines } from '../../data/network';
+import { trackGap } from '../../data/network-layout';
+import { profile } from '../../data/profile';
+import { tr, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Id of the heading, referenced by aria-labelledby of the section. */
+  id: string;
+}
+
+type Point = [number, number];
+
+const { lang, id } = Astro.props;
+/** The lines come in from the left edge, close up into parallel tracks at 45° and stop at the end bars. */
+const width = 164;
+const height = 64;
+const middleY = height / 2;
+const endX = width - 4;
+const middle = (lines.length - 1) / 2;
+const tracks = lines.map((line, index) => {
+  const at = middleY + (index - middle) * trackGap;
+  const from = middleY + (index - middle) * trackGap * 2;
+  const bend = 40 + Math.abs(from - at);
+  const points: Point[] = [[0, from], [40, from], [bend, at], [endX, at]];
+  return {
+    line: line.number,
+    y: at,
+    points: points.filter(([x, y], position) => position === 0 || x !== points[position - 1][0] || y !== points[position - 1][1]),
+  };
+});
+---
+
+<div class="terminus">
+  <div class="terminus-head">
+    <svg class="terminus-art" viewBox={`0 0 ${width} ${height}`} aria-hidden="true" focusable="false">
+      {tracks.map((track) => <Track line={track.line} points={track.points} />)}
+      {tracks.map((track) => <Terminal x={endX} y={track.y} line={track.line} length={trackGap} />)}
+    </svg>
+    <h2 class="section-title terminus-sign" id={id} tabindex="-1">
+      <span class="sr-only">{tr('contactTitle', lang)}: </span>{tr('contactTerminus', lang)}
+    </h2>
+  </div>
+  <p class="contact-body">{tr('contactBody', lang)}</p>
+  <div class="contact-ctas">
+    {
+      profile.links.linkedin && (
+        <ExternalLink
+          href={profile.links.linkedin}
+          lang={lang}
+          label={profile.linkNames.linkedin}
+          icon="linkedin"
+          class="button primary"
+        />
+      )
+    }
+    {
+      profile.links.github && (
+        <ExternalLink
+          href={profile.links.github}
+          lang={lang}
+          label={profile.linkNames.github}
+          icon="github"
+          class="button secondary"
+        />
+      )
+    }
+  </div>
+</div>
+
+<style>
+  /* The section sign: the lines arrive from the left and stop at their end bars, right against the word. */
+  .terminus-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .terminus-art {
+    display: block;
+    flex: none;
+    width: 104px;
+    height: auto;
+  }
+
+  .terminus-sign {
+    margin: 0;
+  }
+
+  .contact-body {
+    max-width: 46ch;
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .contact-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .contact-ctas :global(.button) {
+    min-height: 48px;
+    padding: 0 24px;
+  }
+
+  @media (min-width: 640px) {
+    .terminus-head {
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .terminus-art {
+      width: 144px;
+    }
+  }
+</style>

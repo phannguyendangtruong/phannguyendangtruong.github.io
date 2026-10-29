@@ -1,0 +1,265 @@
+---
+import Icon from '../Icon.astro';
+import { interchangeOf, lineByNumber, type JobProject } from '../../data/network';
+import { projectCountForSkill, skillKey, skillKeys, skillName } from '../../data/skill-keys';
+import { tr, trCount, type Lang } from '../../i18n/ui';
+
+interface Props {
+  project: JobProject;
+  lang: Lang;
+}
+
+const { project, lang } = Astro.props;
+/** Points shown before the "Show n more" fold, and technology chips shown before the "+n" button. */
+const pointsShown = 2;
+const techShown = 6;
+/** The chips fold only when that hides at least two of them: a "+1" button would take the room of the chip itself. */
+const techFoldMin = 2;
+
+const points = project.bullets?.[lang] ?? [];
+const shown = points.slice(0, pointsShown);
+const more = points.slice(pointsShown);
+const extraTech = project.tech.length - techShown;
+const hiddenTech = extraTech >= techFoldMin ? extraTech : 0;
+const visibleTech = project.tech.length - hiddenTech;
+const moreTechLabel = trCount('showMoreTechOne', 'showMoreTechMany', hiddenTech, lang);
+
+/** Technology chip: a button that filters the route by its shared key; an interchange shows the lines through it. */
+const chips = project.tech.map((name) => {
+  const key = skillKey(name);
+  const junction = interchangeOf(key);
+  return {
+    name,
+    key,
+    label: trCount('skillFilterOne', 'skillFilterMany', projectCountForSkill(key), lang).replace('{name}', name),
+    filterName: skillName(key, name),
+    colors: junction ? junction.lines.map((number) => lineByNumber(number).color) : [],
+  };
+});
+---
+
+<li class="stop" data-skills={skillKeys(project.tech).join(' ')}>
+  <h4 class="stop-name">{project.name[lang]}</h4>
+  <p class="stop-sum">{project.summary[lang]}</p>
+  {
+    shown.length > 0 && (
+      <ul class="dash-list stop-points">
+        {shown.map((point) => (
+          <li>{point}</li>
+        ))}
+      </ul>
+    )
+  }
+  {
+    more.length > 0 && (
+      <details class="stop-more">
+        <summary>
+          <span class="stop-more-show">{tr('showMoreItems', lang).replace('{n}', String(more.length))}</span>
+          <span class="stop-more-hide">{tr('showLess', lang)}</span>
+          <Icon name="arrow-down" size={14} class="stop-more-arrow" />
+        </summary>
+        <ul class="dash-list stop-points">
+          {more.map((point) => (
+            <li>{point}</li>
+          ))}
+        </ul>
+      </details>
+    )
+  }
+  <ul class="stop-tags" aria-label={tr('techLabel', lang)}>
+    {
+      chips.map((chip, position) => (
+        <li class:list={{ 'stop-extra': position >= visibleTech }}>
+          <button
+            type="button"
+            class="stop-chip"
+            data-skill={chip.key}
+            data-skill-name={chip.filterName}
+            aria-pressed="false"
+            aria-label={chip.label}
+            disabled
+          >
+            {chip.colors.length > 0 && (
+              <span class="chip-dots" aria-hidden="true">
+                {chip.colors.map((color) => (
+                  <i style={`--line: ${color}`} />
+                ))}
+              </span>
+            )}
+            {chip.name}
+          </button>
+        </li>
+      ))
+    }
+    {
+      hiddenTech > 0 && (
+        <li class="stop-plus js-only no-print">
+          <button type="button" class="stop-chip stop-plus-btn" aria-expanded="false" aria-label={moreTechLabel} data-tech-more>
+            +{hiddenTech}
+          </button>
+        </li>
+      )
+    }
+  </ul>
+</li>
+
+<style>
+  /* A project is a station on the leg of its company: a ring on the rail (--rail, --pad, --line come from the leg). */
+  .stop {
+    position: relative;
+    padding-bottom: 32px;
+  }
+
+  .stop:last-child {
+    padding-bottom: 0;
+  }
+
+  .stop::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--rail) - var(--pad) - 8px);
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    border: 3px solid var(--line);
+    border-radius: 50%;
+    background: var(--bg);
+    transition: background-color var(--t-hover);
+  }
+
+  .stop-name {
+    margin: 0;
+    font-size: 1.125rem;
+    line-height: 1.4;
+  }
+
+  .stop-sum {
+    max-width: 70ch;
+    margin: 6px 0 0;
+    color: var(--muted);
+  }
+
+  .stop-points {
+    max-width: 70ch;
+    margin-top: 12px;
+  }
+
+  /* Points past the second wait in a fold; its label turns into "Show less" and the arrow turns up once open. */
+  .stop-more summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--accent);
+    cursor: pointer;
+    list-style: none;
+    transition: color var(--t-hover);
+  }
+
+  .stop-more summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .stop-more summary:hover {
+    color: var(--text);
+  }
+
+  .stop-more[open] .stop-more-show,
+  .stop-more:not([open]) .stop-more-hide {
+    display: none;
+  }
+
+  .stop-more[open] :global(.stop-more-arrow) {
+    transform: rotate(180deg);
+  }
+
+  .stop-more .stop-points {
+    margin-top: 0;
+  }
+
+  /* Chips: 32px capsules; each button reaches 44px for touch through its ::after, rows are 12px apart. */
+  .stop-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 8px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .stop-chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 44px;
+    min-height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    font: 500 0.875rem/1 var(--font);
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color var(--t-hover), background-color var(--t-hover), color var(--t-hover);
+  }
+
+  .stop-chip::after {
+    content: '';
+    position: absolute;
+    inset: -6px -4px;
+  }
+
+  .stop-chip:disabled {
+    cursor: default;
+  }
+
+  .stop-chip:enabled:hover {
+    border-color: var(--text);
+  }
+
+  .stop-chip[aria-pressed='true'] {
+    border-color: var(--text);
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  /* Lines through an interchange chip, in route order. */
+  .chip-dots {
+    display: inline-flex;
+    gap: 3px;
+  }
+
+  .chip-dots i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--line);
+  }
+
+  .stop-plus-btn {
+    border-style: dashed;
+  }
+
+  .stop-tags.open .stop-plus {
+    display: none;
+  }
+
+  /* Filter: the matching stations fill their ring, the others fade. Chips past the sixth wait behind "+n". */
+  @media screen {
+    :global(html.js) .stop-tags:not(.open) .stop-extra {
+      display: none;
+    }
+
+    .stop.dim {
+      opacity: 0.45;
+    }
+
+    .stop.match::before {
+      background: var(--line);
+    }
+  }
+</style>

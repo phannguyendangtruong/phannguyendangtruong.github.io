@@ -1,0 +1,25 @@
+---
+import { lines } from '../../data/network';
+import { tr, type Lang, type UiKey } from '../../i18n/ui';
+
+/** Section sign of the CV sheet; styled in Resume.astro with the rest of the sheet, so print sizes stay in one place. */
+interface Props {
+  lang: Lang;
+  /** Id of the heading, referenced by aria-labelledby of the section. */
+  id: string;
+  title: UiKey;
+}
+
+const { lang, id, title } = Astro.props;
+---
+
+<h2 id={id} class="cv-h2">
+  <span>{tr(title, lang)}</span>
+  <span class="cv-band no-print" aria-hidden="true">
+    {
+      lines.map((line) => (
+        <span style={`--line: ${line.color}`} />
+      ))
+    }
+  </span>
+</h2>

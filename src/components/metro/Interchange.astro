@@ -1,0 +1,39 @@
+---
+interface Props {
+  /** Centre in the units of the parent SVG. */
+  x: number;
+  y: number;
+  /** Number of parallel tracks the capsule joins; 1 draws a round stop. */
+  tracks?: number;
+  /** Distance between two neighbouring tracks. */
+  gap?: number;
+  /** 'x' when the tracks sit side by side along x (vertical tracks), 'y' when they are stacked (horizontal tracks). */
+  across?: 'x' | 'y';
+  /** Half the capsule thickness. */
+  r?: number;
+  class?: string;
+}
+
+const { x, y, tracks = 2, gap = 10, across = 'x', r = 7, class: className } = Astro.props;
+const length = Math.max(0, tracks - 1) * gap;
+const width = across === 'x' ? length + r * 2 : r * 2;
+const height = across === 'y' ? length + r * 2 : r * 2;
+---
+
+<rect
+  class:list={['interchange', className]}
+  x={x - width / 2}
+  y={y - height / 2}
+  width={width}
+  height={height}
+  rx={r}
+/>
+
+<style>
+  /* SVG element for a parent <svg>: a light capsule with an ink edge over the tracks it joins. */
+  .interchange {
+    fill: var(--interchange-fill);
+    stroke: var(--interchange-stroke);
+    stroke-width: 2;
+  }
+</style>

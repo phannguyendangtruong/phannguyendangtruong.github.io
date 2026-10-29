@@ -1,49 +1,44 @@
 ---
+import { lineByNumber, lines as networkLines } from '../data/network';
 import { tr, type Lang, type Text, type UiKey } from '../i18n/ui';
 
 interface Props {
   lang: Lang;
   /** Id of the heading, referenced by aria-labelledby of the section. */
   id: string;
-  /** Code-style label above the heading, such as "// about"; the block number is only in `mark`. */
-  label: UiKey;
   /** Label key, or text from a data file (case study lifecycle title). */
   title: UiKey | Text;
   intro?: UiKey;
-  /** Fade the head in on scroll; off when a parent block already does. */
-  reveal?: boolean;
-  /** Large outlined block number at the right end of the heading row, such as "01"; shown from 640px. */
+  /**
+   * Route numbers of the lines the section is about, drawn as the colour band under the sign; all lines by default.
+   * The band always reads in route order (1, 2, 3), whatever the order given.
+   */
+  lines?: number[];
+  /** @deprecated Ignored: section heads have no label above the heading any more. */
+  label?: UiKey;
+  /** @deprecated Ignored: section heads have no block number any more. */
   mark?: string;
+  /** @deprecated Ignored: section heads are always shown, without a fade. */
+  reveal?: boolean;
   class?: string;
 }
 
-const { lang, id, label, title, intro, reveal = true, mark, class: className } = Astro.props;
+const { lang, id, title, intro, lines = networkLines.map((line) => line.number), class: className } = Astro.props;
 const heading = typeof title === 'string' ? tr(title, lang) : title[lang];
-/** Digits of the monospace font are 0.6em wide, so the viewBox follows the digit count. */
-const markWidth = mark ? mark.length * 60 + 8 : 0;
-const markGradient = `${id}-mark`;
+const colors = [...new Set(lines)].sort((a, b) => a - b).map((number) => lineByNumber(number).color);
 ---
 
-<div
-  class:list={['section-head', className, { reveal, 'has-mark': Boolean(mark) }]}
-  style={mark ? `--mark-units: ${markWidth}` : undefined}
->
+<div class:list={['section-head', className]}>
+  <h2 class="section-title" id={id} tabindex="-1">{heading}</h2>
   {
-    mark && (
-      <svg class="sh-mark no-print" viewBox={`0 0 ${markWidth} 100`} aria-hidden="true" focusable="false" data-fx>
-        <defs>
-          <linearGradient id={markGradient} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" class="stop-1" />
-            <stop offset="0.52" class="stop-2" />
-            <stop offset="1" class="stop-3" />
-          </linearGradient>
-        </defs>
-        <text x="4" y="86" stroke={`url(#${markGradient})`}>{mark}</text>
-      </svg>
+    colors.length > 0 && (
+      <span class="sh-band no-print" aria-hidden="true">
+        {colors.map((color) => (
+          <span style={`--line: ${color}`} />
+        ))}
+      </span>
     )
   }
-  <p class="eyebrow" aria-hidden="true">{tr(label, lang)}</p>
-  <h2 class="section-title" id={id} tabindex="-1">{heading}</h2>
   {intro && <p class="section-intro">{tr(intro, lang)}</p>}
 </div>
 
@@ -56,107 +51,20 @@ const markGradient = `${id}-mark`;
     margin: 0;
   }
 
+  /* Band of the related line colours under the sign: one 40px stretch per line. */
+  .sh-band {
+    display: flex;
+    width: fit-content;
+    margin-top: 12px;
+  }
+
+  .sh-band span {
+    width: 40px;
+    height: 6px;
+    background: var(--line);
+  }
+
   .section-intro {
-    margin: 12px 0 0;
-  }
-
-  /* Outlined gradient number, faint. Phones leave it out: there is no room beside the heading. */
-  .sh-mark {
-    display: none;
-    overflow: visible;
-    opacity: 0.12;
-    pointer-events: none;
-  }
-
-  .sh-mark text {
-    font: 700 100px/1 var(--mono);
-    letter-spacing: -0.04em;
-    fill: none;
-    stroke-width: 1.4;
-  }
-
-  /* The outline draws itself once when the number comes on screen (SiteScripts sets .fx-wait, then .fx-run).
-     The dash restarts on every glyph contour, so 360 units cover the longest contour of a 100px digit; after the
-     animation the dash is dropped, which leaves the full outline. */
-  @media screen and (prefers-reduced-motion: no-preference) {
-    .sh-mark.fx-wait text {
-      stroke-dasharray: 360;
-      stroke-dashoffset: 360;
-    }
-
-    .sh-mark.fx-run text {
-      animation: sh-draw 1.8s var(--ease) 0.1s 1 backwards;
-      animation-play-state: paused;
-    }
-
-    .sh-mark.fx-run.fx-on text {
-      animation-play-state: running;
-    }
-  }
-
-  @keyframes sh-draw {
-    from {
-      stroke-dasharray: 360;
-      stroke-dashoffset: 360;
-    }
-
-    to {
-      stroke-dasharray: 360;
-      stroke-dashoffset: 0;
-    }
-  }
-
-  .stop-1 {
-    stop-color: var(--accent);
-  }
-
-  .stop-2 {
-    stop-color: var(--accent-2);
-  }
-
-  .stop-3 {
-    stop-color: var(--accent-3);
-  }
-
-  :global(:root[data-theme='light']) .sh-mark {
-    opacity: 0.1;
-  }
-
-  /* From 640px the number has its own column at the right end of the heading row, so it never sits under the text. */
-  @media (min-width: 640px) {
-    .has-mark {
-      --mark-h: clamp(120px, 10.5vw, 144px);
-      --mark-w: calc(var(--mark-h) * var(--mark-units) / 100);
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) var(--mark-w);
-      column-gap: 24px;
-    }
-
-    .has-mark > :not(.sh-mark) {
-      grid-column: 1;
-    }
-
-    .has-mark .eyebrow {
-      grid-row: 1;
-    }
-
-    .has-mark .section-title {
-      grid-row: 2;
-    }
-
-    .has-mark .section-intro {
-      grid-row: 3;
-    }
-
-    /* Centred on the label and the heading; the negative margins keep the rows at the height of the text. */
-    .sh-mark {
-      display: block;
-      grid-column: 2;
-      grid-row: 1 / span 2;
-      align-self: center;
-      width: var(--mark-w);
-      height: var(--mark-h);
-      margin: calc(var(--mark-h) / -2) 0;
-    }
+    margin: 16px 0 0;
   }
 </style>

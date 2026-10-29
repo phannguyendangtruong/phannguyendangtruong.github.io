@@ -1,37 +1,57 @@
 ---
 import Base from '../layouts/Base.astro';
-import { localePath, notFoundLabels, tr } from '../i18n/ui';
+import Station from '../components/metro/Station.astro';
+import Track from '../components/metro/Track.astro';
+import { lines } from '../data/network';
+import { localePath, notFoundLabels, tr, type Lang } from '../i18n/ui';
+
+type Point = [number, number];
 
 const title = `${notFoundLabels.code} — ${tr('notFoundTitle', 'en')} · ${tr('notFoundTitle', 'vi')}`;
-const description = `${tr('notFoundTitle', 'en')} · ${tr('notFoundTitle', 'vi')}`;
-const homeEn = localePath('en', '/');
-const homeVi = localePath('vi', '/');
+const description = `${tr('notFoundBody', 'en')} · ${tr('notFoundBody', 'vi')}`;
+/** English first, then Vietnamese: each block leads to the home page and the CV in its language. */
+const langs: Lang[] = ['en', 'vi'];
+/** The line of the current job runs into a dashed, unbuilt section that ends at a station not on the map. */
+const line = lines[lines.length - 1].number;
+const built: Point[] = [[0, 44], [100, 44], [124, 20], [196, 20]];
+const stops: Point[] = [[48, 44], [160, 20]];
+const unknown: Point = [324, 20];
+const unbuilt: Point[] = [built[built.length - 1], unknown];
 ---
 
 <Base lang="en" title={title} description={description} path="/404/" variant="minimal" noindex>
   <div class="nf">
-    <div class="nf-bg no-print" aria-hidden="true">
-      <div class="nf-grid"></div>
-      <div class="nf-glow"></div>
-      <div class="nf-noise"></div>
-    </div>
-    <div class="nf-state">
-      <span class="nf-tick tl" aria-hidden="true"></span>
-      <span class="nf-tick tr" aria-hidden="true"></span>
-      <span class="nf-tick bl" aria-hidden="true"></span>
-      <span class="nf-tick br" aria-hidden="true"></span>
+    <div class="container nf-in">
+      <svg class="nf-map" viewBox="0 0 360 52" role="img" aria-labelledby="nf-map-title" aria-describedby="nf-map-desc">
+        <title id="nf-map-title">{tr('notFoundMap', 'en')}</title>
+        <desc id="nf-map-desc" lang="vi">{tr('notFoundMap', 'vi')}</desc>
+        <Track line={line} points={built} />
+        <Track line={line} points={unbuilt} dashed />
+        {stops.map(([x, y]) => <Station x={x} y={y} line={line} />)}
+        <Station x={unknown[0]} y={unknown[1]} line={line} r={16} />
+        <text class="nf-unknown" x={unknown[0]} y={unknown[1] + 7} text-anchor="middle">{notFoundLabels.unknownStation}</text>
+      </svg>
       <p class="nf-code">{notFoundLabels.code}</p>
       <h1 class="nf-title">
         <span class="part">{tr('notFoundTitle', 'en')}</span>{' '}
-        <span class="sep" aria-hidden="true">·</span>{' '}
         <span class="part" lang="vi">{tr('notFoundTitle', 'vi')}</span>
       </h1>
-      <p class="nf-status">
-        <span class="nf-pill"><span class="dot error" aria-hidden="true"></span>{notFoundLabels.status}</span>
-      </p>
-      <div class="nf-actions">
-        <a class="button primary" href={homeEn}>{tr('backHome', 'en')}</a>
-        <a class="button secondary" href={homeVi} hreflang="vi" lang="vi">{tr('backHome', 'vi')}</a>
+      <div class="nf-langs">
+        {
+          langs.map((lang) => (
+            <div class="nf-lang" lang={lang}>
+              <p class="nf-body">{tr('notFoundBody', lang)}</p>
+              <div class="nf-actions">
+                <a class="button primary" href={localePath(lang, '/')} hreflang={lang}>
+                  {tr('backHome', lang)}
+                </a>
+                <a class="button secondary" href={localePath(lang, '/cv/')} hreflang={lang}>
+                  {tr('viewResume', lang)}
+                </a>
+              </div>
+            </div>
+          ))
+        }
       </div>
     </div>
   </div>
@@ -51,234 +71,113 @@ const homeVi = localePath('vi', '/');
     display: grid;
   }
 
-  /* Clips the wide light, so the page never scrolls sideways. */
+  /* The block sits in the middle of the height between header and footer. */
   .nf {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
     display: grid;
-    place-items: center;
-    padding: 48px 16px 64px;
+    align-items: center;
+    padding: 40px 0 56px;
   }
 
-  /* Still background like the home page hero: grid, light, grain. */
-  .nf-bg {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    overflow: hidden;
-    pointer-events: none;
+  .nf-in {
+    max-width: 880px;
   }
 
-  .nf-grid {
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-    background-size: 44px 44px;
-    background-position: center top;
-    /* The mask only sets transparency; the colours are not displayed. */
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 92%);
-    mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 92%);
+  .nf-map {
+    display: block;
+    width: 100%;
+    max-width: 360px;
+    height: auto;
   }
 
-  .nf-glow {
-    position: absolute;
-    left: 50%;
-    top: 40%;
-    width: min(760px, 130%);
-    aspect-ratio: 16 / 10;
-    transform: translate(-50%, -50%);
-    background: var(--hero-glow);
-    filter: blur(8px);
+  /* Sign of the unknown station, inside its ring. */
+  .nf-unknown {
+    font: 700 20px var(--font-display);
+    fill: var(--text);
   }
 
-  /* Soft violet light below and to the right. */
-  .nf-glow::after {
-    content: '';
-    position: absolute;
-    left: 45%;
-    top: 35%;
-    width: 60%;
-    height: 65%;
-    background: var(--hero-glow-2);
-  }
-
-  .nf-noise {
-    position: absolute;
-    inset: 0;
-    opacity: 0.06;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-    background-size: 160px 160px;
-  }
-
-  /* Centred block without border or fill, marked by four corner ticks. */
-  .nf-state {
-    position: relative;
-    width: min(100%, 820px);
-    padding: 32px 16px 40px;
-    text-align: center;
-  }
-
-  .nf-tick {
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border: 0 solid var(--accent-2);
-    opacity: 0.5;
-  }
-
-  .nf-tick.tl {
-    top: 0;
-    left: 0;
-    border-top-width: 1px;
-    border-left-width: 1px;
-  }
-
-  .nf-tick.tr {
-    top: 0;
-    right: 0;
-    border-top-width: 1px;
-    border-right-width: 1px;
-  }
-
-  .nf-tick.bl {
-    bottom: 0;
-    left: 0;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-  }
-
-  .nf-tick.br {
-    bottom: 0;
-    right: 0;
-    border-bottom-width: 1px;
-    border-right-width: 1px;
-  }
-
-  /* Gradient code with a band of light; the still state keeps the band outside the text. */
+  /* Solid code in the sign face, quieter than the title. */
   .nf-code {
-    --nf-shine: var(--text);
-    margin: 0;
-    display: inline-block;
-    padding: 0 0.06em;
-    font: 700 clamp(88px, 20vw, 184px)/1 var(--mono);
-    letter-spacing: -0.04em;
-    background-image:
-      linear-gradient(100deg, transparent 45%, var(--nf-shine) 50%, transparent 55%),
-      linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 25%, var(--accent-3) 50%, var(--accent-2) 75%, var(--accent) 100%);
-    background-size: 300% 100%, 200% 100%;
-    background-position: 0 0, 0 0;
-    background-repeat: no-repeat;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  :global(:root[data-theme='light']) .nf-code {
-    --nf-shine: var(--surface);
-  }
-
-  /* Colours and light cross the code once after load; the end matches the still state. */
-  @media (prefers-reduced-motion: no-preference) {
-    :global(html.js) .nf-code {
-      animation: nf-sweep 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) 0.15s 1 both;
-    }
-  }
-
-  @keyframes nf-sweep {
-    from {
-      background-position: 100% 0, 100% 0;
-    }
-
-    to {
-      background-position: 0 0, 0 0;
-    }
+    margin: 28px 0 0;
+    font: 700 clamp(3.5rem, 12vw, 6rem) / 0.9 var(--font-display);
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
   }
 
   .nf-title {
-    margin: 24px 0 0;
-    font-size: clamp(24px, 2.4vw + 12px, 32px);
-    font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
+    margin: 12px 0 0;
+    font-size: clamp(2.25rem, 5.5vw, 3.5rem);
+    line-height: 1.05;
     color: var(--text);
   }
 
-  /* One line per language until 960px. */
+  /* One line per language, Vietnamese second in the secondary text colour. */
   .nf-title .part {
     display: block;
   }
 
-  .nf-title .sep {
-    display: none;
+  .nf-title .part + .part {
+    margin-top: 4px;
+    color: var(--muted);
   }
 
-  .nf-status {
-    margin: 16px 0 0;
-    display: flex;
-    justify-content: center;
+  .nf-langs {
+    display: grid;
+    gap: 24px;
+    margin-top: 32px;
   }
 
-  .nf-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    max-width: 100%;
-    padding: 6px 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-pill);
-    background: var(--surface);
-    font: 13px/1.4 var(--mono);
-    letter-spacing: 0.01em;
+  .nf-lang {
+    display: grid;
+    align-content: start;
+    gap: 16px;
+  }
+
+  /* Phone: the Vietnamese block under a 1px rule. */
+  .nf-lang + .nf-lang {
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .nf-body {
+    max-width: 46ch;
+    margin: 0;
     color: var(--muted);
   }
 
   .nf-actions {
-    margin-top: 32px;
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: 12px;
+  }
+
+  .nf-actions .button {
+    min-height: 48px;
+    padding: 0 22px;
   }
 
   @media (min-width: 640px) {
     .nf {
-      padding: 72px 24px 88px;
+      padding: 64px 0 80px;
     }
 
-    .nf-state {
-      padding: 40px 56px 48px;
-    }
-  }
-
-  @media (min-width: 960px) {
-    .nf-title .part {
-      display: inline-block;
-      white-space: nowrap;
-    }
-
-    .nf-title .sep {
-      display: inline;
-      color: var(--muted);
-      font-weight: 400;
+    .nf-map {
+      max-width: 440px;
     }
   }
 
-  @media (forced-colors: active) {
-    .nf-code {
-      background: none;
-      color: CanvasText;
+  /* From 720px: English and Vietnamese side by side, split by a 1px rule. */
+  @media (min-width: 720px) {
+    .nf-langs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 32px;
     }
-  }
 
-  /* Browsers do not print backgrounds, so text clipped to one would disappear. */
-  @media print {
-    .nf-code {
-      background: none;
-      color: var(--text);
+    .nf-lang + .nf-lang {
+      padding-top: 0;
+      padding-left: 32px;
+      border-top: 0;
+      border-left: 1px solid var(--border);
     }
   }
 </style>

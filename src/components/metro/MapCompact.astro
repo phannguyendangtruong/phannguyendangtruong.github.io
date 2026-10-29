@@ -1,0 +1,110 @@
+---
+import Interchange from './Interchange.astro';
+import MapStart from './MapStart.astro';
+import Terminal from './Terminal.astro';
+import Track from './Track.astro';
+import { interchanges, lines } from '../../data/network';
+import {
+  along,
+  capsuleRadius,
+  compactKeys,
+  compactMap,
+  packetSeconds,
+  pathOf,
+  placeMap,
+  trackGap,
+} from '../../data/network-layout';
+import { tr, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Accessible name and description, the same as the desktop map. */
+  title: string;
+  desc: string;
+}
+
+const { lang, title, desc } = Astro.props;
+const file = 'src/data/network-layout.ts › compactMap';
+const { width, height, tracks } = compactMap;
+const points = placeMap(file, compactMap, compactKeys());
+const lineOf = new Map(lines.map((line) => [line.key, line] as const));
+const junctionOf = new Map(interchanges.map((item) => [item.key, item] as const));
+
+const starts = points.flatMap((point) => {
+  const line = point.kind === 'start' ? lineOf.get(point.key) : undefined;
+  if (!line) return [];
+  const track = tracks[line.number];
+  return [{ line: line.number, xy: point.at.xy, bar: along(track[0], track[1]), bullet: point.at.bullet ?? point.at.xy }];
+});
+
+/** Hubs only: the phone map leaves out the stations and the other interchanges. */
+const hubs = points.flatMap((point) => {
+  const item = point.kind === 'interchange' ? junctionOf.get(point.key) : undefined;
+  const label = point.at.label;
+  if (!item || !label) return [];
+  return [{ name: item.name, tracks: item.lines.length, xy: point.at.xy, label }];
+});
+
+const end = points.find((point) => point.kind === 'end');
+const endLabel = end?.at.label;
+const here = end?.at.here;
+const ends = lines.map((line) => {
+  const track = tracks[line.number];
+  const last = track[track.length - 1];
+  return { line: line.number, xy: last, bar: along(track[track.length - 2], last) };
+});
+
+const packets = lines.map((line, index) => {
+  const track = tracks[line.number];
+  const seconds = packetSeconds(track);
+  return { d: pathOf(track), seconds, offset: Math.round((seconds * index * 10) / lines.length) / 10 };
+});
+---
+
+<div class="nm-view nm-compact" data-netmap-view>
+  <svg
+    class="nm-svg"
+    viewBox={`0 0 ${width} ${height}`}
+    role="img"
+    aria-labelledby="nm-compact-title"
+    aria-describedby="nm-compact-desc"
+  >
+    <title id="nm-compact-title">{title}</title>
+    <desc id="nm-compact-desc">{desc}</desc>
+    {lines.map((line) => <Track line={line.number} points={tracks[line.number]} />)}
+    <g class="nm-packets">
+      {
+        packets.map((packet) => (
+          <path class="nm-packet" d={packet.d} pathLength="100" style={`--run: ${packet.seconds}s; --from: -${packet.offset}s`} />
+        ))
+      }
+    </g>
+    {starts.map((start) => <Terminal x={start.xy[0]} y={start.xy[1]} line={start.line} track={start.bar} />)}
+    {ends.map((item) => <Terminal x={item.xy[0]} y={item.xy[1]} line={item.line} track={item.bar} length={trackGap} />)}
+    {
+      hubs.map((hub) => (
+        <Interchange x={hub.xy[0]} y={hub.xy[1]} tracks={hub.tracks} gap={trackGap} r={capsuleRadius} across="x" />
+      ))
+    }
+    {
+      hubs.map((hub) => (
+        <text class="nm-label nm-hub" x={hub.label[0]} y={hub.label[1]} text-anchor={hub.label[2]}>{hub.name}</text>
+      ))
+    }
+    {starts.map((start) => <MapStart line={start.line} x={start.bullet[0]} y={start.bullet[1]} lang={lang} />)}
+    {
+      endLabel && (
+        <text class="nm-now" x={endLabel[0]} y={endLabel[1]} text-anchor={endLabel[2]}>{tr('mapNow', lang).toLocaleUpperCase(lang)}</text>
+      )
+    }
+    {
+      here && (
+        <g class="nm-here">
+          <circle class="nm-here-ring" cx={here[0]} cy={here[1]} r="9" />
+          <circle class="nm-here-dot" cx={here[0]} cy={here[1]} r="4" />
+          <text class="nm-here-text" x={here[0] + 16} y={here[1] + 5}>{tr('mapHere', lang)}</text>
+        </g>
+      )
+    }
+  </svg>
+</div>

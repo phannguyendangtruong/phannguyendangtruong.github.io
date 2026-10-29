@@ -1,0 +1,249 @@
+---
+import Icon from '../Icon.astro';
+import { tr, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+---
+
+<div
+  class="tl-filter sr-only no-print"
+  data-filter-bar
+  data-label={tr('filterStatus', lang)}
+  data-one={tr('filterCountOne', lang)}
+  data-many={tr('filterCountMany', lang)}
+  hidden
+>
+  <p class="tl-filter-text" role="status" aria-live="polite" aria-atomic="true" data-filter-status>
+    <span class="tl-filter-name" data-filter-name></span><span class="tl-filter-sep" data-filter-sep hidden> · </span><span class="tl-filter-count" data-filter-count></span>
+  </p>
+  <button type="button" class="chip-btn tl-filter-clear" data-filter-clear hidden>
+    <Icon name="close" size={14} />
+    {tr('filterClear', lang)}
+  </button>
+</div>
+
+<style>
+  /* Status bar of the filter: on screen only while a technology filter is on (the script drops .sr-only); it stays
+     under the site header while the route scrolls, so the filter can always be cleared. */
+  .tl-filter:not(.sr-only) {
+    position: sticky;
+    top: calc(var(--nav-h) + 8px);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 24px;
+    padding: 4px 4px 4px 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  /* Phone: the station on the first line, the project count on the second; the separator is only read out. */
+  .tl-filter-text {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .tl-filter-name,
+  .tl-filter-count {
+    display: block;
+  }
+
+  .tl-filter-count {
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+
+  .tl-filter-sep {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .tl-filter-clear {
+    flex: none;
+    height: 44px;
+  }
+
+  @media (min-width: 640px) {
+    .tl-filter-name,
+    .tl-filter-count {
+      display: inline;
+    }
+
+    .tl-filter-sep {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip: auto;
+    }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    // "+n" shows the technology chips folded past the sixth; the first one shown takes the focus.
+    const unfold = (list) => {
+      if (!list || list.classList.contains('open')) return;
+      list.classList.add('open');
+      const more = list.querySelector('[data-tech-more]');
+      if (more) more.setAttribute('aria-expanded', 'true');
+    };
+
+    // Distance of an element from the top of the page, whatever the current scroll.
+    const pageTop = (el) => {
+      let top = 0;
+      for (let node = el; node; node = node.offsetParent) top += node.offsetTop;
+      return top;
+    };
+
+    // Started once the page is parsed: this bar comes before the route, and the interchange table after it.
+    const start = () => {
+      const wrap = document.querySelector('[data-timeline]');
+      if (!wrap) return;
+      wrap.querySelectorAll('[data-tech-more]').forEach((more) => {
+        more.addEventListener('click', () => {
+          const list = more.closest('ul');
+          unfold(list);
+          const first = list && list.querySelector('.stop-extra button');
+          if (first) first.focus();
+        });
+      });
+
+      // Printing shows every point; the folds that were closed close again afterwards.
+      let folded = [];
+      addEventListener('beforeprint', () => {
+        folded = Array.from(wrap.querySelectorAll('details.stop-more:not([open])'));
+        folded.forEach((details) => {
+          details.open = true;
+        });
+      });
+      addEventListener('afterprint', () => {
+        folded.forEach((details) => {
+          details.open = false;
+        });
+        folded = [];
+      });
+
+      // Technology filter: a [data-skill] control (chip of the route, row of the interchange table, interchange label
+      // of the map) marks the projects that use it. One technology at a time; the same control again, "Clear" or Esc
+      // turns it off.
+      const root = document.documentElement;
+      const rm = matchMedia('(prefers-reduced-motion: reduce)');
+      const bar = document.querySelector('[data-filter-bar]');
+      const status = bar && bar.querySelector('[data-filter-status]');
+      const clear = bar && bar.querySelector('[data-filter-clear]');
+      const nameText = status && status.querySelector('[data-filter-name]');
+      const countText = status && status.querySelector('[data-filter-count]');
+      const separator = status && status.querySelector('[data-filter-sep]');
+      if (!bar || !status || !clear || !nameText || !countText || !separator) return;
+      const section = bar.closest('section');
+      const heading = section && section.querySelector('h2');
+      const projects = Array.from(wrap.querySelectorAll('[data-skills]'));
+      const controls = Array.from(document.querySelectorAll('[data-skill]'));
+      // Part of a project that stays on screen when the company row above it is shown too.
+      const projectPeek = 120;
+      let active = '';
+
+      const apply = (key, name) => {
+        active = key;
+        let first = null;
+        let count = 0;
+        projects.forEach((project) => {
+          const match = key !== '' && project.dataset.skills.split(' ').includes(key);
+          project.classList.toggle('match', match);
+          project.classList.toggle('dim', key !== '' && !match);
+          if (!match) return;
+          count += 1;
+          if (!first) first = project;
+          // A matching chip folded behind "+n" is shown.
+          const chip = project.querySelector(`.stop-extra [data-skill="${key}"]`);
+          if (chip) unfold(chip.closest('ul'));
+        });
+        controls.forEach((control) => {
+          control.setAttribute('aria-pressed', String(key !== '' && control.dataset.skill === key));
+        });
+        const template = (count === 1 ? bar.dataset.one : bar.dataset.many) || '';
+        nameText.textContent = key ? (bar.dataset.label || '').replace('{name}', name) : '';
+        countText.textContent = key ? template.replace('{n}', String(count)) : '';
+        separator.hidden = key === '';
+        bar.classList.toggle('sr-only', key === '');
+        clear.hidden = key === '';
+        return first;
+      };
+
+      // Scroll so the project sits below the site header, the stuck filter bar and 16px. Its company row shows too,
+      // unless that would push the project itself off screen.
+      const scrollToMatch = (project) => {
+        const offset = (parseFloat(getComputedStyle(bar).top) || 0) + bar.offsetHeight + 16;
+        const item = project.closest('.tl-item');
+        const head = item && item.querySelector('.tl-head');
+        const projectTop = pageTop(project);
+        const headTop = head ? pageTop(head) : projectTop;
+        const top = projectTop - headTop + projectPeek <= innerHeight - offset ? headTop : projectTop;
+        scrollTo({ top: Math.max(0, top - offset), behavior: rm.matches ? 'auto' : 'smooth' });
+      };
+
+      // The clear button goes away with the filter: if it had the focus, the Experience heading takes it.
+      const reset = () => {
+        const hadFocus = bar.contains(document.activeElement);
+        apply('', '');
+        if (hadFocus && heading) heading.focus({ preventScroll: true });
+      };
+
+      const toggle = (control) => {
+        const key = control.dataset.skill || '';
+        if (key === '' || key === active) {
+          reset();
+          return;
+        }
+        const first = apply(key, control.dataset.skillName || (control.textContent || '').trim());
+        // From the table or the map: go to the first matching project, at once with reduced motion.
+        if (first && !wrap.contains(control)) scrollToMatch(first);
+      };
+
+      controls.forEach((control) => {
+        if (control instanceof HTMLButtonElement) {
+          control.disabled = false;
+        } else {
+          // A map label is a link to the Experience block; with the script it is a toggle button.
+          control.setAttribute('role', 'button');
+          control.setAttribute('aria-pressed', 'false');
+          control.addEventListener('keydown', (event) => {
+            if (event.key !== ' ') return;
+            event.preventDefault();
+            toggle(control);
+          });
+        }
+        control.addEventListener('click', (event) => {
+          event.preventDefault();
+          toggle(control);
+        });
+      });
+      clear.addEventListener('click', reset);
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape' || event.defaultPrevented || active === '') return;
+        // Esc closes the command palette or the mobile menu first.
+        if (root.classList.contains('cmdk-lock') || root.classList.contains('menu-lock')) return;
+        reset();
+      });
+      bar.hidden = false;
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+    else start();
+  })();
+</script>

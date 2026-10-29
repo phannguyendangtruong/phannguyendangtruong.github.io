@@ -1,5 +1,4 @@
 import * as profileData from './profile';
-import { heroDiagram } from './hero';
 import { ui } from '../i18n/ui';
 
 const emailPattern = /[^\s@]+@[^\s@]+\.[a-z]{2,}/i;
@@ -97,25 +96,6 @@ function checkSlugs(): void {
   });
 }
 
-function checkHeroDiagram(): void {
-  const file = 'src/data/hero.ts';
-  const ids = new Set<string>();
-  heroDiagram.nodes.forEach((node) => {
-    if (ids.has(node.id)) {
-      throw new Error(`Dữ liệu nội dung: ${file} có mã trùng: ${node.id}.`);
-    }
-    ids.add(node.id);
-  });
-  heroDiagram.edges.forEach((edge, index) => {
-    (['from', 'to'] as const).forEach((end) => {
-      if (ids.has(edge[end])) return;
-      throw new Error(
-        `Dữ liệu nội dung: ${file} › heroDiagram.edges[${index}].${end} trỏ tới ${edge[end]} không tồn tại.`,
-      );
-    });
-  });
-}
-
 /**
  * Data files to check: hero.ts and the case study of each project slug. A case study file whose slug is not in
  * `projects` is never built (the project was taken off the site), so it is left out until it is deleted.
@@ -196,7 +176,6 @@ export function validateContent(): void {
     Object.entries(module as Record<string, unknown>).forEach(([name, value]) => walk(value, file, name));
   });
   checkSlugs();
-  checkHeroDiagram();
   checkCaseStudies(modules);
   checked = true;
 }

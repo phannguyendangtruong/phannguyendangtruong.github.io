@@ -1,0 +1,154 @@
+---
+import Interchange from './Interchange.astro';
+import MapStart from './MapStart.astro';
+import Station from './Station.astro';
+import Terminal from './Terminal.astro';
+import Track from './Track.astro';
+import { interchanges, lines } from '../../data/network';
+import {
+  along,
+  capsuleRadius,
+  packetSeconds,
+  pathOf,
+  placeMap,
+  trackGap,
+  wideMap,
+  type LabelAt,
+} from '../../data/network-layout';
+import { projectCountForSkill } from '../../data/skill-keys';
+import { tr, trCount, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Accessible name and description, the same as the phone map. */
+  title: string;
+  desc: string;
+}
+
+const { lang, title, desc } = Astro.props;
+const file = 'src/data/network-layout.ts › wideMap';
+const { width, height, tracks } = wideMap;
+const viewBox = `0 0 ${width} ${height}`;
+const points = placeMap(file, wideMap);
+const lineOf = new Map(lines.map((line) => [line.key, line] as const));
+const stationOf = new Map(lines.flatMap((line) => line.stations.map((station) => [station.key, station] as const)));
+const junctionOf = new Map(interchanges.map((item) => [item.key, item] as const));
+
+function labelAt(key: string, label: LabelAt | undefined): LabelAt {
+  if (!label) throw new Error(`Sơ đồ tuyến: ${file} chưa có vị trí nhãn cho ga ${key}.`);
+  return label;
+}
+
+/** Box behind a link label until the script fits it to the text: about half the font size a character, 6 units around. */
+function hitBox(name: string, size: number, [x, y, anchor]: LabelAt) {
+  const w = Math.ceil(name.length * size * 0.5) + 12;
+  const left = anchor === 'start' ? x - 6 : anchor === 'end' ? x - w + 6 : x - w / 2;
+  return { x: left, y: y - size - 3, w, h: size + 10 };
+}
+
+const starts = points.flatMap((point) => {
+  const line = point.kind === 'start' ? lineOf.get(point.key) : undefined;
+  if (!line) return [];
+  const track = tracks[line.number];
+  return [{ line: line.number, xy: point.at.xy, bar: along(track[0], track[1]), bullet: point.at.bullet ?? point.at.xy }];
+});
+
+const stations = points.flatMap((point) => {
+  const station = point.kind === 'station' ? stationOf.get(point.key) : undefined;
+  if (!station) return [];
+  const name = (station.project.mapLabel ?? station.name)[lang];
+  return [{ line: station.line, xy: point.at.xy, name, label: labelAt(point.key, point.at.label) }];
+});
+
+/** Interchanges top to bottom, so their links come in reading order. */
+const junctions = points
+  .flatMap((point) => {
+    const item = point.kind === 'interchange' ? junctionOf.get(point.key) : undefined;
+    if (!item) return [];
+    const hub = item.lines.length === lines.length;
+    const label = labelAt(point.key, point.at.label);
+    const count = projectCountForSkill(item.key);
+    return [
+      {
+        key: item.key,
+        name: item.name,
+        hub,
+        tracks: point.at.crossing ? 1 : item.lines.length,
+        xy: point.at.xy,
+        label,
+        box: hitBox(item.name, hub ? 16 : 14, label),
+        aria: trCount('skillFilterOne', 'skillFilterMany', count, lang).replace('{name}', item.name),
+      },
+    ];
+  })
+  .sort((a, b) => a.xy[1] - b.xy[1] || a.xy[0] - b.xy[0]);
+
+const end = points.find((point) => point.kind === 'end');
+const endLabel = end ? labelAt(end.key, end.at.label) : undefined;
+const here = end?.at.here;
+const ends = lines.map((line) => {
+  const track = tracks[line.number];
+  const last = track[track.length - 1];
+  return { line: line.number, xy: last, bar: along(track[track.length - 2], last) };
+});
+
+/** One data packet a line; each starts a share of its run later, so they never move together. */
+const packets = lines.map((line, index) => {
+  const track = tracks[line.number];
+  const seconds = packetSeconds(track);
+  return { d: pathOf(track), seconds, offset: Math.round((seconds * index * 10) / lines.length) / 10 };
+});
+---
+
+<div class="nm-view nm-wide" data-netmap-view>
+  <svg class="nm-svg" viewBox={viewBox} role="img" aria-labelledby="nm-wide-title" aria-describedby="nm-wide-desc">
+    <title id="nm-wide-title">{title}</title>
+    <desc id="nm-wide-desc">{desc}</desc>
+    {lines.map((line) => <Track line={line.number} points={tracks[line.number]} />)}
+    <g class="nm-packets">
+      {
+        packets.map((packet) => (
+          <path class="nm-packet" d={packet.d} pathLength="100" style={`--run: ${packet.seconds}s; --from: -${packet.offset}s`} />
+        ))
+      }
+    </g>
+    {starts.map((start) => <Terminal x={start.xy[0]} y={start.xy[1]} line={start.line} track={start.bar} />)}
+    {ends.map((item) => <Terminal x={item.xy[0]} y={item.xy[1]} line={item.line} track={item.bar} length={trackGap} />)}
+    {stations.map((station) => <Station x={station.xy[0]} y={station.xy[1]} line={station.line} />)}
+    {
+      junctions.map((item) => (
+        <Interchange x={item.xy[0]} y={item.xy[1]} tracks={item.tracks} gap={trackGap} r={capsuleRadius} across="x" />
+      ))
+    }
+    {
+      stations.map((station) => (
+        <text class="nm-label" x={station.label[0]} y={station.label[1]} text-anchor={station.label[2]}>{station.name}</text>
+      ))
+    }
+    {starts.map((start) => <MapStart line={start.line} x={start.bullet[0]} y={start.bullet[1]} lang={lang} />)}
+    {
+      endLabel && (
+        <text class="nm-now" x={endLabel[0]} y={endLabel[1]} text-anchor={endLabel[2]}>{tr('mapNow', lang).toLocaleUpperCase(lang)}</text>
+      )
+    }
+    {
+      here && (
+        <g class="nm-here">
+          <circle class="nm-here-ring" cx={here[0]} cy={here[1]} r="9" />
+          <circle class="nm-here-dot" cx={here[0]} cy={here[1]} r="4" />
+          <text class="nm-here-text" x={here[0] + 16} y={here[1] + 5}>{tr('mapHere', lang)}</text>
+        </g>
+      )
+    }
+  </svg>
+  <svg class="nm-svg nm-links" viewBox={viewBox} role="group" aria-label={tr('mapLinks', lang)}>
+    {
+      junctions.map((item) => (
+        <a class="nm-link" href="#experience" data-skill={item.key} data-skill-name={item.name} aria-label={item.aria}>
+          <rect class="nm-hit" x={item.box.x} y={item.box.y} width={item.box.w} height={item.box.h} rx="4" />
+          <text class:list={['nm-label', { 'nm-hub': item.hub }]} x={item.label[0]} y={item.label[1]} text-anchor={item.label[2]}>{item.name}</text>
+        </a>
+      ))
+    }
+  </svg>
+</div>
