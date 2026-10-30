@@ -19,7 +19,7 @@ All text lives in these files:
 - `src/data/network-layout.ts` – coordinates of the home page network map, desktop and phone. Each company is a line, each project a station, a technology used at two companies or more an interchange (computed from `experience`). The build stops when a station or interchange has no coordinates, when coordinates name one that is no longer in the data, or when a track bends at another angle than 45° or 90°: place it there after changing the experience.
 - `src/i18n/ui.ts` – interface labels in both languages.
 
-A project with a `slug` gets a case study page at `/projects/<slug>/` only when `src/data/case-studies/<slug>.ts` and `src/components/CaseStudy.astro` exist. There is none at the moment.
+A project with a `slug`, not `planned`, and a `src/data/case-studies/<slug>.ts` file gets a case study page at `/projects/<slug>/` and `/vi/projects/<slug>/`, rendered by `src/components/CaseStudy.astro`; the build stops when that component is missing. There is none at the moment.
 
 ## Commands
 
