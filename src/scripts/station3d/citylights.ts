@@ -10,12 +10,11 @@ const led = [0.85, 0.92, 1.0];
 const quay = [1.0, 0.72, 0.42];
 const beacon = [1, 0.06, 0.03];
 
-/** Colours of the LED crowns on top of some towers: cyan, magenta, amber, white; bright enough to bloom. */
+/** Colours of the LED crowns on top of some towers: warm white, cool white and a slightly dimmer neutral white, so no crown reads as a line colour; bright enough to bloom. */
 const crownColors = [
-  new Color(0.2, 0.85, 1.0),
-  new Color(1.0, 0.3, 0.75),
-  new Color(1.0, 0.7, 0.3),
-  new Color(0.9, 0.95, 1.0),
+  new Color(1.0, 0.88, 0.72),
+  new Color(0.85, 0.92, 1.0),
+  new Color(0.8, 0.8, 0.8),
 ];
 
 /**

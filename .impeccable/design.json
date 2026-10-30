@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-30T09:00:00Z",
+  "generatedAt": "2026-10-30T08:36:59Z",
   "title": "Design System: Transit Network Portfolio",
   "extensions": {
     "colorMeta": {
@@ -431,6 +431,11 @@
         "purpose": "The single ambient loop: one white data packet per line on the hero map, with a small halo in the dark theme, staggered, paused off screen, pausable, removed under reduced motion; the static glow of the tracks stays."
       },
       {
+        "name": "night-city",
+        "value": "7.5s opening shot, then damped camera and endless scene time",
+        "purpose": "The 3D night city of the full and lite levels: trains, traffic trails, light streams, the beam and rings of \"Now\", the drone drift. Drawn only while seen, stopped by the pause button, absent under reduced motion and Save-Data, where the page is the flat map."
+      },
+      {
         "name": "json-line",
         "value": "140ms, stagger min(30ms, 450ms / lines)",
         "purpose": "One-shot entrance of the JSON body when the view opens; only with no reduced-motion preference."
@@ -544,23 +549,32 @@
       "description": "A stretch of the vertical route: 6px track in the line colour, route bullet on the track, period in mono, project stations as rings.",
       "html": "<div class=\"ds-route\"><div class=\"ds-leg ds-l3\"><p class=\"ds-now\"><span class=\"ds-now-bar\"></span>Now</p><div class=\"ds-leg-head\"><span class=\"ds-leg-bullet\">3</span><div><h3 class=\"ds-company\">Current employer</h3><p class=\"ds-role\">Backend Developer</p></div><p class=\"ds-period\">2026 – Now</p></div><div class=\"ds-stop\"><h4 class=\"ds-stop-name\">Platform project</h4><p class=\"ds-stop-sum\">Report ingestion, approval workflow and scheduled jobs.</p></div></div></div>",
       "css": ".ds-route { --rail: 14px; --pad: 44px; font: 400 1.0625rem/1.6 var(--font, 'Barlow', system-ui, sans-serif); color: var(--text, #f3f4f6); } .ds-leg { position: relative; padding: 0 0 8px var(--pad); } .ds-leg::before { content: ''; position: absolute; left: calc(var(--rail) - 3px); top: 10px; bottom: 0; width: 6px; background: var(--line); } .ds-now { position: relative; margin: 0 0 20px; font: 700 1rem/20px var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); letter-spacing: 0.06em; text-transform: uppercase; } .ds-now-bar { position: absolute; left: calc(var(--rail) - var(--pad) - 14px); top: 7px; width: 28px; height: 6px; background: var(--line); } .ds-leg-head { position: relative; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 20px; } .ds-leg-bullet { position: absolute; left: calc(var(--rail) - var(--pad) - 14px); top: -1px; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--line); color: var(--on-line, #0e1013); font: 700 16.8px/1 var(--font-display, 'Barlow Condensed', 'Arial Narrow', sans-serif); } .ds-company { margin: 0; font: 600 1.375rem/1.2 var(--font, 'Barlow', system-ui, sans-serif); } .ds-role, .ds-period { margin: 2px 0 0; color: var(--muted, #aeb4bd); } .ds-period { margin: 0; font-family: var(--mono, 'JetBrains Mono', ui-monospace, monospace); font-size: 0.875rem; font-variant-numeric: tabular-nums; white-space: nowrap; } .ds-stop { position: relative; } .ds-stop::before { content: ''; position: absolute; left: calc(var(--rail) - var(--pad) - 8px); top: 5px; width: 16px; height: 16px; border: 3px solid var(--line); border-radius: 50%; background: var(--bg, #0e1013); box-sizing: border-box; } .ds-stop:hover::before { background: var(--line); } .ds-stop-name { margin: 0; font: 600 1.125rem/1.4 var(--font, 'Barlow', system-ui, sans-serif); } .ds-stop-sum { max-width: 70ch; margin: 6px 0 0; color: var(--muted, #aeb4bd); } .ds-l1 { --line: var(--line-1, #00a7db); --on-line: var(--on-line-1, #0e1013); } .ds-l2 { --line: var(--line-2, #f39700); --on-line: var(--on-line-2, #0e1013); } .ds-l3 { --line: var(--line-3, #e85298); --on-line: var(--on-line-3, #0e1013); }"
+    },
+    {
+      "name": "Glass Card (full 3D level)",
+      "kind": "container",
+      "refersTo": "phone-card",
+      "description": "A home block over the 3D night city: the page background at 82% (86% for the wide platform panel), 6px backdrop blur, 1px rule, 16px corners, no shadow; its text keeps 4.5:1 over the scene.",
+      "html": "<div class=\"ds-glass\"><h3 class=\"ds-glass-title\">Skills</h3><p class=\"ds-glass-text\">Interchanges of the network: every technology used at two companies or more.</p></div>",
+      "css": ".ds-glass { max-width: 360px; padding: 22px 20px; border: 1px solid var(--border, #2a2f37); border-radius: 16px; background: color-mix(in srgb, var(--bg, #0e1013) 82%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); color: var(--text, #f3f4f6); } .ds-glass-title { margin: 0 0 8px; font: 700 28px/1 \"Barlow Condensed\", sans-serif; text-transform: uppercase; } .ds-glass-text { margin: 0; color: var(--muted, #aeb4bd); font: 400 16px/1.6 Barlow, sans-serif; }"
     }
   ],
   "narrative": {
     "northStar": "The Night Network Map",
-    "overview": "The site is drawn as a schematic transit map at night. A career is a network: each employer is a coloured line, numbered by start date; each project is a station on its line; every technology used at two employers or more is an interchange where their lines meet, and all lines converge on a shared terminus labelled \"Now\". These relationships are computed from the experience data, and the build stops when a hand-placed map no longer matches that data, so the drawing is a record, not an illustration. Map language (lines, stations, end bars, legend, \"not to scale\") reaches every block, from the route of the experience section to the CV sheet and the 404 page.\n\nThe material is a graphite signal board: flat graphite panels with 1px rules over a fine dot grid fixed behind the page, and, in the dark theme only, tracks lit like the lamps of a dispatch board. Colour is scarce and semantic: three line colours, each owned by one job and used for nothing else; actions are drawn in ink, the text colour of the theme. Type is split into signs, text and data: condensed capitals for the name and section signs; a plain sans for anything a person reads; JetBrains Mono for data (map labels, dates, counts, technology chips, shortcut keys) and code. Density is moderate and reading-first: a recruiter must find role, stack and contact without decoding the map, and every map has a plain equivalent (accessible SVG title and description, the route list, the interchange table).\n\nMotion is one quiet loop: small white data packets running along the hero map's lines, paused off screen, paused by a button, and absent under reduced motion. The world rejects the generic dark developer portfolio: no gradient name, frosted stat tiles, comment-style labels, numbered sections, blobs or glowing text; light belongs to the tracks alone.",
+    "overview": "The site is drawn as a schematic transit map at night. A career is a network: each employer is a coloured line, numbered by start date; each project is a station on its line; every technology used at two employers or more is an interchange where their lines meet, and all lines converge on a shared terminus labelled \"Now\". These relationships are computed from the experience data, and the build stops when a hand-placed map no longer matches that data, so the drawing is a record, not an illustration. Map language (lines, stations, end bars, legend, \"not to scale\") reaches every block, from the route of the experience section to the CV sheet and the 404 page.\n\nThe material is a graphite signal board: flat graphite panels with 1px rules over a fine dot grid fixed behind the page, and, in the dark theme only, tracks lit like the lamps of a dispatch board. Colour is scarce and semantic: three line colours, each owned by one job and used for nothing else; actions are drawn in ink, the text colour of the theme. Type is split into signs, text and data: condensed capitals for the name and section signs; a plain sans for anything a person reads; JetBrains Mono for data (map labels, dates, counts, technology chips, shortcut keys) and code. Density is moderate and reading-first: a recruiter must find role, stack and contact without decoding the map, and every map has a plain equivalent (accessible SVG title and description, the route list, the interchange table).\n\nMotion is one quiet loop: small white data packets running along the hero map's lines, paused off screen, paused by a button, and absent under reduced motion. Where the device allows it, the same network also stands as a miniature city at night in 3D (see Night City 3D), on phones as on desktops: lit towers, a river, metro viaducts, trains running into \"Now\", and a drone camera that follows the page. Without WebGL 2, under reduced motion or with Save-Data, the page is exactly the flat map. The world rejects the generic dark developer portfolio: no gradient name, frosted stat tiles, comment-style labels, numbered sections, blobs or glowing text. On the flat page light belongs to the tracks alone; in the 3D city it belongs to the city and to the lines.",
     "keyCharacteristics": [
       "Three line colours (cyan, orange, magenta) belong to the lines only; actions are ink, never a line colour.",
       "Tracks run only horizontally, vertically or at 45°, with rounded bends and square end bars; in the dark theme they glow.",
       "Stations are rings on the page background; interchanges are light capsules with an ink edge.",
       "Barlow Condensed for signs, Barlow for text, JetBrains Mono for data and code.",
       "Flat graphite surfaces with 1px edges over a fixed dot grid; soft black shadow only on layers that float over content.",
-      "Dark is the default theme; light is an explicit visitor choice; print is pure black on white."
+      "Dark is the default theme; light is an explicit visitor choice; print is pure black on white.",
+      "The 3D night city is progressive: its metro is built from the same data. At the full level it stands behind the whole home page, beside platform panels on wide windows and between glass cards on phones; on weak devices it falls back to the hero map box (lite level). The flat page is its off level."
     ],
     "rules": [
       {
         "name": "The Three Lines Rule",
-        "body": "The line colours belong to the lines and to nothing else. Each belongs to one job in start order (line 1 = first job) and appears only where that line is meant: track, station, bullet, band stretch, its chip dots, and the 404 line. Status, actions and diagrams that belong to no job have colours of their own.",
+        "body": "The line colours belong to the lines and to nothing else. Each belongs to one job in start order (line 1 = first job) and appears only where that line is meant: track, station, bullet, band stretch, its chip dots, and the 404 line. Status, actions and diagrams that belong to no job have colours of their own. In the 3D city a line colour appears only on parts of its line: the LED strips of its viaduct, the stripe of its trains, its portal, hologram and light stream, its ring at \"Now\" and the tags of its stations; the city's own lights are white, warm, or the red beacons of the towers.",
         "section": "colors"
       },
       {
@@ -575,12 +589,12 @@
       },
       {
         "name": "The Lit Tracks Rule",
-        "body": "Light belongs to the tracks. In the dark theme only, the tracks and end bars of a job's line glow like the lamps of a dispatch board on the hero map, the terminus sign and the 404 map: two blurred copies of the track under it, about 4px and 10px, the outer one at 45% (class `.led`, filter `#led` in `src/components/metro/LedGlow.astro`). Data packets are white with a small halo. Text, buttons, cards and the neutral diagrams never glow, nor does anything in the light theme or in print. No gradients, frosted glass, backdrop blur or coloured shadows; the older tokens (`--grad`, `--glass`, `--glow*`, `--grid-line`, `--hero-glow*`, `--grad-rail`, `--accent-2/3`) resolve to a flat colour, transparent or none and must never be re-inflated.",
+        "body": "Light belongs to the tracks. In the dark theme only, the tracks and end bars of a job's line glow like the lamps of a dispatch board on the hero map, the terminus sign and the 404 map: two blurred copies of the track under it, about 4px and 10px, the outer one at 45% (class `.led`, filter `#led` in `src/components/metro/LedGlow.astro`). In the 3D city the light comes from the scene itself (windows, street lamps, trains, the LED strips of the viaducts and the light layer of portals, holograms, streams and the beam) under a moderate bloom, dark theme only. Data packets are white with a small halo. Text, buttons, cards and the neutral diagrams never glow, nor does anything in the light theme or in print. No gradients, frosted glass, backdrop blur or coloured shadows, apart from the surfaces of the full 3D level: platform panels, phone cards, the soft backdrop behind the hero name block and the glass tags of the scene (see Elevation & Depth); the older tokens (`--grad`, `--glass`, `--glow*`, `--grid-line`, `--hero-glow*`, `--grad-rail`, `--accent-2/3`) resolve to a flat colour, transparent or none and must never be re-inflated.",
         "section": "colors"
       },
       {
         "name": "The Dot Grid Rule",
-        "body": "One background texture only: a 1px dot every 22px in `--grid-dot`, fixed behind the page while it scrolls. No square grid, no noise; every block with a background of its own covers it.",
+        "body": "One background texture only: a 1px dot every 22px in `--grid-dot`, fixed behind the page while it scrolls. No square grid, no noise; every block with a background of its own covers it. The 3D city brings its own ground (roads, pavements, parks, the river); the dot grid stays the texture of the page wherever the scene is not drawn.",
         "section": "colors"
       },
       {
@@ -618,15 +632,16 @@
       "**Do** keep touch targets at least 44px, extending a smaller visual (32px chip) with an invisible `::after` rather than enlarging it.",
       "**Do** keep interaction feedback to colour and border changes at 150ms ease-out, with the 2px text-colour focus outline at 3px offset; a pressed filter control inverts to text-colour fill; where the ink equals the text colour, hover underlines instead.",
       "**Do** keep dark as the default theme regardless of OS preference, and give every block a black-on-white print state.",
-      "**Do** use Barlow at 400, 500 and 600 only; 700 belongs to the condensed face."
+      "**Do** use Barlow at 400, 500 and 600 only; 700 belongs to the condensed face.",
+      "**Do** keep the 3D city a progressive layer: its metro built from the same data and line tokens as the SVG map, fetched only after load, drawn only while it is seen, falling back to lite on weak or slow devices, and leaving the page exactly as it is at the off level."
     ],
     "donts": [
-      "**Don't** use gradients, frosted glass, backdrop blur, coloured shadows, blobs, noise or a square background grid; the dot grid is the only texture.",
-      "**Don't** put a glow on text, buttons, cards or the neutral diagrams, or anywhere in the light theme or in print.",
+      "**Don't** use gradients, frosted glass, backdrop blur, coloured shadows, blobs, noise or a square background grid; the dot grid is the only texture. The surfaces of the full 3D level (platform panels, phone cards, the hero backdrop and the scene tags) are the only translucent, blurred ones.",
+      "**Don't** put a glow on text, buttons, cards or the neutral diagrams, or anywhere in the light theme or in print; inside the 3D scene only its own lights and the faint halo of its tags glow.",
       "**Don't** put a kicker or eyebrow label above a heading, number sections (01–04), or use comment-style labels such as `// about`.",
       "**Don't** set names, titles, running text or company names in mono; mono is for data and code.",
       "**Don't** add another hue or use a line colour for something that is not its line: actions are ink, status is green or red, unowned diagrams are neutral grey.",
-      "**Don't** add scroll reveals, count-ups, typing effects or looping decoration; content is visible on load, and the packet loop stays the only ambient motion.",
+      "**Don't** add scroll reveals, count-ups, typing effects or looping decoration; content is visible on load. The packet loop and the 3D city (trains, traffic, streams, the beam, the drone's drift), all stopped by the pause button and absent under reduced motion, stay the only ambient motion.",
       "**Don't** nest cards inside cards or box content that reads as a list; use rules and bands.",
       "**Don't** draw a track segment at any angle other than 0°, 45° or 90°, or label a map relationship the data does not contain."
     ]
