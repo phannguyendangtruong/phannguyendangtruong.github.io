@@ -9,9 +9,11 @@ import {
   MeshStandardMaterial,
   PlaneGeometry,
   Vector3,
+  type BufferGeometry,
   type CurvePath,
 } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import type { Kit } from './assets';
 import { frameAt, newFrame } from './geometry';
 import { trackSide, type Metro } from './metro';
@@ -81,30 +83,68 @@ function where({ legs, cycle }: Timetable, time: number): { s: number; dir: numb
   return { s: last.to, dir: Math.sign(last.to - last.from) };
 }
 
+/** Merges `parts` into one geometry and frees them. */
+function merged(parts: BufferGeometry[]): BufferGeometry {
+  const geometry = mergeGeometries(parts);
+  parts.forEach((part) => part.dispose());
+  if (!geometry) throw new Error('Cảnh 3D: không ghép được chi tiết toa tàu (trains.ts)');
+  return geometry;
+}
+
+/** Door seams down both sides (two doors a side) and two air-conditioning units on the roof: one geometry each. */
+function carDetails(): { seams: BufferGeometry; roof: BufferGeometry } {
+  const parts: BufferGeometry[] = [];
+  [-0.3, 0.3].forEach((z) => {
+    [-0.075, 0.075].forEach((dz) => parts.push(new BoxGeometry(0.308, 0.21, 0.008).translate(0, 0.2, z + dz)));
+    parts.push(new BoxGeometry(0.308, 0.008, 0.15).translate(0, 0.304, z));
+  });
+  const units = [-0.32, 0.32].map((z) => new BoxGeometry(0.17, 0.04, 0.26).translate(0, 0.38, z));
+  return { seams: merged(parts), roof: merged(units) };
+}
+
 export type Trains = { group: Group; update: (time: number) => void };
 
 /**
  * Two trains a line, one on each track, shuttling between the portal at the start of the line and the end, stopping
  * at every station and hub: silver cars with a band of warm lit windows and a stripe of the line colour (paint of that
- * colour by day); white lamps at the end that leads, red at the end that trails, a soft beam on the deck ahead by
- * night. Cars still behind the portal are hidden, so a train slides out of the ring of light car by car.
+ * colour by day), door seams down the sides and two air-conditioning units on the roof; at each cab end a raked dark
+ * windscreen with a faint cab light and a sign of the line colour over it; white lamps at the end that leads, red at
+ * the end that trails, a soft beam on the deck ahead by night. Cars still behind the portal are hidden, so a train
+ * slides out of the ring of light car by car. During the wake the windows come on a quarter of the way in, the
+ * stripes and signs a little after (wake.ts).
  */
 export function buildTrains(model: SceneModel, metro: Metro, kit: Kit): Trains {
   const group = new Group();
   const body = new MeshStandardMaterial({ color: 0xc9cdd3, roughness: 0.3, metalness: 0.7, envMapIntensity: 0.8 });
-  const glass = new MeshStandardMaterial({
-    color: 0x050608,
-    emissive: 0xffffff,
-    emissiveMap: kit.own(carWindowTexture()),
-    emissiveIntensity: 0.95,
-    roughness: 0.1,
-    metalness: 0.4,
-  });
+  const glass = kit.wake.lamp(
+    new MeshStandardMaterial({
+      color: 0x050608,
+      emissive: 0xffffff,
+      emissiveMap: kit.own(carWindowTexture()),
+      emissiveIntensity: 0.95,
+      roughness: 0.1,
+      metalness: 0.4,
+    }),
+    0.25,
+    0.5,
+  );
   const shell = new RoundedBoxGeometry(0.3, 0.3, car.length, 3, 0.07);
   const band = new BoxGeometry(0.304, 0.085, car.length - 0.16);
   const stripeShape = new BoxGeometry(0.306, 0.022, car.length - 0.1);
   const lampShape = new BoxGeometry(0.05, 0.03, 0.01);
   const beamShape = new PlaneGeometry(0.42, 2.2);
+  const { seams, roof } = carDetails();
+  const seamPaint = new MeshStandardMaterial({ color: 0x2a2d31, roughness: 0.6, metalness: 0.4 });
+  const roofPaint = new MeshStandardMaterial({ color: 0x8d9197, roughness: 0.55, metalness: 0.5 });
+  const screenShape = new BoxGeometry(0.24, 0.1, 0.012);
+  const screen = new MeshStandardMaterial({
+    color: 0x0a0d12,
+    roughness: 0.05,
+    metalness: 0.6,
+    emissive: 0x6a7a90,
+    emissiveIntensity: 0.12,
+  });
+  const signShape = new BoxGeometry(0.14, 0.022, 0.006);
   const head = new Color();
   const tail = new Color();
   const beams: Mesh[] = [];
@@ -116,11 +156,23 @@ export function buildTrains(model: SceneModel, metro: Metro, kit: Kit): Trains {
     if (!path || end === undefined) return;
     const table = timetable(metro.stops.get(line.number) ?? [], end);
     const color = kit.colors.of(line.number);
-    const stripe = new MeshStandardMaterial({ color: 0x000000, emissive: color, emissiveIntensity: 2.2 });
+    const stripe = kit.wake.lamp(
+      new MeshStandardMaterial({ color: 0x000000, emissive: color, emissiveIntensity: 2.2 }),
+      0.35,
+      0.6,
+    );
+    const signPaint = kit.wake.lamp(
+      new MeshStandardMaterial({ color: 0x000000, emissive: color, emissiveIntensity: 1.8 }),
+      0.35,
+      0.6,
+    );
     kit.theme.on((day) => {
       stripe.color.set(day ? color : 0x000000);
       stripe.emissive.copy(color);
-      stripe.emissiveIntensity = day ? 0.15 : 2.2;
+      kit.wake.setBase(stripe, day ? 0.15 : 2.2);
+      signPaint.color.set(day ? 0x111111 : 0x000000);
+      signPaint.emissive.copy(color);
+      kit.wake.setBase(signPaint, day ? 0.5 : 1.8);
     });
     [-1, 1].forEach((side, k) => {
       const lamps = { front: new MeshBasicMaterial(), back: new MeshBasicMaterial() };
@@ -133,9 +185,15 @@ export function buildTrains(model: SceneModel, metro: Metro, kit: Kit): Trains {
         bandMesh.position.y = 0.245;
         const stripeMesh = new Mesh(stripeShape, stripe);
         stripeMesh.position.y = 0.15;
-        carGroup.add(shellMesh, bandMesh, stripeMesh);
+        carGroup.add(shellMesh, bandMesh, stripeMesh, new Mesh(seams, seamPaint), new Mesh(roof, roofPaint));
         if (position === 0 || position === car.count - 1) {
           const sign = position === 0 ? 1 : -1;
+          const windscreen = new Mesh(screenShape, screen);
+          windscreen.position.set(0, 0.255, sign * (car.length / 2 + 0.001));
+          windscreen.rotation.x = sign * 0.12;
+          const board = new Mesh(signShape, signPaint);
+          board.position.set(0, 0.325, sign * (car.length / 2 + 0.002));
+          carGroup.add(windscreen, board);
           [-0.08, 0.08].forEach((x) => {
             const light = new Mesh(lampShape, position === 0 ? lamps.front : lamps.back);
             light.position.set(x, 0.12, sign * (car.length / 2 + 0.002));
@@ -166,8 +224,9 @@ export function buildTrains(model: SceneModel, metro: Metro, kit: Kit): Trains {
     });
   });
   kit.theme.on((day) => {
-    glass.emissiveIntensity = day ? 0.05 : 0.95;
+    kit.wake.setBase(glass, day ? 0.05 : 0.95);
     glass.color.set(day ? 0x22303e : 0x050608);
+    screen.emissiveIntensity = day ? 0 : 0.12;
     head.setRGB(1.0, 0.95, 0.85).multiplyScalar(day ? 1.6 : 5);
     tail.setRGB(1.0, 0.05, 0.02).multiplyScalar(day ? 1.2 : 5);
     beams.forEach((beam) => {

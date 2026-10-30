@@ -48,21 +48,19 @@ function isHttpsUrl(value: string): boolean {
   }
 }
 
+/** Every string, URLs included, is checked for an email or phone number first, so such a value is never printed. */
 function checkString(value: string, file: string, path: string): void {
   if (value.trim() === '') {
     if (optionalUrlKeys.includes(lastKey(path))) return;
     throw new Error(`Dữ liệu nội dung: chuỗi rỗng tại ${file} › ${path}.`);
   }
-  if (isUrlKey(path)) {
-    if (!isHttpsUrl(value)) {
-      throw new Error(`Dữ liệu nội dung: URL không hợp lệ tại ${file} › ${path}: ${value}. Cần dạng https://…`);
-    }
-    return;
-  }
   if (emailPattern.test(value) || phonePattern.test(value)) {
     throw new Error(
       `Dữ liệu nội dung: ${file} › ${path} có dạng email hoặc số điện thoại, không được đưa lên trang công khai.`,
     );
+  }
+  if (isUrlKey(path) && !isHttpsUrl(value)) {
+    throw new Error(`Dữ liệu nội dung: URL không hợp lệ tại ${file} › ${path}: ${value}. Cần dạng https://…`);
   }
 }
 
@@ -94,6 +92,13 @@ function checkSlugs(): void {
     }
     seen.add(project.slug);
   });
+}
+
+/** A birth year, when the profile has one, is a whole number of four digits; the entered value is never printed. */
+function checkBirthYear(): void {
+  const year = profileData.profile.birthYear;
+  if (year === undefined || (Number.isInteger(year) && year >= 1000 && year <= 9999)) return;
+  throw new Error('Dữ liệu nội dung: src/data/profile.ts › birthYear phải là năm 4 chữ số, ví dụ 2002.');
 }
 
 /**
@@ -176,6 +181,7 @@ export function validateContent(): void {
     Object.entries(module as Record<string, unknown>).forEach(([name, value]) => walk(value, file, name));
   });
   checkSlugs();
+  checkBirthYear();
   checkCaseStudies(modules);
   checked = true;
 }

@@ -46,6 +46,39 @@ export function cloudTexture(): CanvasTexture {
   return new CanvasTexture(canvas);
 }
 
+/**
+ * Soft noise that tiles without a seam, for the mist over the ground: blurred blobs of many sizes, each drawn again
+ * across the edges it overlaps; the same on every visit.
+ */
+export function mistTexture(): CanvasTexture {
+  const size = 256;
+  const [canvas, context] = drawing(size);
+  context.fillStyle = '#000';
+  context.fillRect(0, 0, size, size);
+  let seed = 11;
+  const random = () => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  for (let index = 0; index < 160; index += 1) {
+    const x = random() * size;
+    const y = random() * size;
+    const reach = 18 + random() * 60;
+    const alpha = 0.05 + random() * 0.12;
+    [[0, 0], [size, 0], [-size, 0], [0, size], [0, -size]].forEach(([dx, dy]) => {
+      const blob = context.createRadialGradient(x + dx, y + dy, 0, x + dx, y + dy, reach);
+      blob.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
+      blob.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      context.fillStyle = blob;
+      context.fillRect(0, 0, size, size);
+    });
+  }
+  const texture = new CanvasTexture(canvas);
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+  return texture;
+}
+
 /** Band of lit windows along a car: warm panes with dark pillars between them, the doors narrower. */
 export function carWindowTexture(): CanvasTexture {
   const [canvas, context] = drawing(256, 32);

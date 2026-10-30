@@ -1,0 +1,131 @@
+---
+/**
+ * Labels and the pointer card of the 3D station (src/scripts/station3d/labels.ts, interact.ts), drawn by the scene
+ * into the labels layer of Station3D.astro. Styles only.
+ */
+---
+
+<style>
+  /* Labels: small glass chips pinned in the scene, the data in the mono face as on the SVG map. The chip keeps its
+     text at 4.5:1 or more whatever lights up behind it, in both themes. */
+  :global(.s3d-labels .s3d-tag) {
+    padding: 4px 8px;
+    border: 1px solid color-mix(in srgb, var(--text) 28%, transparent);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--text) 16%, transparent);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    font: 500 12px/1.2 var(--mono);
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  /* A project station: the chip edged and lit in the colour of its line (--tag, set by the script). */
+  :global(.s3d-labels .s3d-station) {
+    border-color: color-mix(in srgb, var(--tag) 70%, var(--text));
+    box-shadow: 0 0 18px color-mix(in srgb, var(--tag) 45%, transparent);
+  }
+
+  :global(.s3d-labels .s3d-now) {
+    padding: 7px 12px;
+    font: 700 18px/1 var(--mono);
+    letter-spacing: 0.12em;
+    box-shadow: 0 0 28px color-mix(in srgb, var(--text) 26%, transparent);
+  }
+
+  /* "You are here" stands without a chip, over a halo of the page background. */
+  :global(.s3d-labels .s3d-here) {
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    font-weight: 600;
+    text-shadow: 0 1px 2px var(--bg), 0 0 6px var(--bg);
+  }
+
+  /* Interchange label as a filter button, as on the SVG map: the chip fills on hover, takes the focus ring and
+     inverts while its filter is on; an invisible margin brings it to a 44px target. */
+  :global(.s3d-labels .s3d-link) {
+    pointer-events: auto;
+    cursor: pointer;
+    transition: background-color var(--t-hover), color var(--t-hover);
+  }
+
+  :global(.s3d-labels .s3d-link::after) {
+    content: '';
+    position: absolute;
+    inset: -12px -4px;
+  }
+
+  :global(.s3d-labels .s3d-link:hover) {
+    background: var(--surface-2);
+  }
+
+  :global(.s3d-labels .s3d-link[aria-pressed='true']) {
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  :global(.s3d-labels .s3d-hub) {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  /* Card of what the pointer is on in the scene (interact.ts): a glass card over the station or the hologram, edged
+     and lit in the colour of its line (--tag), its name, the company and line in the mono face, and the hint to go
+     there. It takes no pointer: the scene under it still answers. */
+  :global(.s3d-labels .s3d-card) {
+    display: grid;
+    gap: 3px;
+    min-width: 180px;
+    margin-top: -14px;
+    padding: 9px 12px;
+    border: 1px solid color-mix(in srgb, var(--tag) 70%, var(--text));
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--tag) 40%, transparent);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  :global(.s3d-labels .s3d-card b) {
+    font: 600 15px/1.2 var(--font);
+    color: var(--text);
+  }
+
+  :global(.s3d-labels .s3d-card small) {
+    font: 500 11px/1.2 var(--mono);
+    color: color-mix(in srgb, var(--tag) 60%, var(--text));
+  }
+
+  :global(.s3d-labels .s3d-card span) {
+    font: 400 11px/1.2 var(--font);
+    color: var(--muted);
+  }
+
+  /* Light theme: nothing glows (DESIGN.md). The chips and the card lose their halo, the card floats on the soft
+     shadow of floating layers; "You are here" takes a chip of the page background instead of its halo. */
+  :global(:root[data-theme='light'] .s3d-labels .s3d-tag),
+  :global(:root[data-theme='light'] .s3d-labels .s3d-station),
+  :global(:root[data-theme='light'] .s3d-labels .s3d-now) {
+    box-shadow: none;
+  }
+
+  :global(:root[data-theme='light'] .s3d-labels .s3d-here) {
+    padding: 4px 8px;
+    border: 1px solid color-mix(in srgb, var(--text) 28%, transparent);
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    text-shadow: none;
+  }
+
+  :global(:root[data-theme='light'] .s3d-labels .s3d-card) {
+    box-shadow: var(--shadow);
+  }
+</style>

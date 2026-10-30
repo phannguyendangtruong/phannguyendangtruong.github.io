@@ -1,5 +1,5 @@
 ---
-import { lineByNumber, lines as networkLines } from '../data/network';
+import { lineByNumber, lineColor, lines as networkLines } from '../data/network';
 import { tr, type Lang, type Text, type UiKey } from '../i18n/ui';
 
 interface Props {
@@ -14,6 +14,8 @@ interface Props {
    * The band always reads in route order (1, 2, 3), whatever the order given.
    */
   lines?: number[];
+  /** A section that belongs to no job: the band is one stretch in the neutral line colour, and `lines` is ignored. */
+  neutral?: boolean;
   /** @deprecated Ignored: section heads have no label above the heading any more. */
   label?: UiKey;
   /** @deprecated Ignored: section heads have no block number any more. */
@@ -23,9 +25,19 @@ interface Props {
   class?: string;
 }
 
-const { lang, id, title, intro, lines = networkLines.map((line) => line.number), class: className } = Astro.props;
+const {
+  lang,
+  id,
+  title,
+  intro,
+  lines = networkLines.map((line) => line.number),
+  neutral = false,
+  class: className,
+} = Astro.props;
 const heading = typeof title === 'string' ? tr(title, lang) : title[lang];
-const colors = [...new Set(lines)].sort((a, b) => a - b).map((number) => lineByNumber(number).color);
+const colors = neutral
+  ? [lineColor()]
+  : [...new Set(lines)].sort((a, b) => a - b).map((number) => lineByNumber(number).color);
 ---
 
 <div class:list={['section-head', className]}>
@@ -51,7 +63,8 @@ const colors = [...new Set(lines)].sort((a, b) => a - b).map((number) => lineByN
     margin: 0;
   }
 
-  /* Band of the related line colours under the sign: one 40px stretch per line. */
+  /* Band of the related line colours under the sign: one 40px stretch per line, or a single stretch in the neutral
+     line colour for a section that belongs to no job. */
   .sh-band {
     display: flex;
     width: fit-content;

@@ -18,6 +18,10 @@ export type SceneLine = {
   /** Hologram over the start of the line: the company in capitals, then "LINE 1 · SINCE 2023" under it. */
   title: string;
   subtitle: string;
+  /** Card of the scene when the pointer is on the line (interact.ts): "Acme", "Line 1", "Line 1 · since 2023". */
+  company: string;
+  name: string;
+  since: string;
 };
 
 export type SceneStation = { line: number; xy: XY; name: string; side: Side };
@@ -52,7 +56,8 @@ export type SceneModel = {
   stations: SceneStation[];
   interchanges: SceneInterchange[];
   end: { xy: XY };
-  text: { now: string; here: string };
+  /** "Now", "You are here", and the hint of the card of a line ("Click to go to this line"). */
+  text: { now: string; here: string; go: string };
 };
 
 const file = 'src/data/network-layout.ts › wideMap';
@@ -95,6 +100,9 @@ export function buildSceneModel(lang: Lang): SceneModel {
         track: wideMap.tracks[line.number],
         title: line.job.company[lang].toLocaleUpperCase(lang),
         subtitle: since.toLocaleUpperCase(lang),
+        company: line.job.company[lang],
+        name: tr('mapLineName', lang).replace('{n}', String(line.number)),
+        since,
       },
     ];
   });
@@ -135,6 +143,10 @@ export function buildSceneModel(lang: Lang): SceneModel {
     stations,
     interchanges: junctions,
     end: { xy: end.at.xy },
-    text: { now: tr('mapNow', lang).toLocaleUpperCase(lang), here: tr('mapHere', lang) },
+    text: {
+      now: tr('mapNow', lang).toLocaleUpperCase(lang),
+      here: tr('mapHere', lang),
+      go: tr('mapGoToLine', lang),
+    },
   };
 }

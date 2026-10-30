@@ -24,6 +24,12 @@ const shown = projects
       project.slug && caseStudySlugs.includes(project.slug) ? localePath(lang, `/projects/${project.slug}/`) : undefined,
   }));
 const title = `${tr('navResume', lang)} — ${profile.name[lang]}`;
+/** Line under the name: role · place, then the birth year when the profile has one. */
+const roleLine = [
+  profile.role[lang],
+  profile.location[lang],
+  ...(profile.birthYear === undefined ? [] : [tr('resumeBorn', lang).replace('{n}', String(profile.birthYear))]),
+].join(' · ');
 const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '');
 /** Set to true when the printed CV runs past two A4 pages: projects then print without their points. */
 const compactProjectsInPrint = false;
@@ -50,7 +56,7 @@ const compactProjectsInPrint = false;
         <article class="sheet" aria-labelledby="cv-name">
           <header class="cv-head">
             <h1 id="cv-name" class="cv-name">{profile.name[lang]}</h1>
-            <p class="cv-role">{profile.role[lang]} · {profile.location[lang]}</p>
+            <p class="cv-role">{roleLine}</p>
             <ul class="cv-links">
               <li>
                 <ExternalLink

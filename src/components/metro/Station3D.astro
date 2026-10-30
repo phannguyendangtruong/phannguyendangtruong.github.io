@@ -1,5 +1,6 @@
 ---
 import Station3DNarrow from './Station3DNarrow.astro';
+import Station3DTags from './Station3DTags.astro';
 import { buildSceneModel } from '../../scripts/station3d/model';
 import { tr, type Lang } from '../../i18n/ui';
 
@@ -32,18 +33,29 @@ const narrowQuery = '(max-width: 1023px)';
 </div>
 <div class="s3d-labels no-print" data-s3d-labels role="group" aria-label={tr('mapLinks', lang)} hidden></div>
 <Station3DNarrow />
+<Station3DTags />
 
 <script is:inline>
   // Run before the blocks under the hero are drawn: the full level sets them out over the scene (platform panels on a
   // wide window, stacked cards on a narrow one), so the layout is fixed now and does not shift when the scene comes in
-  // after the page has loaded. The same tests as level.ts: less than 4 GB of memory or fewer than 4 cores, or a full
-  // level that already ran too slowly in this session, take the lite level. The module script tests WebGL 2 for real
-  // and drops the level when it is missing.
+  // after the page has loaded. The same tests as level.ts: WebGL 2 on a real GPU is tried for real (a software
+  // renderer fails it, so the level is never set and then dropped), its test context is given back at once and the
+  // result is kept in data-webgl2 for level.ts; then less than 4 GB of memory or fewer than 4 cores, or a full level
+  // that already ran too slowly in this session, take the lite level.
   (() => {
     const host = document.querySelector('[data-s3d]');
     const connection = navigator.connection;
-    if (!host || !('WebGL2RenderingContext' in window) || (connection && connection.saveData)) return;
+    if (!host || (connection && connection.saveData)) return;
     if (matchMedia(host.dataset.offQuery).matches) return;
+    let webgl = false;
+    try {
+      const gl = document.createElement('canvas').getContext('webgl2', { failIfMajorPerformanceCaveat: true });
+      webgl = gl !== null;
+      const lose = gl && gl.getExtension('WEBGL_lose_context');
+      if (lose) lose.loseContext();
+    } catch (_) {}
+    host.dataset.webgl2 = webgl ? 'yes' : 'no';
+    if (!webgl) return;
     const memory = navigator.deviceMemory;
     const cores = navigator.hardwareConcurrency;
     let lite = (memory > 0 && memory < 4) || (cores > 0 && cores < 4);
@@ -72,7 +84,8 @@ const narrowQuery = '(max-width: 1023px)';
 
   /* Full level: the canvas behind the whole home page, under every block, fading in once its first frame is drawn.
      The labels sit above the open page background and under the platform panels; the scene fades out a label as it
-     comes up to a panel, so none is cut at the edge of one. */
+     comes up to a panel, so none is cut at the edge of one. The labels and the pointer card are styled in
+     Station3DTags.astro. */
   .s3d {
     z-index: -1;
     opacity: 0;
@@ -128,74 +141,6 @@ const narrowQuery = '(max-width: 1023px)';
     :global(html[data-scene3d='lite'] .netmap) {
       aspect-ratio: auto;
     }
-  }
-
-  /* Labels: small glass chips pinned in the scene, the data in the mono face as on the SVG map. The chip keeps its
-     text at 4.5:1 or more whatever lights up behind it, in both themes. */
-  .s3d-labels :global(.s3d-tag) {
-    padding: 4px 8px;
-    border: 1px solid color-mix(in srgb, var(--text) 28%, transparent);
-    border-radius: 6px;
-    background: color-mix(in srgb, var(--bg) 70%, transparent);
-    box-shadow: 0 0 16px color-mix(in srgb, var(--text) 16%, transparent);
-    -webkit-backdrop-filter: blur(4px);
-    backdrop-filter: blur(4px);
-    font: 500 12px/1.2 var(--mono);
-    color: var(--text);
-    white-space: nowrap;
-  }
-
-  /* A project station: the chip edged and lit in the colour of its line (--tag, set by the script). */
-  .s3d-labels :global(.s3d-station) {
-    border-color: color-mix(in srgb, var(--tag) 70%, var(--text));
-    box-shadow: 0 0 18px color-mix(in srgb, var(--tag) 45%, transparent);
-  }
-
-  .s3d-labels :global(.s3d-now) {
-    padding: 7px 12px;
-    font: 700 18px/1 var(--mono);
-    letter-spacing: 0.12em;
-    box-shadow: 0 0 28px color-mix(in srgb, var(--text) 26%, transparent);
-  }
-
-  /* "You are here" stands without a chip, over a halo of the page background. */
-  .s3d-labels :global(.s3d-here) {
-    padding: 0;
-    border: 0;
-    background: none;
-    box-shadow: none;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    font-weight: 600;
-    text-shadow: 0 1px 2px var(--bg), 0 0 6px var(--bg);
-  }
-
-  /* Interchange label as a filter button, as on the SVG map: the chip fills on hover, takes the focus ring and
-     inverts while its filter is on; an invisible margin brings it to a 44px target. */
-  .s3d-labels :global(.s3d-link) {
-    pointer-events: auto;
-    cursor: pointer;
-    transition: background-color var(--t-hover), color var(--t-hover);
-  }
-
-  .s3d-labels :global(.s3d-link::after) {
-    content: '';
-    position: absolute;
-    inset: -12px -4px;
-  }
-
-  .s3d-labels :global(.s3d-link:hover) {
-    background: var(--surface-2);
-  }
-
-  .s3d-labels :global(.s3d-link[aria-pressed='true']) {
-    background: var(--text);
-    color: var(--bg);
-  }
-
-  .s3d-labels :global(.s3d-hub) {
-    font-size: 13px;
-    font-weight: 700;
   }
 
   /* The hero map under the scene (NetworkMap.astro), once the first frame is drawn: its drawing fades out but stays

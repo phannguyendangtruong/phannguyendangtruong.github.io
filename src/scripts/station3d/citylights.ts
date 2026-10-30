@@ -3,6 +3,7 @@ import type { Kit } from './assets';
 import type { Top } from './buildings';
 import { extent, grid, hash, riverWidth, type CityPlan } from './layout';
 import { sparks } from './sparks';
+import { smooth } from './wake';
 
 /** Warm sodium and white LED street lamps, the warm lamps of the embankment, the red lights on the towers. */
 const sodium = [1.0, 0.6, 0.28];
@@ -21,6 +22,8 @@ const crownColors = [
  * Lights of the streets and the skyline: a lamp head every 1.5 units on both pavements of every grid road (as the
  * pools of light on the ground), lamps along both embankments, a blinking red light on top of every tower, and an LED
  * crown along the top edge of some towers. Street lamps and crowns are night things; the red lights stay by day.
+ * During the opening shot the lamps and red lights come on as the wave of the wake passes them, the crowns a little
+ * before the middle of the wake (wake.ts).
  */
 export function buildCityLights(tops: Top[], plan: CityPlan, kit: Kit): Group {
   const group = new Group();
@@ -68,6 +71,7 @@ export function buildCityLights(tops: Top[], plan: CityPlan, kit: Kit): Group {
     colors: Float32Array.from(lamps.colors),
     sizes: Float32Array.from(lamps.sizes),
     intensity: 2.6,
+    wake: true,
   });
 
   const towers = tops.filter((top) => top.tower);
@@ -77,14 +81,12 @@ export function buildCityLights(tops: Top[], plan: CityPlan, kit: Kit): Group {
     sizes: new Float32Array(towers.length).fill(0.32),
     blink: Float32Array.from(towers.map((top) => hash(top.x, top.z, 1))),
     intensity: 5,
+    wake: true,
   });
 
   const crowned = towers.filter((top) => hash(top.seed, 9) < 0.4);
-  const crowns = new InstancedMesh(
-    new BoxGeometry(1, 1, 1),
-    new MeshBasicMaterial({ color: 0xffffff }),
-    crowned.length * 4,
-  );
+  const crownLight = new MeshBasicMaterial({ color: 0xffffff });
+  const crowns = new InstancedMesh(new BoxGeometry(1, 1, 1), crownLight, crowned.length * 4);
   const matrix = new Matrix4();
   const color = new Color();
   let index = 0;
@@ -102,6 +104,7 @@ export function buildCityLights(tops: Top[], plan: CityPlan, kit: Kit): Group {
       index += 1;
     });
   });
+  kit.wake.on((progress) => crownLight.color.setScalar(smooth(0.4, 0.7, progress)));
   kit.theme.on((day) => {
     streets.visible = !day;
     crowns.visible = !day;

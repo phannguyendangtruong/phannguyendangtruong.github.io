@@ -51,8 +51,11 @@ const title = tr('mapTitle', lang);
     max-width: 440px;
   }
 
-  .netmap :global(.nm-wide) {
+  .netmap :global(.nm-view) {
     position: relative;
+  }
+
+  .netmap :global(.nm-wide) {
     display: none;
   }
 
@@ -63,7 +66,8 @@ const title = tr('mapTitle', lang);
     overflow: visible;
   }
 
-  /* Interchange labels of the full map: a second drawing with the same viewBox, laid exactly over the first. */
+  /* Interchange labels of both maps (MapLinks.astro): a second drawing with the same viewBox, laid exactly over the
+     first. */
   .netmap :global(.nm-links) {
     position: absolute;
     inset: 0;
@@ -163,6 +167,12 @@ const title = tr('mapTitle', lang);
     fill: transparent;
     stroke: none;
     transition: fill var(--t-hover);
+  }
+
+  /* Where the map is drawn small (compact map), an invisible area round the label brings it to a 44px target. */
+  .netmap :global(.nm-touch) {
+    fill: transparent;
+    stroke: none;
   }
 
   .netmap :global(.nm-link:hover .nm-hit) {
@@ -282,7 +292,8 @@ const title = tr('mapTitle', lang);
     rm.addEventListener('change', sync);
     sync();
 
-    // The box behind each interchange label follows its text once the fonts are in (hidden maps keep the estimate).
+    // The box behind each interchange label of both maps follows its text once the fonts are in (the hidden map keeps
+    // the estimate).
     const fit = () => {
       map.querySelectorAll('.nm-link').forEach((link) => {
         const text = link.querySelector('text');

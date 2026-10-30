@@ -64,9 +64,19 @@ export function markSlow(): void {
 
 let webgl: boolean | undefined;
 
-/** WebGL 2 on a real GPU (no software fallback); tested once, the test context is dropped at once. */
+/**
+ * WebGL 2 on a real GPU (no software fallback), tested once. The script of Station3D.astro tries it before the page
+ * is drawn and leaves the result on the scene host (data-webgl2, 'yes' or 'no'); it is taken from there, and tested
+ * here only when that script skipped the test (Save-Data or reduced motion at load). The test context is dropped at
+ * once.
+ */
 function hasWebGL2(): boolean {
   if (webgl !== undefined) return webgl;
+  const tested = document.querySelector<HTMLElement>('[data-s3d]')?.dataset.webgl2;
+  if (tested === 'yes' || tested === 'no') {
+    webgl = tested === 'yes';
+    return webgl;
+  }
   try {
     const gl = document.createElement('canvas').getContext('webgl2', { failIfMajorPerformanceCaveat: true });
     webgl = gl !== null;

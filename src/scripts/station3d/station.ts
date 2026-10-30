@@ -35,6 +35,9 @@ const cold = new Color(0.75, 0.9, 1.0);
 /** The concourse of the end stands this far up the trunk from the end point, over the ends of the lines. */
 export const terminusBack = 1.6;
 
+/** A station label hangs this far over the deck of its station (the canopy is at 0.665). */
+export const stationLift = 0.95;
+
 /** A label on the side its map label is written on: right of its point, left of it, or above it. */
 function anchor(position: Vector3, side: Side): Anchor {
   if (side === 'start') return { position, centre: [0, 0.5] };
@@ -48,13 +51,20 @@ function box(width: number, height: number, depth: number, material: Material, x
   return mesh;
 }
 
-/** A light by night; by day the same part painted `dayColor`, unlit. */
+/**
+ * A light by night, coming on a little after the middle of the wake (wake.ts); by day the same part painted
+ * `dayColor`, unlit.
+ */
 function lamp(kit: Kit, color: Color, intensity: number, dayColor: Color | number = 0xe6e4df): MeshStandardMaterial {
-  const material = new MeshStandardMaterial({ color: 0x000000, emissive: color, emissiveIntensity: intensity });
+  const material = kit.wake.lamp(
+    new MeshStandardMaterial({ color: 0x000000, emissive: color, emissiveIntensity: intensity }),
+    0.45,
+    0.7,
+  );
   kit.theme.on((day) => {
     material.color.set(day ? dayColor : 0x000000);
     material.emissive.copy(color);
-    material.emissiveIntensity = day ? 0 : intensity;
+    kit.wake.setBase(material, day ? 0 : intensity);
   });
   return material;
 }
@@ -108,7 +118,7 @@ export function buildStations(model: SceneModel, at: ToWorld, metro: Metro, kit:
   const strip = lamp(kit, warm, 2.2);
   const edge = lamp(kit, amber, 1.6, 0xe2b400);
   const gateLight = lamp(kit, cold, 3.5);
-  const lift = new Vector3(0, 0.95, 0);
+  const lift = new Vector3(0, stationLift, 0);
 
   const stations = model.stations.map((station): Anchor => {
     const path = metro.paths.get(station.line);
@@ -185,7 +195,10 @@ export function buildStations(model: SceneModel, at: ToWorld, metro: Metro, kit:
   return { group, anchors: { stations, interchanges, now, here } };
 }
 
-/** The end: a glass barrel vault with lit ribs over the ends of the lines, on a concourse lit from inside. */
+/**
+ * The end: a glass barrel vault with lit ribs over the ends of the lines, on a concourse lit from inside, its glass
+ * front the first light of the wake (wake.ts).
+ */
 function buildTerminus(kit: Kit, end: Vector3, roof: Material, slab: Material): Group {
   const terminus = new Group();
   const length = 5.2;
@@ -219,14 +232,18 @@ function buildTerminus(kit: Kit, end: Vector3, roof: Material, slab: Material): 
   terminus.add(box(4.6, 1.5, length - 0.4, roof, 0, 0.75, 0));
   const front = kit.own(glazingTexture());
   front.repeat.set(3, 1);
-  const glazing = new MeshStandardMaterial({
-    color: 0x050608,
-    emissive: 0xffffff,
-    emissiveMap: front,
-    emissiveIntensity: 0.9,
-    roughness: 0.12,
-    metalness: 0.5,
-  });
+  const glazing = kit.wake.lamp(
+    new MeshStandardMaterial({
+      color: 0x050608,
+      emissive: 0xffffff,
+      emissiveMap: front,
+      emissiveIntensity: 0.9,
+      roughness: 0.12,
+      metalness: 0.5,
+    }),
+    0.1,
+    0.3,
+  );
   terminus.add(box(4.64, 0.9, length - 0.8, glazing, 0, 0.62, 0));
   const rim = lamp(kit, amber, 2);
   [-1, 1].forEach((side) => terminus.add(box(0.06, 0.08, length, rim, side * 2.38, 1.62, 0)));
@@ -236,7 +253,7 @@ function buildTerminus(kit: Kit, end: Vector3, roof: Material, slab: Material): 
   kit.theme.on((day) => {
     glass.emissiveIntensity = day ? 0 : 0.06;
     glass.opacity = day ? 0.3 : 0.16;
-    glazing.emissiveIntensity = day ? 0.12 : 0.9;
+    kit.wake.setBase(glazing, day ? 0.12 : 0.9);
     glazing.color.set(day ? 0x2c3a48 : 0x050608);
   });
   terminus.position.set(end.x, 0, end.z - terminusBack);

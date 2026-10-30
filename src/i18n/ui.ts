@@ -79,6 +79,7 @@ export const ui = {
     en: 'Full CV with contact details available on request.',
     vi: 'CV đầy đủ kèm thông tin liên hệ được gửi khi có yêu cầu.',
   },
+  resumeBorn: { en: 'Born {n}', vi: 'Sinh năm {n}' },
   resumeDescription: {
     en: 'CV of Phan Nguyen Dang Truong, Java Backend Developer in Hanoi: skills, experience, projects. Printable as PDF.',
     vi: 'CV của Phan Nguyễn Đăng Trường, Lập trình viên Java Backend tại Hà Nội: kỹ năng, kinh nghiệm, dự án. In hoặc lưu được thành PDF.',
@@ -110,6 +111,8 @@ export const ui = {
   },
   mapHere: { en: 'You are here', vi: 'Bạn đang ở đây' },
   mapLineSince: { en: 'Line {n} · since {year}', vi: 'Tuyến {n} · từ {year}' },
+  mapLineName: { en: 'Line {n}', vi: 'Tuyến {n}' },
+  mapGoToLine: { en: 'Click to go to this line', vi: 'Bấm để đi tới tuyến này' },
   cmdkOpen: { en: 'Open command palette', vi: 'Mở bảng lệnh' },
   cmdkTitle: { en: 'Command palette', vi: 'Bảng lệnh' },
   cmdkPlaceholder: { en: 'Type a command or section…', vi: 'Nhập lệnh hoặc tên mục…' },

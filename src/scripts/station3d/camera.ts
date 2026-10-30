@@ -2,6 +2,7 @@ import { MathUtils, Vector3, type PerspectiveCamera } from 'three';
 import type { Layout } from './level';
 import { frameBeside, panelOf } from './panels';
 import type { Shot, Shots } from './shots';
+import { Sway } from './sway';
 
 /** Seconds of the opening shot, coming down from above the clouds to the first shot of the page. */
 export const introSeconds = 7.5;
@@ -52,26 +53,28 @@ function smooth(value: number): number {
 }
 
 /**
- * A shot held by an element of the page: its middle on the page, where its look point is drawn in the window, and the
- * room it has there (panels.ts).
+ * A shot held by an element of the page: the key it names (data-cam), its middle on the page, where its look point
+ * is drawn in the window, and the room it has there (panels.ts).
  */
-type Anchor = { shot: Shot; middle: number; frame: number; frameY: number; room: number };
+type Anchor = { key: string; shot: Shot; middle: number; frame: number; frameY: number; room: number };
 
 type Goal = { pos: Vector3; look: Vector3; frame: number; frameY: number };
 
 /**
  * Drone that follows the page: every element with a data-cam attribute holds a shot, and the camera flies from one to
  * the next as the middle of the window passes their anchors, eased and damped, climbing a little between two shots so
- * it passes over the towers, and drifting round its point as a drone hovers. On a wide window each shot is framed in
- * the room its platform panel leaves: the look point is drawn in the middle of that room rather than in the middle of
- * the window (a view offset), sliding across as the shots change, and the camera steps back when that room is
- * narrower than the shots are framed for. On a narrow window held upright it takes the upright shots and a wider
- * lens, the look point drawn as high in the window as each shot says (a view offset too), and a block after an
- * open gap holds its shot while that gap is in the middle of the window. At the lite level it holds the lite shot
- * and swings slowly to and fro round its look point, in the middle of the hero map box, or right of it in the wide
- * map.
+ * it passes over the towers, and drifting round its point as a drone hovers; it banks into its turns and, at the full
+ * level, leans towards the pointer (sway.ts). On a wide window each shot is framed in the room its platform panel
+ * leaves: the look point is drawn in the middle of that room rather than in the middle of the window (a view offset),
+ * sliding across as the shots change, and the camera steps back when that room is narrower than the shots are framed
+ * for. On a narrow window held upright it takes the upright shots and a wider lens, the look point drawn as high in
+ * the window as each shot says (a view offset too), and a block after an open gap holds its shot while that gap is in
+ * the middle of the window. At the lite level it holds the lite shot and swings slowly to and fro round its look
+ * point, in the middle of the hero map box, or right of it in the wide map.
  */
 export class Rig {
+  /** Bank and lean of the drone on top of its flight. */
+  readonly sway = new Sway();
   private readonly camera: PerspectiveCamera;
   private readonly wideShots: Shots;
   private readonly tallShots: Shots | null;
@@ -120,7 +123,7 @@ export class Rig {
   /** Shot held when no element of the page holds one: the overview, or the lite shot at the lite level. */
   private held(shots: Shots): Anchor {
     const shot = this.follow ? (shots.byKey.get('overview') ?? shots.intro) : shots.lite;
-    return { shot, middle: 0, frame: shot.frame, frameY: shot.frameY, room: 1 };
+    return { key: '', shot, middle: 0, frame: shot.frame, frameY: shot.frameY, room: 1 };
   }
 
   /** Page positions, frames and rooms of the anchors; measured again whenever the page changes size. */
@@ -130,7 +133,8 @@ export class Rig {
     // The window stops at the end of the page: a block too near it holds its shot from as far as the window goes.
     const lowest = document.documentElement.scrollHeight - innerHeight / 2;
     this.anchors = Array.from(document.querySelectorAll<HTMLElement>('[data-cam]')).flatMap((element): Anchor[] => {
-      const shot = this.shots.byKey.get(element.dataset.cam ?? '');
+      const key = element.dataset.cam ?? '';
+      const shot = this.shots.byKey.get(key);
       const box = element.getBoundingClientRect();
       if (!shot || box.height === 0) return [];
       const top = box.top + scrollY;
@@ -138,8 +142,16 @@ export class Rig {
       const middle = Math.min(gap > openGap ? top - gap / 2 : top + box.height / 2, lowest);
       const panel = wide ? panelOf(element) : null;
       const framing = panel ? frameBeside(panel, this.width) : { frame: shot.frame, room: 1 };
-      return [{ shot, middle, frameY: shot.frameY, ...framing }];
+      return [{ key, shot, middle, frameY: shot.frameY, ...framing }];
     });
+  }
+
+  /**
+   * Point of the page that holds the shot of `key` (a data-cam value) once it is in the middle of the window, as the
+   * anchors are measured; null when no block of the page holds it.
+   */
+  middleOf(key: string): number | null {
+    return this.anchors.find((anchor) => anchor.key === key)?.middle ?? null;
   }
 
   /**
@@ -192,7 +204,7 @@ export class Rig {
       this.frame = MathUtils.lerp(this.frame, goal.frame, k);
       this.frameY = MathUtils.lerp(this.frameY, goal.frameY, k);
     }
-    this.aim(time);
+    this.aim(time, dt, goal.pos);
     const still =
       this.pos.distanceToSquared(goal.pos) < 1e-6 &&
       this.look.distanceToSquared(goal.look) < 1e-6 &&
@@ -201,13 +213,14 @@ export class Rig {
     return intro !== null || !still;
   }
 
-  private aim(time: number): void {
+  private aim(time: number, dt: number, goal: Vector3): void {
     this.drift.set(Math.sin(time * 0.21) * 0.35, Math.sin(time * 0.33) * 0.18, Math.cos(time * 0.17) * 0.35);
     this.camera.position.copy(this.pos).add(this.drift);
     if (!this.follow) {
       const swing = Math.sin(time * 0.05) * 0.45;
       this.camera.position.sub(this.look).applyAxisAngle(up, swing).add(this.look);
     }
+    this.sway.apply(this.camera, this.pos, this.look, goal, dt);
     this.camera.lookAt(this.look);
     this.project();
   }

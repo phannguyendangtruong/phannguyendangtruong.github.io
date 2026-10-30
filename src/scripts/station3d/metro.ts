@@ -20,6 +20,8 @@ export type Metro = {
   stops: Map<number, number[]>;
   /** Length along the path of each line where it reaches the end. */
   ends: Map<number, number>;
+  /** LED strip of each line by route number: brighter or dimmer when the pointer is on a line (interact.ts). */
+  leds: Map<number, MeshStandardMaterial>;
 };
 
 /** Height of the decks over the ground. */
@@ -95,8 +97,8 @@ function heightsOf(line: SceneLine, model: SceneModel, at: ToWorld): number[] {
 
 /**
  * Viaducts of the lines: a concrete deck on piers, parapets with an LED strip in the line colour under the deck edge
- * (paint of that colour by day), two tracks of steel rails on sleepers. Gives the paths the trains run on and the
- * stops of each line.
+ * (paint of that colour by day), two tracks of steel rails on sleepers. The LED strips come on a third of the way into
+ * the wake (wake.ts). Gives the paths the trains run on and the stops of each line.
  */
 export function buildMetro(model: SceneModel, at: ToWorld, kit: Kit): Metro {
   const group = new Group();
@@ -118,6 +120,7 @@ export function buildMetro(model: SceneModel, at: ToWorld, kit: Kit): Metro {
   const paths = new Map<number, CurvePath<Vector3>>();
   const stops = new Map<number, number[]>();
   const ends = new Map<number, number>();
+  const leds = new Map<number, MeshStandardMaterial>();
   const sleepers: Matrix4[] = [];
   const column = new BoxGeometry(0.26, 1, 0.26);
   const cap = new BoxGeometry(0.9, 0.16, 0.36);
@@ -131,11 +134,16 @@ export function buildMetro(model: SceneModel, at: ToWorld, kit: Kit): Metro {
     const length = path.getLength();
     paths.set(line.number, path);
     const color = kit.colors.of(line.number);
-    const led = new MeshStandardMaterial({ color: 0x000000, emissive: color, emissiveIntensity: 2.4 });
+    const led = kit.wake.lamp(
+      new MeshStandardMaterial({ color: 0x000000, emissive: color, emissiveIntensity: 2.4 }),
+      0.3,
+      0.55,
+    );
+    leds.set(line.number, led);
     kit.theme.on((day) => {
       led.color.set(day ? color : 0x000000);
       led.emissive.copy(color);
-      led.emissiveIntensity = day ? 0.1 : 2.4;
+      kit.wake.setBase(led, day ? 0.1 : 2.4);
     });
     group.add(
       new Mesh(sweepBox(path, [-0.52, 0.52, -0.2, 0]), concrete),
@@ -182,5 +190,5 @@ export function buildMetro(model: SceneModel, at: ToWorld, kit: Kit): Metro {
   const ties = new InstancedMesh(new BoxGeometry(0.24, 0.02, 0.04), sleeperPaint, sleepers.length);
   sleepers.forEach((matrix, index) => ties.setMatrixAt(index, matrix));
   group.add(ties);
-  return { group, paths, stops, ends };
+  return { group, paths, stops, ends, leds };
 }

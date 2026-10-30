@@ -1,10 +1,12 @@
 import type { FocusScene } from './hero';
 import type { Lang, Text, TextList, UiKey } from '../i18n/ui';
 
-export const profile = {
+const profileFields = {
   name: { en: 'Phan Nguyen Dang Truong', vi: 'Phan Nguyễn Đăng Trường' } satisfies Text,
   role: { en: 'Java Backend Developer', vi: 'Lập trình viên Java Backend' } satisfies Text,
   location: { en: 'Hanoi, Vietnam', vi: 'Hà Nội, Việt Nam' } satisfies Text,
+  /** Optional year of birth (a four-digit number): shown only on the CV line under the name and as `born` in the profile JSON. */
+  birthYear: 2002,
   /** Job title on the line under the name in the hero, written the same in both languages. */
   jobTitle: 'Java Backend Developer',
   /** City on the line under the name in the hero. */
@@ -39,6 +41,9 @@ export const profile = {
   /** Main technologies, listed in the profile JSON. */
   coreTech: ['Java 21', 'Spring Boot', 'Kafka', 'Keycloak'],
 };
+
+/** `birthYear` may be deleted above: the CV line and the profile JSON then leave the year out. */
+export const profile: typeof profileFields & { birthYear?: number } = profileFields;
 
 /**
  * Share images (1200×630 PNG, path under BASE_URL such as 'og/default-en.png'); null means no og:image tags.

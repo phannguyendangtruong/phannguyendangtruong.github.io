@@ -8,7 +8,6 @@ const sections: readonly string[] = homeSections;
   (() => {
     const root = document.documentElement;
     const header = document.querySelector('.site-header');
-    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
     // Theme: dark until the visitor picks light; the choice is saved and the OS setting is not followed.
     const themeColor = document.querySelector('meta[name="theme-color"]');
@@ -57,6 +56,17 @@ const sections: readonly string[] = homeSections;
         if (!anchor) return;
         event.preventDefault();
         location.assign(link.getAttribute('href') + anchor);
+      });
+    });
+
+    // Footer "Profile as JSON": a real link to the JSON file (no JavaScript, Ctrl/⌘/Shift + click, middle click).
+    // A plain click goes to the JSON view address instead (/#api): on the home page only the hash changes and
+    // ApiView.astro opens the view on hashchange, other pages load the home page with the view open.
+    document.querySelectorAll('[data-api-view-href]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        location.assign(link.dataset.apiViewHref);
       });
     });
 
@@ -153,39 +163,6 @@ const sections: readonly string[] = homeSections;
       addEventListener('scroll', schedule, { passive: true });
       addEventListener('resize', schedule);
       markCurrent();
-    }
-
-    // Effects ([data-fx]): wait (.fx-wait) until on screen, then run once (.fx-run); .fx-on while on screen with the tab
-    // visible, so the CSS pauses them otherwise. Reduced motion or no observer: no class, the static final state stays.
-    const effects = Array.from(document.querySelectorAll('[data-fx]'));
-    if ('IntersectionObserver' in window && !reduceMotion.matches && effects.length) {
-      const onScreen = new Set();
-      const syncEffect = (el) => el.classList.toggle('fx-on', onScreen.has(el) && !document.hidden);
-      const fxObserver = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            const el = entry.target;
-            if (entry.isIntersecting) {
-              onScreen.add(el);
-              el.classList.replace('fx-wait', 'fx-run');
-            } else {
-              onScreen.delete(el);
-            }
-            syncEffect(el);
-          });
-        },
-        { rootMargin: '0px 0px -15% 0px' },
-      );
-      effects.forEach((el) => {
-        el.classList.add('fx-wait');
-        fxObserver.observe(el);
-      });
-      document.addEventListener('visibilitychange', () => effects.forEach(syncEffect));
-      reduceMotion.addEventListener('change', (event) => {
-        if (!event.matches) return;
-        fxObserver.disconnect();
-        effects.forEach((el) => el.classList.remove('fx-wait', 'fx-run', 'fx-on'));
-      });
     }
 
     window.__site = { toggleTheme, isDark, langTarget, isMenuOpen, closeMenu };

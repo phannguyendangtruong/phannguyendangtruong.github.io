@@ -15,6 +15,7 @@ import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js';
 import { cloudTexture, glowTexture } from './textures';
 import type { Environments, ThemeSwitch } from './theme';
 import type { LineColors } from './tokens';
+import type { Wake } from './wake';
 
 /** Anything holding GPU memory until it is disposed: a texture, a render target. */
 export type Freeable = { dispose: () => void };
@@ -54,12 +55,13 @@ export type Uniforms = {
   fogDensity: IUniform<number>;
 };
 
-/** What every part of the city is built with. */
+/** What every part of the city is built with; `wake` lights it up during the opening shot (wake.ts). */
 export type Kit = {
   assets: Assets;
   uniforms: Uniforms;
   colors: LineColors;
   theme: ThemeSwitch;
+  wake: Wake;
   own: Own;
 };
 

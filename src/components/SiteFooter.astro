@@ -1,6 +1,7 @@
 ---
 import ExternalLink from './ExternalLink.astro';
 import RouteBullet from './metro/RouteBullet.astro';
+import { profileJsonPath } from '../data/api';
 import { lines } from '../data/network';
 import { profile } from '../data/profile';
 import { localePath, tr, ui, type Lang } from '../i18n/ui';
@@ -15,6 +16,10 @@ const { lang, variant = 'full' } = Astro.props;
 const minimal = variant === 'minimal';
 const name = minimal ? profile.name.en : profile.name[lang];
 const year = new Date().getFullYear();
+/** The JSON file, so the link works without JavaScript and in a new tab. */
+const jsonHref = localePath(lang, profileJsonPath);
+/** JSON view of the home page (ApiView.astro), opened on a plain click by SiteScripts.astro. */
+const jsonViewHref = localePath(lang, '/#api');
 ---
 
 <footer class="site-footer no-print">
@@ -44,7 +49,7 @@ const year = new Date().getFullYear();
         <div class="footer-meta">
           <ul class="footer-links">
             <li>
-              <a class="text-link footer-json" href={localePath(lang, '/#api')}>
+              <a class="text-link footer-json" href={jsonHref} data-api-view-href={jsonViewHref}>
                 {tr('apiTitle', lang)}
               </a>
             </li>

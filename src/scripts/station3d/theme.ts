@@ -12,12 +12,16 @@ import {
 } from 'three';
 import type { Uniforms } from './assets';
 
-/** Haze of city light at the horizon of the night sky, which the night fog fades into; the haze of a clear day. */
+/** Haze of city light at the horizon of the night sky, which the night fog fades into; the warm haze of golden hour. */
 export const horizon = new Color(0.028, 0.026, 0.04);
-const dayHaze = new Color(0.86, 0.89, 0.93);
+export const dayHaze = new Color(0.91, 0.88, 0.84);
 
-/** Where the sun of the light theme stands from the look point: high in the south-west, so the towers cast long shadows. */
-const sunFrom = new Vector3(-34, 62, 26);
+/**
+ * Where the sun of the light theme stands from the look point: low in the west, behind the viewer's shoulder, so the
+ * fronts facing the camera catch the golden light and the towers cast long shadows. The sky dome (sky.ts) glows round
+ * the same direction.
+ */
+export const sunFrom = new Vector3(-46, 30, 58);
 
 /**
  * Parts of the scene that change with the page theme register here; `apply` runs them all, so a theme change repaints
@@ -43,8 +47,9 @@ export type SunShadow = { size: number; reach: number };
 
 /**
  * Light of the scene. Night: reflections of the night HDRI, a faint sky light and moonlight, ACES tone mapping, fog
- * fading into the haze of the horizon. Day (the light theme, a model in daylight): a studio of light panels, a bright
- * sky light and a sun with soft shadows in a box that follows the look point, Neutral tone mapping, a light haze.
+ * fading into the haze of the horizon. Day (the light theme, a model at golden hour): a studio of light panels, a sky
+ * light between a cool sky and warm ground, a low warm sun with shadows in a box that follows the look point, Neutral
+ * tone mapping, a warm haze.
  */
 export class Lighting {
   readonly fog = new FogExp2(horizon.clone(), 0.0068);
@@ -52,7 +57,7 @@ export class Lighting {
   private readonly env: Environments;
   private readonly sky = new HemisphereLight(0x23304a, 0x120c08, 0.12);
   private readonly moon = new DirectionalLight(0x9db4ff, 0.22);
-  private readonly sun = new DirectionalLight(0xfff1df, 0);
+  private readonly sun = new DirectionalLight(0xffd7ad, 0);
   private day = false;
 
   /** `shadow`: a smaller map for a phone, over a smaller box for the close shot of the lite level. */
@@ -80,14 +85,14 @@ export class Lighting {
     this.day = day;
     this.scene.environment = day ? this.env.day : this.env.night;
     this.scene.environmentIntensity = day ? 0.75 : 1;
-    this.sky.color.set(day ? 0xe4ecf7 : 0x23304a);
-    this.sky.groundColor.set(day ? 0xb5ad9f : 0x120c08);
-    this.sky.intensity = day ? 1.15 : 0.12;
+    this.sky.color.set(day ? 0xdfe3ee : 0x23304a);
+    this.sky.groundColor.set(day ? 0xb8957a : 0x120c08);
+    this.sky.intensity = day ? 1.05 : 0.12;
     this.moon.intensity = day ? 0 : 0.22;
-    this.sun.intensity = day ? 2.3 : 0;
+    this.sun.intensity = day ? 3.3 : 0;
     this.sun.castShadow = day;
     this.fog.color.copy(day ? dayHaze : horizon);
-    this.fog.density = day ? 0.0052 : 0.0068;
+    this.fog.density = day ? 0.0058 : 0.0068;
     uniforms.fogColor.value.copy(this.fog.color);
     uniforms.fogDensity.value = this.fog.density;
     renderer.toneMapping = day ? NeutralToneMapping : ACESFilmicToneMapping;

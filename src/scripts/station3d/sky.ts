@@ -13,35 +13,45 @@ import {
 } from 'three';
 import type { Kit } from './assets';
 import { sparks } from './sparks';
-import { horizon } from './theme';
+import { dayHaze, horizon, sunFrom } from './theme';
 
 export type Sky = { group: Group; update: (camera: Camera) => void };
 
 const domeVertex = `varying vec3 vDir;
   void main() { vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
 
-/** Dome from the haze of the horizon to the deep blue above, a warm glow of city light low down; pale blue by day. */
-const domeShader = `uniform vec3 horizon; uniform float uDay; varying vec3 vDir;
+/**
+ * Dome from the haze of the horizon to the deep blue above, a warm glow of city light low down. At golden hour (the
+ * light theme) from the warm haze of the day fog at the horizon to a clear blue above, brighter round the low sun.
+ */
+const domeShader = `uniform vec3 horizon; uniform vec3 dayHaze; uniform vec3 sunDir; uniform float uDay; varying vec3 vDir;
   void main() {
     float h = max(vDir.y, 0.0);
     vec3 top = vec3(0.004, 0.008, 0.022);
     vec3 glow = vec3(0.16, 0.08, 0.06);
     vec3 c = mix(horizon, top, pow(h, 0.45));
     c += glow * exp(-h * 9.0) * 0.6;
-    vec3 day = mix(vec3(0.86, 0.89, 0.93), vec3(0.55, 0.69, 0.88), pow(h, 0.6));
+    vec3 day = mix(dayHaze, vec3(0.52, 0.66, 0.86), pow(h, 0.55));
+    float toSun = max(dot(vDir, sunDir), 0.0);
+    day += vec3(1.0, 0.62, 0.3) * (pow(toSun, 6.0) * 0.32 + pow(toSun, 60.0) * 0.6);
     gl_FragColor = vec4(mix(c, day, uDay), 1.0);
   }`;
 
 /**
  * Night sky: a dome, stars, a moon with its halo, and a deck of clouds lit by the moon that the opening shot comes
- * down through. By day a pale blue dome with white clouds, no stars and no moon.
+ * down through. At golden hour a warm dome glowing round the sun (theme.ts) with clouds lit warm, no stars, no moon.
  */
 export function buildSky(kit: Kit): Sky {
   const group = new Group();
   const dome = new Mesh(
     new SphereGeometry(420, 48, 24),
     new ShaderMaterial({
-      uniforms: { horizon: { value: horizon }, uDay: kit.uniforms.uDay },
+      uniforms: {
+        horizon: { value: horizon },
+        dayHaze: { value: dayHaze },
+        sunDir: { value: sunFrom.clone().normalize() },
+        uDay: kit.uniforms.uDay,
+      },
       vertexShader: domeVertex,
       fragmentShader: domeShader,
       side: BackSide,
@@ -108,7 +118,7 @@ export function buildSky(kit: Kit): Sky {
     stars.visible = !day;
     moon.visible = !day;
     halo.visible = !day;
-    clouds.forEach((cloud) => cloud.material.color.set(day ? 0xffffff : 0x9eadd9));
+    clouds.forEach((cloud) => cloud.material.color.set(day ? 0xffe2c4 : 0x9eadd9));
   });
 
   // Clouds show only while the camera is up among them, and thin out right next to it.

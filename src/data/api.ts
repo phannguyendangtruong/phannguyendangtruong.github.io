@@ -9,6 +9,8 @@ export type ProfileJson = {
   name: string;
   role: string;
   location: string;
+  /** Year of birth; the key is left out when the profile has none. */
+  born?: number;
   summary: string;
   links: { github: string; linkedin: string };
   stack: string[];
@@ -29,6 +31,7 @@ export function profileJson(lang: Lang): ProfileJson {
     name: profile.name[lang],
     role: profile.role[lang],
     location: profile.location[lang],
+    ...(profile.birthYear === undefined ? {} : { born: profile.birthYear }),
     summary: profile.tagline[lang],
     links: { github: profile.links.github, linkedin: profile.links.linkedin },
     stack: [...profile.coreTech],

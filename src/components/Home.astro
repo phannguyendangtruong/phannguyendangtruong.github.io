@@ -19,8 +19,11 @@ interface Props {
 
 const { lang } = Astro.props;
 const shown = shownProjects();
-const featured = shown.filter((project) => project.status !== 'planned');
-const planned = shown.filter((project) => project.status === 'planned');
+/** Personal projects as one line under construction: the built stations first, then the planned ones. */
+const projectLine = [
+  ...shown.filter((project) => project.status !== 'planned'),
+  ...shown.filter((project) => project.status === 'planned'),
+];
 const title = `${profile.name[lang]} — ${profile.role[lang]}`;
 ---
 
@@ -46,25 +49,12 @@ const title = `${profile.name[lang]} — ${profile.role[lang]}`;
     homeSections.includes('projects') && (
       <section id="projects" class="section" aria-labelledby="projects-title">
         <div class="container">
-          <SectionHead lang={lang} id="projects-title" title="projectsTitle" intro="projectsIntro" />
-          {featured.length > 0 && (
-            <ul class="project-list">
-              {featured.map((project) => (
-                <li>
-                  <ProjectCard project={project} lang={lang} featured />
-                </li>
-              ))}
-            </ul>
-          )}
-          {planned.length > 0 && (
-            <ul class="project-grid">
-              {planned.map((project) => (
-                <li>
-                  <ProjectCard project={project} lang={lang} />
-                </li>
-              ))}
-            </ul>
-          )}
+          <SectionHead lang={lang} id="projects-title" title="projectsTitle" intro="projectsIntro" neutral />
+          <ol class:list={['pj-line', { 'from-planned': projectLine[0]?.status === 'planned' }]}>
+            {projectLine.map((project, index) => (
+              <ProjectCard project={project} lang={lang} next={projectLine[index + 1]?.status} />
+            ))}
+          </ol>
         </div>
       </section>
     )
@@ -122,22 +112,43 @@ const title = `${profile.name[lang]} — ${profile.role[lang]}`;
     text-transform: uppercase;
   }
 
-  .project-list,
-  .project-grid {
-    display: grid;
-    gap: 16px;
+  /* Projects: personal projects belong to no job, so they make a line of their own, under construction, in the
+     neutral line colour, with no route number and no glow. One vertical axis as the Experience route: --rail is the
+     centre of the track from the left edge, --pad where the text starts. The line starts at an end bar; the track
+     from it to the first station is solid, or dashed 10/8 when that station is planned (ProjectCard.astro draws the
+     stations and the track between them). */
+  .pj-line {
+    --rail: 14px;
+    --pad: 44px;
+    position: relative;
     margin: 0;
-    padding: 0;
+    padding: 28px 0 0;
     list-style: none;
   }
 
-  .project-grid {
-    margin-top: 16px;
+  .pj-line::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--rail) - 3px);
+    top: 0;
+    width: 6px;
+    height: 33px;
+    background: var(--line-neutral);
   }
 
-  /* Cards in one row share the row height. */
-  .project-grid > li {
-    display: grid;
+  .pj-line.from-planned::before {
+    background: repeating-linear-gradient(to bottom, var(--line-neutral) 0 10px, transparent 10px 18px);
+  }
+
+  /* End bar across the start of the track, as the "Now" bar of the route. */
+  .pj-line::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--rail) - 14px);
+    top: 0;
+    width: 28px;
+    height: 0;
+    border-top: 6px solid var(--line-neutral);
   }
 
   @media (min-width: 640px) {
@@ -149,8 +160,27 @@ const title = `${profile.name[lang]} — ${profile.role[lang]}`;
       margin-top: 64px;
     }
 
-    .project-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .pj-line {
+      --pad: 56px;
+    }
+  }
+
+  /* Printed: a thin black rule instead of the 6px track, as on the route. */
+  @media print {
+    .pj-line::before,
+    .pj-line.from-planned::before {
+      left: calc(var(--rail) - 1px);
+      width: 0;
+      border-left: 2px solid var(--line-neutral);
+      background: none;
+    }
+
+    .pj-line.from-planned::before {
+      border-left-style: dashed;
+    }
+
+    .pj-line::after {
+      border-top-width: 2px;
     }
   }
 </style>

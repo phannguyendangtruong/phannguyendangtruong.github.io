@@ -1,146 +1,165 @@
 ---
 import ExternalLink from './ExternalLink.astro';
 import Icon from './Icon.astro';
-import { statusLabel, type Project } from '../data/profile';
+import { statusLabel, type Project, type ProjectStatus } from '../data/profile';
 import { caseStudyProjects } from '../i18n/nav';
 import { localePath, tr, type Lang } from '../i18n/ui';
 
 interface Props {
   project: Project;
   lang: Lang;
-  /** Large card (in-progress and done projects); the small card has no links. */
-  featured?: boolean;
+  /** Status of the next station down the line, which the track under this one runs to; none on the last station. */
+  next?: ProjectStatus;
 }
 
-const { project, lang, featured = false } = Astro.props;
-const points = featured && project.points ? project.points[lang].slice(0, 3) : [];
-const arch = featured && project.arch ? project.arch : [];
+const { project, lang, next } = Astro.props;
+const points = project.points?.[lang] ?? [];
+const arch = project.arch ?? [];
 const archId = `${(project.slug ?? project.name).toLowerCase().replace(/[^a-z0-9]+/g, '-')}-arch`;
-const hasSide = points.length > 0 || arch.length > 0;
-const hasCaseStudy = featured && caseStudyProjects().some((item) => item.slug === project.slug);
+const hasCaseStudy = caseStudyProjects().some((item) => item.slug === project.slug);
 const caseStudy = hasCaseStudy ? localePath(lang, `/projects/${project.slug}/`) : undefined;
-const demoUrl = featured && project.demoUrl ? project.demoUrl : undefined;
-const repoUrl = featured && project.repoUrl ? project.repoUrl : undefined;
-const repoSoon = featured && project.status === 'in-progress' && !project.repoUrl;
-const linked = Boolean(caseStudy || demoUrl || repoUrl);
+const repoSoon = project.status === 'in-progress' && !project.repoUrl;
+const linked = Boolean(caseStudy || project.demoUrl || project.repoUrl || repoSoon);
 ---
 
-<article class:list={['card', 'project', { linked, featured, 'with-side': hasSide }]}>
-  <div class="pc-main">
+<li class:list={['pj-stop', { 'to-planned': next === 'planned', last: next === undefined }]}>
+  <div class="pj-head">
+    <h3 class="pj-name">{project.name}</h3>
     <span class:list={['badge', project.status]}>{tr(statusLabel[project.status], lang)}</span>
-    <h3 class="pc-name">{project.name}</h3>
-    <p class="pc-summary">{project.summary[lang]}</p>
   </div>
+  <p class="pj-sum">{project.summary[lang]}</p>
   {
-    hasSide && (
-      <div class="pc-side">
-        {arch.length > 0 && (
-          <div class="pc-arch">
-            <p class="caps-label" id={archId} aria-hidden="true">
-              {tr('projectArch', lang)}
-            </p>
-            <ol class="pc-arch-list" aria-labelledby={archId}>
-              {arch.map((item, index) => (
-                <li>
-                  {index > 0 && <Icon name="arrow-right" size={12} />}
-                  <span class="chip">{item}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        )}
-        {points.length > 0 && (
-          <ul class="points pc-points">
-            {points.map((point) => (
-              <li>{point}</li>
-            ))}
-          </ul>
-        )}
+    points.length > 0 && (
+      <ul class="dash-list pj-points">
+        {points.map((point) => (
+          <li>{point}</li>
+        ))}
+      </ul>
+    )
+  }
+  {
+    arch.length > 0 && (
+      <div class="pj-arch">
+        <p class="caps-label" id={archId} aria-hidden="true">
+          {tr('projectArch', lang)}
+        </p>
+        <ol class="pj-arch-list" aria-labelledby={archId}>
+          {arch.map((item, index) => (
+            <li>
+              {index > 0 && <Icon name="arrow-right" size={12} />}
+              <span class="pj-part">{item}</span>
+            </li>
+          ))}
+        </ol>
       </div>
     )
   }
-  <ul class="tags pc-tech" aria-label={tr('techLabel', lang)}>
+  <ul class="tags pj-tags" aria-label={tr('techLabel', lang)}>
     {project.tech.map((item) => <li>{item}</li>)}
   </ul>
   {
-    (linked || repoSoon) && (
-      <div class="pc-actions">
+    linked && (
+      <div class="pj-links">
         {caseStudy && (
-          <a class="button primary pc-case" href={caseStudy}>
+          <a class="text-link accent" href={caseStudy}>
             {tr('readCaseStudy', lang)}
             <span class="sr-only">{` ${project.name}`}</span>
             <Icon name="arrow-right" size={16} />
           </a>
         )}
-        {demoUrl && <ExternalLink href={demoUrl} lang={lang} label={tr('demo', lang)} class="text-link" />}
-        {repoUrl && <ExternalLink href={repoUrl} lang={lang} label={tr('repository', lang)} class="text-link" />}
-        {repoSoon && <span class="pc-soon faint">{tr('repoSoon', lang)}</span>}
+        {project.demoUrl && <ExternalLink href={project.demoUrl} lang={lang} label={tr('demo', lang)} class="text-link" />}
+        {project.repoUrl && (
+          <ExternalLink href={project.repoUrl} lang={lang} label={tr('repository', lang)} class="text-link" />
+        )}
+        {repoSoon && <span class="pj-soon faint">{tr('repoSoon', lang)}</span>}
       </div>
     )
   }
-</article>
+</li>
 
 <style>
-  .project:not(.featured) {
+  /* A project is a station of the projects line: a ring on the rail, with its name, status, summary, points,
+     technologies and links beside it as on the route; no card round it (--rail and --pad come from the line in
+     Home.astro). */
+  .pj-stop {
+    position: relative;
+    padding: 0 0 40px var(--pad);
+  }
+
+  .pj-stop.last {
+    padding-bottom: 0;
+  }
+
+  /* The track from this station down to the next one, in the neutral line colour, with no glow: solid, or dashed 10/8
+     when it runs to a planned station (an unbuilt section). Hard stops, so a dash pattern rather than a gradient. */
+  .pj-stop::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--rail) - 3px);
+    top: 13px;
+    bottom: -13px;
+    width: 6px;
+    background: var(--line-neutral);
+  }
+
+  .pj-stop.to-planned::before {
+    background: repeating-linear-gradient(to bottom, var(--line-neutral) 0 10px, transparent 10px 18px);
+  }
+
+  .pj-stop.last::before {
+    content: none;
+  }
+
+  /* Station ring on the page background, centred on the first line of the name; the next station's ring covers the
+     end of the track above it. */
+  .pj-stop::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--rail) - 8px);
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    border: 3px solid var(--line-neutral);
+    border-radius: 50%;
+    background: var(--bg);
+  }
+
+  /* Name and status chip on one row, the chip under the name when the row is too narrow. */
+  .pj-head {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
   }
 
-  /* Flat surface with its 1px edge (global .card). */
-  .featured {
-    display: grid;
-    gap: 20px;
-    padding: 20px;
-  }
-
-  .pc-main {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .pc-name {
+  .pj-name {
     margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
+    font: 600 1.375rem/1.2 var(--font);
   }
 
-  .featured .pc-name {
-    font-family: var(--font-display);
-    font-size: clamp(36px, 5vw, 56px);
-    font-weight: 700;
-    line-height: 1.04;
-  }
-
-  .pc-summary {
-    margin: 0;
+  .pj-sum {
+    max-width: 70ch;
+    margin: 8px 0 0;
     color: var(--muted);
   }
 
-  .project:not(.featured) .pc-summary {
-    flex: 1;
-    font-size: 15px;
+  .dash-list.pj-points {
+    max-width: 70ch;
+    margin-top: 12px;
   }
 
-  .pc-side {
-    display: grid;
-    gap: 16px;
-    min-width: 0;
-  }
-
-  .pc-arch {
+  /* Main parts of the system in order: names of code, so the mono face, joined by arrows. */
+  .pj-arch {
     display: grid;
     gap: 8px;
+    margin-top: 16px;
   }
 
-  .pc-arch .caps-label {
+  .pj-arch .caps-label {
     margin: 0;
   }
 
-  .pc-arch-list {
+  .pj-arch-list {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -150,101 +169,65 @@ const linked = Boolean(caseStudy || demoUrl || repoUrl);
     list-style: none;
   }
 
-  .pc-arch-list li {
+  .pj-arch-list li {
     display: inline-flex;
     align-items: center;
     gap: 6px;
   }
 
-  .pc-arch-list :global(svg) {
+  .pj-arch-list :global(svg) {
     flex: none;
     width: 12px;
     height: 12px;
     color: var(--muted);
   }
 
-  /* Names of system parts: code, so they keep the code face. */
-  .chip {
-    padding: 6px 10px;
-    border: 1px solid var(--border-strong);
-    border-radius: 6px;
-    background: var(--surface-2);
-    font: 12px/1 var(--mono);
+  .pj-part {
+    font: 500 0.8125rem/1.4 var(--mono);
     color: var(--text);
   }
 
-  /* Phone: the points sit straight on the card, no inner frame. */
-  .pc-points {
-    gap: 12px;
-    padding: 16px 0 0;
-    border-top: 1px solid var(--border);
+  /* Technologies: 32px capsules in the mono face, as the chips of the route, but not buttons. */
+  .tags.pj-tags {
+    gap: 12px 8px;
+    margin-top: 16px;
   }
 
-  .pc-actions {
+  .tags.pj-tags li {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0 12px;
+  }
+
+  .pj-links {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 12px 16px;
+    gap: 0 20px;
+    margin-top: 8px;
   }
 
-  .pc-case {
-    width: 100%;
-    min-height: 52px;
-    padding: 0 24px;
-    font-size: 16px;
-  }
-
-  .pc-soon {
+  .pj-soon {
     font-size: 0.8125rem;
   }
 
-  @media (min-width: 640px) {
-    .featured {
-      padding: 28px;
+  /* Printed: a thin black rule instead of the 6px track, dashed towards a planned station. */
+  @media print {
+    .pj-stop {
+      break-inside: avoid;
     }
 
-    .pc-points {
-      padding: 20px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface-2);
+    .pj-stop::before,
+    .pj-stop.to-planned::before {
+      left: calc(var(--rail) - 1px);
+      width: 0;
+      border-left: 2px solid var(--line-neutral);
+      background: none;
     }
 
-    .pc-case {
-      width: auto;
-      padding: 0 28px;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .featured {
-      padding: 40px;
-    }
-
-    .with-side {
-      grid-template-columns: 1.05fr 1fr;
-      grid-template-areas:
-        'main side'
-        'tech side'
-        'act side';
-      gap: 24px 48px;
-    }
-
-    .with-side .pc-main {
-      grid-area: main;
-    }
-
-    .with-side .pc-side {
-      grid-area: side;
-      align-self: start;
-    }
-
-    .with-side .pc-tech {
-      grid-area: tech;
-    }
-
-    .with-side .pc-actions {
-      grid-area: act;
+    .pj-stop.to-planned::before {
+      border-left-style: dashed;
     }
   }
 </style>

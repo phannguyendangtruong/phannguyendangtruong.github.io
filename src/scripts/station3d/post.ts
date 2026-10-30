@@ -41,11 +41,21 @@ function tiltShift(direction: 'h' | 'v') {
   };
 }
 
-/** Lens and film: a little colour fringe towards the edges, a cool lift in the shadows, vignette, grain. */
+/**
+ * Lens and film: a little colour fringe towards the edges, a cool lift in the shadows, a warm cast at golden hour
+ * (`warm`, the light theme), vignette, grain.
+ */
 const grade = {
-  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, vignette: { value: 0.9 }, grain: { value: 0.018 } },
+  uniforms: {
+    tDiffuse: { value: null },
+    uTime: { value: 0 },
+    vignette: { value: 0.9 },
+    grain: { value: 0.018 },
+    warm: { value: 0 },
+  },
   vertexShader: quad,
-  fragmentShader: `uniform sampler2D tDiffuse; uniform float uTime; uniform float vignette; uniform float grain; varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float uTime; uniform float vignette; uniform float grain; uniform float warm;
+    varying vec2 vUv;
     float rand(vec2 co) { return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
     void main() {
       vec2 c = vUv - 0.5;
@@ -53,6 +63,7 @@ const grade = {
       vec2 shift = c * r2 * 0.012;
       vec3 col = vec3(texture2D(tDiffuse, vUv + shift).r, texture2D(tDiffuse, vUv).g, texture2D(tDiffuse, vUv - shift).b);
       col += vec3(0.0, 0.004, 0.012) * (1.0 - smoothstep(0.0, 0.25, dot(col, vec3(0.33))));
+      col *= mix(vec3(1.0), vec3(1.05, 1.0, 0.92), warm);
       col *= mix(1.0, smoothstep(0.95, 0.1, r2 * 2.2), vignette);
       col += (rand(vUv * 1000.0 + fract(uTime)) - 0.5) * grain;
       gl_FragColor = vec4(max(col, 0.0), 1.0);
@@ -62,7 +73,7 @@ const grade = {
 export type Post = {
   /** Size of the canvas in CSS pixels and its pixel ratio. */
   setSize: (width: number, height: number, ratio: number) => void;
-  /** Light theme: no bloom, a lighter vignette and grain. */
+  /** Light theme (golden hour): no bloom, a lighter vignette and grain, a warm cast. */
   setDay: (day: boolean) => void;
   /** Height of the band kept sharp (0 at the bottom, 1 at the top) and the strength of the blur round it. */
   setFocus: (focus: number, amount: number) => void;
@@ -94,7 +105,8 @@ export function buildPost(renderer: WebGLRenderer, scene: Scene, camera: Camera,
     },
     setDay: (day) => {
       bloom.enabled = !day;
-      look.uniforms.vignette.value = day ? 0.35 : 0.9;
+      look.uniforms.vignette.value = day ? 0.5 : 0.9;
+      look.uniforms.warm.value = day ? 1 : 0;
       look.uniforms.grain.value = day ? 0.01 : 0.018;
     },
     setFocus: (focus, amount) => {

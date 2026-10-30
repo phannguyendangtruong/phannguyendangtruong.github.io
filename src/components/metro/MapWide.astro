@@ -1,5 +1,6 @@
 ---
 import Interchange from './Interchange.astro';
+import MapLinks from './MapLinks.astro';
 import MapStart from './MapStart.astro';
 import Station from './Station.astro';
 import Terminal from './Terminal.astro';
@@ -15,8 +16,7 @@ import {
   wideMap,
   type LabelAt,
 } from '../../data/network-layout';
-import { projectCountForSkill } from '../../data/skill-keys';
-import { tr, trCount, type Lang } from '../../i18n/ui';
+import { tr, type Lang } from '../../i18n/ui';
 
 interface Props {
   lang: Lang;
@@ -34,19 +34,11 @@ const lineOf = new Map(lines.map((line) => [line.key, line] as const));
 const stationOf = new Map(lines.flatMap((line) => line.stations.map((station) => [station.key, station] as const)));
 const junctionOf = new Map(interchanges.map((item) => [item.key, item] as const));
 /** Font sizes of the interchange labels in viewBox units, as set in NetworkMap.astro (.nm-label, .nm-hub). */
-const labelSize = 12;
-const hubSize = 13;
+const labelSizes = { label: 12, hub: 13 };
 
 function labelAt(key: string, label: LabelAt | undefined): LabelAt {
   if (!label) throw new Error(`Sơ đồ tuyến: ${file} chưa có vị trí nhãn cho ga ${key}.`);
   return label;
-}
-
-/** Box behind a link label until the script fits it to the text: 0.6 em a mono character, 6 units around. */
-function hitBox(name: string, size: number, [x, y, anchor]: LabelAt) {
-  const w = Math.ceil(name.length * size * 0.6) + 12;
-  const left = anchor === 'start' ? x - 6 : anchor === 'end' ? x - w + 6 : x - w / 2;
-  return { x: left, y: y - size - 3, w, h: size + 10 };
 }
 
 const starts = points.flatMap((point) => {
@@ -68,21 +60,15 @@ const junctions = points
   .flatMap((point) => {
     const item = point.kind === 'interchange' ? junctionOf.get(point.key) : undefined;
     if (!item) return [];
-    const hub = item.lines.length === lines.length;
-    const label = labelAt(point.key, point.at.label);
-    const text = point.at.short ?? item.name;
-    const count = projectCountForSkill(item.key);
     return [
       {
         key: item.key,
         name: item.name,
-        text,
-        hub,
+        text: point.at.short ?? item.name,
+        hub: item.lines.length === lines.length,
         tracks: point.at.crossing ? 1 : item.lines.length,
         xy: point.at.xy,
-        label,
-        box: hitBox(text, hub ? hubSize : labelSize, label),
-        aria: trCount('skillFilterOne', 'skillFilterMany', count, lang).replace('{name}', item.name),
+        label: labelAt(point.key, point.at.label),
       },
     ];
   })
@@ -148,14 +134,5 @@ const packets = lines.map((line, index) => {
       )
     }
   </svg>
-  <svg class="nm-svg nm-links" viewBox={viewBox} role="group" aria-label={tr('mapLinks', lang)}>
-    {
-      junctions.map((item) => (
-        <a class="nm-link" href="#experience" data-skill={item.key} data-skill-name={item.name} aria-label={item.aria}>
-          <rect class="nm-hit" x={item.box.x} y={item.box.y} width={item.box.w} height={item.box.h} rx="4" />
-          <text class:list={['nm-label', { 'nm-hub': item.hub }]} x={item.label[0]} y={item.label[1]} text-anchor={item.label[2]}>{item.text}</text>
-        </a>
-      ))
-    }
-  </svg>
+  <MapLinks lang={lang} viewBox={viewBox} links={junctions} sizes={labelSizes} />
 </div>

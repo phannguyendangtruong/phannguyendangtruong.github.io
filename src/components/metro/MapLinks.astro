@@ -1,0 +1,87 @@
+---
+import type { LabelAt } from '../../data/network-layout';
+import { projectCountForSkill } from '../../data/skill-keys';
+import { tr, trCount, type Lang } from '../../i18n/ui';
+
+/** An interchange label of a map, written as a link that filters the Experience route by its technology. */
+type Link = {
+  /** Technology key: the data-skill of every filter control of the page. */
+  key: string;
+  /** Full name, read by the filter status bar and in the accessible name. */
+  name: string;
+  /** Text written on the map: the full name, or the shorter one this map gives it. */
+  text: string;
+  /** A hub every line goes through: the bolder label. */
+  hub: boolean;
+  label: LabelAt;
+};
+
+interface Props {
+  lang: Lang;
+  /** viewBox of the map drawing this layer lies over. */
+  viewBox: string;
+  links: Link[];
+  /** Font sizes of the labels in viewBox units, as NetworkMap.astro sets them on this map (.nm-label, .nm-hub). */
+  sizes: { label: number; hub: number };
+  /**
+   * Height, and least width, in viewBox units of the area round each label that takes a click or a touch, for a map
+   * drawn small; without it the box and the text take them.
+   */
+  touch?: number;
+}
+
+const { lang, viewBox, links, sizes, touch } = Astro.props;
+
+type Box = { x: number; y: number; w: number; h: number };
+
+/** Box behind a link label until the script fits it to the text: 0.6 em a mono character, 6 units around. */
+function hitBox(name: string, size: number, [x, y, anchor]: LabelAt): Box {
+  const w = Math.ceil(name.length * size * 0.6) + 12;
+  const left = anchor === 'start' ? x - 6 : anchor === 'end' ? x - w + 6 : x - w / 2;
+  return { x: left, y: y - size - 3, w, h: size + 10 };
+}
+
+const boxes = links.map((link) => hitBox(link.text, link.hub ? sizes.hub : sizes.label, link.label));
+
+/**
+ * Area round a box that takes the pointer: `size` units high and at least as wide, centred on the box, but never past
+ * the middle of the gap to a label stacked above or under it; what that cuts on one side is added on the other.
+ */
+function touchArea(box: Box, index: number, size: number): Box {
+  const stacked = boxes.filter((other, at) => at !== index && other.x < box.x + box.w && box.x < other.x + other.w);
+  const over = stacked.filter((other) => other.y < box.y).map((other) => (other.y + other.h + box.y) / 2);
+  const under = stacked.filter((other) => other.y > box.y).map((other) => (box.y + box.h + other.y) / 2);
+  const above = Math.max(-Infinity, ...over);
+  const below = Math.min(Infinity, ...under);
+  const extra = Math.max(0, size - box.h) / 2;
+  let top = Math.max(above, box.y - extra);
+  let bottom = Math.min(below, box.y + box.h + extra);
+  const missing = size - (bottom - top);
+  if (missing > 0 && top === above) bottom = Math.min(below, bottom + missing);
+  else if (missing > 0) top = Math.max(above, top - missing);
+  const w = Math.max(box.w, size);
+  return { x: box.x + (box.w - w) / 2, y: top, w, h: bottom - top };
+}
+
+const items = links.map((link, index) => {
+  const box = boxes[index];
+  return {
+    ...link,
+    box,
+    area: touch ? touchArea(box, index, touch) : undefined,
+    aria: trCount('skillFilterOne', 'skillFilterMany', projectCountForSkill(link.key), lang).replace('{name}', link.name),
+  };
+});
+---
+
+<svg class="nm-svg nm-links" viewBox={viewBox} role="group" aria-label={tr('mapLinks', lang)}>
+  {
+    items.map((item) => (
+      <a class="nm-link" href="#experience" data-skill={item.key} data-skill-name={item.name} aria-label={item.aria}>
+        {item.area && <rect class="nm-touch" x={item.area.x} y={item.area.y} width={item.area.w} height={item.area.h} />}
+        <rect class="nm-hit" x={item.box.x} y={item.box.y} width={item.box.w} height={item.box.h} rx="4" />
+        <text class:list={['nm-label', { 'nm-hub': item.hub }]} x={item.label[0]} y={item.label[1]} text-anchor={item.label[2]}>{item.text}</text>
+      </a>
+    ))
+  }
+</svg>

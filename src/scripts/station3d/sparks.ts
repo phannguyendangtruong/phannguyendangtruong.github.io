@@ -7,6 +7,7 @@ import {
   ShaderMaterial,
 } from 'three';
 import type { Kit } from './assets';
+import { wakeGlsl } from './wake';
 
 /** Lights of one draw call; the arrays stay the buffers of the geometry, so writing them and flagging moves them. */
 export type SparkData = {
@@ -21,6 +22,8 @@ export type SparkData = {
   intensity?: number;
   /** Fades into the fog; false for the stars. */
   fog?: boolean;
+  /** Each light comes on as the wave of the wake passes it (wake.ts); false for lights that are always there. */
+  wake?: boolean;
 };
 
 /**
@@ -28,7 +31,7 @@ export type SparkData = {
  * they bloom. In the light theme each is a small dot of its colour drawn over the scene instead.
  */
 export function sparks(kit: Kit, data: SparkData): Points<BufferGeometry, ShaderMaterial> {
-  const { positions, colors, sizes, intensity = 3, fog = true } = data;
+  const { positions, colors, sizes, intensity = 3, fog = true, wake = false } = data;
   const geometry = new BufferGeometry();
   geometry.setAttribute('position', new BufferAttribute(positions, 3));
   geometry.setAttribute('color', new BufferAttribute(colors, 3));
@@ -43,10 +46,12 @@ export function sparks(kit: Kit, data: SparkData): Points<BufferGeometry, Shader
       uIntensity: { value: intensity },
       fogColor: uniforms.fogColor,
       fogDensity: uniforms.fogDensity,
+      ...kit.wake.uniforms,
     },
     vertexShader: `
       attribute float size; attribute float blink; attribute vec3 color;
       uniform float uScale; uniform float uTime;
+      ${wakeGlsl}
       varying vec3 vColor; varying float vAlpha; varying float vDepth;
       void main() {
         vec4 mv = modelViewMatrix * vec4(position, 1.0);
@@ -54,6 +59,12 @@ export function sparks(kit: Kit, data: SparkData): Points<BufferGeometry, Shader
         gl_PointSize = max(1.5, size * uScale / -mv.z);
         float pulse = blink > 0.0 ? pow(max(0.0, sin(uTime * 2.4 + blink * 40.0)), 8.0) : 1.0;
         vColor = color; vAlpha = pulse; vDepth = -mv.z;
+        ${
+          wake
+            ? `vec3 wp = (modelMatrix * vec4(position, 1.0)).xyz;
+        vAlpha *= wakeAt(wp.xz, fract(position.x * 0.731 + position.z * 0.377));`
+            : ''
+        }
       }`,
     fragmentShader: `
       uniform float uIntensity; uniform vec3 fogColor; uniform float fogDensity; uniform float uDay;

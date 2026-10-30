@@ -15,15 +15,18 @@ import type { Assets, Kit, Own, Uniforms } from './assets';
 import { Rig, introSeconds } from './camera';
 import { buildCity } from './city';
 import { mapToWorld } from './geometry';
+import { buildInteraction } from './interact';
 import { buildTags } from './labels';
 import type { Layout } from './level';
 import type { SceneModel } from './model';
+import { Pace, quality } from './pace';
 import { Panels } from './panels';
 import { buildPost } from './post';
 import { buildShots, buildTallShots } from './shots';
 import type { SignFonts } from './textures';
 import { Lighting, ThemeSwitch } from './theme';
 import { LineColors, isDay } from './tokens';
+import { Wake } from './wake';
 
 export type LoopOptions = {
   /** Layout of the scene (level.ts). */
@@ -45,28 +48,9 @@ export type LoopOptions = {
 
 export type Loop = { stop: () => void };
 
-/**
- * What each layout can afford: multisampling of the post-processing; the largest pixel ratio of the canvas and the
- * lowest it steps down to when frames take too long; the shadow map of the sun and the half width of the box it
- * covers round the look point.
- */
-type Quality = { samples: number; maxRatio: number; minRatio: number; shadow: { size: number; reach: number } };
-
-const quality: Record<Layout, Quality> = {
-  wide: { samples: 4, maxRatio: 1.25, minRatio: 0.7, shadow: { size: 2048, reach: 46 } },
-  narrow: { samples: 2, maxRatio: 1.25, minRatio: 0.6, shadow: { size: 1024, reach: 46 } },
-  lite: { samples: 2, maxRatio: 1.5, minRatio: 0.7, shadow: { size: 1024, reach: 30 } },
-};
-
-const ratioStep = 0.15;
-/** Seconds a frame may take before it counts as slow. */
-const slowFrame = 0.024;
-/**
- * At its lowest pixel ratio the full level times its frames over `judged` seconds: a mean frame longer than `tooSlow`
- * seconds means this device cannot run it.
- */
-const judged = 4;
-const tooSlow = 0.045;
+/** Seconds into the opening shot the wake starts, and how long it takes to cross the city (wake.ts). */
+const wakeFrom = 0.6;
+const wakeSeconds = 5.4;
 
 /**
  * Reflection of the water as a share of the canvas size in CSS pixels: half of it on a wide window; on a narrow one
@@ -91,11 +75,14 @@ function release(scene: Scene): void {
 
 /**
  * Builds the city and draws it until stopped: the camera follows the page at the full level and holds the lite shot
- * otherwise; labels follow the camera. It draws only while it can be seen (tab visible, page view rather than the JSON
+ * otherwise; labels follow the camera. During the opening shot the city wakes up from the end (wake.ts); without one
+ * (scrolled, paused) or in the light theme it is lit from the first frame. At the full level the pointer can pick a
+ * line in the scene (interact.ts). It draws only while it can be seen (tab visible, page view rather than the JSON
  * view, and at the lite level the hero map on screen). The pause button of the hero map freezes the time of the scene
- * (trains, magic, the drone's drift); paused, it draws again only when the page scrolls or resizes or the theme
- * changes. A theme change repaints the scene through the theme switch, without building it again. Frames that take
- * too long step the pixel ratio down; still too slow at the lowest one, the full level gives way (onSlow).
+ * (trains, cars, magic, the drone's drift, bank and lean); paused, it draws again only when the page scrolls or
+ * resizes, the theme changes or the pointer picks something. A theme change repaints the scene through the theme
+ * switch, without building it again. Frames that take too long step the pixel ratio down; still too slow at the
+ * lowest one, the full level gives way (onSlow).
  */
 export function startLoop(options: LoopOptions): Loop {
   const { layout, host, netmap, pause, model, renderer, css, assets, fonts, own, onSlow } = options;
@@ -113,11 +100,12 @@ export function startLoop(options: LoopOptions): Loop {
   };
   const theme = new ThemeSwitch();
   const colors = new LineColors(model.lines);
-  const kit: Kit = { assets, uniforms, colors, theme, own };
+  const kit: Kit = { assets, uniforms, colors, theme, wake: new Wake(), own };
   const scene = new Scene();
   const lighting = new Lighting(scene, assets.env, tier.shadow);
   const at = mapToWorld(model);
-  const city = buildCity(model, at, kit, fonts, !full);
+  // A phone (narrow layout, lite level) keeps the cars to the roads round the trunk and the end.
+  const city = buildCity(model, at, kit, fonts, !full, layout !== 'wide');
   const tags = buildTags(model, city.anchors, layout);
   scene.add(city.group, ...tags.objects);
 
@@ -128,9 +116,15 @@ export function startLoop(options: LoopOptions): Loop {
   const panels = layout === 'wide' ? new Panels() : null;
   const post = buildPost(renderer, scene, camera, tier.samples);
   const focus = new Vector3();
-  let ratio = Math.min(devicePixelRatio, tier.maxRatio);
+  const pace = new Pace(tier, full);
 
   let dirty = true;
+  const interaction =
+    layout === 'lite'
+      ? null
+      : buildInteraction({ layout, model, city, camera, rig, host, onChange: () => (dirty = true) });
+  if (interaction) scene.add(interaction.card);
+
   const applyTheme = () => {
     const day = isDay();
     colors.read();
@@ -150,47 +144,22 @@ export function startLoop(options: LoopOptions): Loop {
   const resize = () => {
     const width = Math.max(1, host.clientWidth);
     const height = Math.max(1, host.clientHeight);
-    const share = reflectionShare(layout, ratio);
-    renderer.setPixelRatio(ratio);
+    const share = reflectionShare(layout, pace.ratio);
+    renderer.setPixelRatio(pace.ratio);
     renderer.setSize(width, height);
-    post.setSize(width, height, ratio);
+    post.setSize(width, height, pace.ratio);
     city.setSize(width * share, height * share);
     css.setSize(width, height);
     tags.setSize(width, height);
     rig.setSize(width, height);
     // Pixels a scene unit covers at distance 1, for the size of the point lights.
-    uniforms.uScale.value = (height * ratio) / (2 * Math.tan(MathUtils.degToRad(camera.fov / 2)));
+    uniforms.uScale.value = (height * pace.ratio) / (2 * Math.tan(MathUtils.degToRad(camera.fov / 2)));
     measure();
-  };
-
-  // Slow frames build up `slow`; past 0.6 the pixel ratio steps down, at most once every 2s. At the lowest ratio the
-  // full level times its frames from 1s after the last step: true when their mean is still too long.
-  let slow = 0;
-  let steppedAt = 0;
-  let spent = 0;
-  let timed = 0;
-  const adapt = (now: number, dt: number): boolean => {
-    slow = slow * 0.95 + (dt > slowFrame ? 0.05 : 0);
-    if (ratio > tier.minRatio) {
-      if (slow <= 0.6 || now - steppedAt <= 2000) return false;
-      ratio = Math.max(tier.minRatio, ratio - ratioStep);
-      steppedAt = now;
-      slow = 0;
-      resize();
-      return false;
-    }
-    if (!full || dt === 0 || now - steppedAt < 1000) return false;
-    spent += dt;
-    timed += 1;
-    if (spent < judged) return false;
-    const mean = spent / timed;
-    spent = 0;
-    timed = 0;
-    return mean > tooSlow;
   };
 
   const pressed = () => pause?.getAttribute('aria-pressed') === 'true';
   let paused = pressed();
+  rig.sway.steady = paused;
   let inView = true;
   let drawn = false;
   let frame = 0;
@@ -198,6 +167,8 @@ export function startLoop(options: LoopOptions): Loop {
   // Time of the scene, frozen while paused; time into the opening shot, null once it is over or skipped.
   let time = 0;
   let intro: number | null = paused || scrollY > 10 ? null : 0;
+  // The city is lit for good once the opening shot is over or skipped, or in the light theme.
+  let awake = false;
   // Scroll of the last frame: the panels move with the page even while the camera holds still.
   let scrolled = scrollY;
 
@@ -211,12 +182,15 @@ export function startLoop(options: LoopOptions): Loop {
       if (paused || intro >= introSeconds || (full && scrollY > 10)) intro = null;
     }
     const moving = rig.update(dt, time, intro);
+    const easing = interaction?.update(dt) ?? false;
     if (panels && scrollY !== scrolled) {
       scrolled = scrollY;
       dirty = true;
     }
-    if (paused && !moving && !dirty) return;
+    if (paused && !moving && !easing && !dirty) return;
     dirty = false;
+    if (intro === null || uniforms.uDay.value > 0.5) awake = true;
+    kit.wake.set(awake || intro === null ? 1 : (intro - wakeFrom) / wakeSeconds);
     uniforms.uTime.value = time;
     lighting.follow(rig.focus);
     city.update(time, camera);
@@ -229,7 +203,9 @@ export function startLoop(options: LoopOptions): Loop {
     const show = intro === null ? 1 : MathUtils.smoothstep(intro, introSeconds - 1.5, introSeconds);
     tags.update(camera, show, panels?.inView() ?? []);
     css.render(scene, camera);
-    if (adapt(now, dt)) {
+    const verdict = pace.check(now, dt);
+    if (verdict === 'step') resize();
+    if (verdict === 'slow') {
       onSlow();
       return;
     }
@@ -256,6 +232,7 @@ export function startLoop(options: LoopOptions): Loop {
   });
   const watchPause = new MutationObserver(() => {
     paused = pressed();
+    rig.sway.steady = paused;
     dirty = true;
   });
   const watchSize = new ResizeObserver(resize);
@@ -284,6 +261,7 @@ export function startLoop(options: LoopOptions): Loop {
     frame = 0;
     [watchPage, watchPause, watchSize, watchLayout, watchView].forEach((watch) => watch?.disconnect());
     document.removeEventListener('visibilitychange', sync);
+    interaction?.stop();
     release(scene);
     city.dispose();
     lighting.dispose();

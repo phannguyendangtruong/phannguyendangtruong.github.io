@@ -1,5 +1,6 @@
 ---
 import Interchange from './Interchange.astro';
+import MapLinks from './MapLinks.astro';
 import MapStart from './MapStart.astro';
 import Terminal from './Terminal.astro';
 import Track from './Track.astro';
@@ -26,9 +27,14 @@ interface Props {
 const { lang, title, desc } = Astro.props;
 const file = 'src/data/network-layout.ts › compactMap';
 const { width, height, tracks } = compactMap;
+const viewBox = `0 0 ${width} ${height}`;
 const points = placeMap(file, compactMap, compactKeys());
 const lineOf = new Map(lines.map((line) => [line.key, line] as const));
 const junctionOf = new Map(interchanges.map((item) => [item.key, item] as const));
+/** Font sizes of the labels in viewBox units, as set in NetworkMap.astro (.nm-label, and .nm-hub on this map). */
+const labelSizes = { label: 12, hub: 15 };
+/** A 44px target round each hub label where the map is drawn smallest: 280px wide for its viewBox width. */
+const touch = Math.ceil((44 * width) / 280);
 
 const starts = points.flatMap((point) => {
   const line = point.kind === 'start' ? lineOf.get(point.key) : undefined;
@@ -37,12 +43,22 @@ const starts = points.flatMap((point) => {
   return [{ line: line.number, xy: point.at.xy, bar: along(track[0], track[1]), bullet: point.at.bullet ?? point.at.xy }];
 });
 
-/** Hubs only: the phone map leaves out the stations and the other interchanges. */
+/** Hubs only: the phone map leaves out the stations and the other interchanges. Their labels filter the route. */
 const hubs = points.flatMap((point) => {
   const item = point.kind === 'interchange' ? junctionOf.get(point.key) : undefined;
   const label = point.at.label;
   if (!item || !label) return [];
-  return [{ name: point.at.short ?? item.name, tracks: item.lines.length, xy: point.at.xy, label }];
+  return [
+    {
+      key: item.key,
+      name: item.name,
+      text: point.at.short ?? item.name,
+      hub: true,
+      tracks: item.lines.length,
+      xy: point.at.xy,
+      label,
+    },
+  ];
 });
 
 const end = points.find((point) => point.kind === 'end');
@@ -66,7 +82,7 @@ const packets = lines.map((line, index) => {
 <div class="nm-view nm-compact" data-netmap-view>
   <svg
     class="nm-svg"
-    viewBox={`0 0 ${width} ${height}`}
+    viewBox={viewBox}
     role="img"
     aria-labelledby="nm-compact-title"
     aria-describedby="nm-compact-desc"
@@ -89,11 +105,6 @@ const packets = lines.map((line, index) => {
         <Interchange x={hub.xy[0]} y={hub.xy[1]} tracks={hub.tracks} gap={trackGap} r={capsuleRadius} across="x" />
       ))
     }
-    {
-      hubs.map((hub) => (
-        <text class="nm-label nm-hub" x={hub.label[0]} y={hub.label[1]} text-anchor={hub.label[2]}>{hub.name}</text>
-      ))
-    }
     {starts.map((start) => <MapStart line={start.line} x={start.bullet[0]} y={start.bullet[1]} lang={lang} />)}
     {
       endLabel && (
@@ -110,4 +121,5 @@ const packets = lines.map((line, index) => {
       )
     }
   </svg>
+  <MapLinks lang={lang} viewBox={viewBox} links={hubs} sizes={labelSizes} touch={touch} />
 </div>

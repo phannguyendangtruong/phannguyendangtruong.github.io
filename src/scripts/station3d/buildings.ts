@@ -1,6 +1,7 @@
 import { BoxGeometry, InstancedBufferAttribute, InstancedMesh, Matrix4, MeshStandardMaterial } from 'three';
 import type { Kit } from './assets';
 import { hash, type Lot } from './layout';
+import { wakeGlsl } from './wake';
 
 /** Roof of a building: where its plant, rim, red light and LED crown stand. */
 export type Top = { x: number; z: number; top: number; w: number; d: number; seed: number; tower: boolean };
@@ -14,8 +15,9 @@ type Box = [number, number, number, number, number, number, number, number, numb
  * Every building of the city in one instanced mesh of unit boxes. A tower is a podium, a slimmer shaft and sometimes a
  * crown set back again; housing and shophouses are one box. The facade is drawn in the shader: a grid of windows by
  * kind (curtain wall for towers, punched windows for housing, a lit shop front at street level for shophouses), each
- * window lit or dark by chance, warm or cool, a few switching over time; roofs carry the bitumen texture. Glass and
- * dark windows reflect the environment of the theme.
+ * window lit or dark by chance, warm or cool, a few switching over time, with a room seen behind it; roofs carry the
+ * bitumen texture. Glass and dark windows reflect the environment of the theme. During the opening shot the windows
+ * light up as the wave of the wake passes them (wake.ts).
  */
 export function buildBuildings(lots: Lot[], kit: Kit): Buildings {
   const boxes: Box[] = [];
@@ -65,6 +67,7 @@ function facadeMaterial(kit: Kit): MeshStandardMaterial {
       uTime: uniforms.uTime,
       uWindow: uniforms.uWindow,
       uDay: uniforms.uDay,
+      ...kit.wake.uniforms,
     });
     shader.vertexShader = shader.vertexShader
       .replace(
@@ -88,6 +91,7 @@ function facadeMaterial(kit: Kit): MeshStandardMaterial {
         `#include <common>
         uniform sampler2D uFacade; uniform sampler2D uRoof; uniform sampler2D uRoofArm;
         uniform float uTime; uniform float uWindow; uniform float uDay;
+        ${wakeGlsl}
         varying vec3 vInfo; varying vec3 vLocal; varying vec3 vSize; varying vec3 vObjNormal; varying vec3 vWorld;
         float h13(vec3 p) { p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }
         vec3 fEmit; float fRough; float fMetal;`,
@@ -99,6 +103,35 @@ function facadeMaterial(kit: Kit): MeshStandardMaterial {
   };
   return material;
 }
+
+/**
+ * A room behind each window but the shop fronts, seen through the glass with parallax (interior mapping): a ray from
+ * the camera into a box as wide and high as the window cell, `depth` deep, finds its back wall, a side wall, the bright
+ * ceiling or the darker floor; now and then a dark block of furniture stands against the back wall, and each room has
+ * a tint of its own. It shades the light of the window.
+ */
+const roomChunk = `
+      if (shop < 0.5) {
+        vec3 V = normalize(vWorld - cameraPosition);
+        vec3 T = sideX ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+        vec3 rd = vec3(dot(V, T), V.y, max(dot(V, -vObjNormal), 0.02));
+        vec2 room = vec2(px, pitch.y);
+        float depth = 0.16 + 0.1 * h13(vec3(id, seed + 9.0));
+        vec3 ro = vec3(f * room, 0.0);
+        float tx = rd.x > 0.0 ? (room.x - ro.x) / rd.x : -ro.x / min(rd.x, -1e-4);
+        float ty = rd.y > 0.0 ? (room.y - ro.y) / rd.y : -ro.y / min(rd.y, -1e-4);
+        float tz = depth / rd.z;
+        float tHit = min(min(tx, ty), tz);
+        vec3 hit = ro + rd * tHit;
+        float shade = tHit == tz ? 0.95 - 0.35 * pow(abs(hit.x / room.x - 0.5) * 2.0, 2.0)
+                    : tHit == ty ? (rd.y > 0.0 ? 1.3 : 0.36) : 0.6;
+        if (tHit == tz && h13(vec3(id, seed + 7.0)) < 0.5 && hit.y < room.y * 0.38 && abs(hit.x / room.x - 0.5) < 0.24) {
+          shade *= 0.28;
+        }
+        vec3 roomTint = vec3(0.86 + 0.28 * h13(vec3(id, seed + 3.0)), 0.92, 0.8 + 0.3 * h13(vec3(id, seed + 4.0)));
+        bright *= shade;
+        light *= mix(vec3(1.0), roomTint, 0.6);
+      }`;
 
 /** Colour, roughness, metalness and light of a facade or a roof, after the map of the material. */
 const facadeChunk = `
@@ -149,6 +182,7 @@ const facadeChunk = `
         light = mix(vec3(1.0, 0.55, 0.25), vec3(1.0, 0.9, 0.7), h13(vec3(id.x, seed, 5.0)));
         bright = 1.3;
       }
+      ${roomChunk}
       vec3 glass = mix(kind < 0.5 ? vec3(0.012, 0.018, 0.026) : vec3(0.012), vec3(0.2, 0.27, 0.34), uDay);
       diffuseColor.rgb = mix(wall, glass, win);
       fRough = mix(0.82, 0.18, win);
@@ -158,6 +192,8 @@ const facadeChunk = `
         fRough = mix(0.45, 0.14, win);
         fMetal = mix(0.4, 0.45, win);
       }
-      fEmit = win * lit * light * bright * uWindow * (1.0 - uDay);
+      // Each window comes on as the wave of the wake passes it, a little early or late by chance; by day a few still
+      // glow faintly warm behind the glass.
+      fEmit = win * lit * light * bright * uWindow * mix(1.0, 0.07, uDay) * wakeAt(vWorld.xz, r);
     }
   }`;

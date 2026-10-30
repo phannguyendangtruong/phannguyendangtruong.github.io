@@ -10,6 +10,9 @@ export type Segment = { a: XZ; b: XZ; line: number };
 /** A lot and the building on it: kind 0 a glass tower, 1 housing, 2 a shophouse; `seed` varies its look. */
 export type Lot = { x: number; z: number; w: number; d: number; h: number; kind: number; seed: number };
 
+/** A box of the ground plan, from x0 to x1 and from z0 to z1. */
+export type Area = { x0: number; x1: number; z0: number; z1: number };
+
 /** Road grid: centre lines every `pitch` units on x and z, asphalt to `road` and pavement to `walk` from the centre. */
 export const grid = { pitch: 6, road: 0.55, walk: 0.85 };
 
@@ -44,6 +47,13 @@ const downtownFromEnd: XZ = [-6, -18.6];
 
 /** Lite level: only the lots round the trunk and the end are built, within these ranges of x and z from the end. */
 const liteArea = { x: [-40, 36], z: [-54.6, 23.4] };
+
+/**
+ * Where the cars drive (cars.ts): most of the city from its middle; on a phone (narrow layout, lite level) the roads
+ * round the trunk and the end only, within these ranges of x and z from the end.
+ */
+const wideCarArea: Area = { x0: -60, x1: 90, z0: -54, z1: 60 };
+const smallCarArea = { x: [-46, 44], z: [-60.6, 29.4] };
 
 /** Repeatable noise in [0, 1) from up to three numbers: the same city on every visit. */
 export function hash(a: number, b: number, c = 0): number {
@@ -119,6 +129,18 @@ export class CityPlan {
     const cz = bz * grid.pitch + grid.pitch / 2;
     const d = Math.hypot(cx - this.downtown[0], cz - this.downtown[1]);
     return d > 16 && hash(bx, bz, 7) < 0.07;
+  }
+
+  /** Box the cars drive in: the wide one, or the `small` one round the trunk and the end; never beyond the city. */
+  carArea(small: boolean): Area {
+    if (!small) return wideCarArea;
+    const [ex, ez] = this.end;
+    return {
+      x0: Math.max(-extent.x, ex + smallCarArea.x[0]),
+      x1: Math.min(extent.x, ex + smallCarArea.x[1]),
+      z0: Math.max(-extent.z, ez + smallCarArea.z[0]),
+      z1: Math.min(extent.z, ez + smallCarArea.z[1]),
+    };
   }
 
   /**
