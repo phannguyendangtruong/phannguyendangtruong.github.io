@@ -50,7 +50,7 @@ export const coneShader = `uniform vec3 color; varying vec2 vUv;
 /** Beam of the end into the sky, in moving bands, fading with height. */
 export const beamShader = `uniform float uTime; varying vec2 vUv;
   void main() {
-    float fade = pow(1.0 - vUv.y, 2.2);
+    float fade = pow(max(1.0 - vUv.y, 0.0), 2.2);
     float bands = 0.75 + 0.25 * sin(vUv.y * 160.0 - uTime * 5.0);
     gl_FragColor = vec4(vec3(1.0, 0.86, 0.66) * fade * bands * 0.9, 1.0);
   }`;

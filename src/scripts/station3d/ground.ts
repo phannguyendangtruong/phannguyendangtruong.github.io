@@ -186,7 +186,8 @@ function groundChunk(segmentCount: number, riverCount: number): string {
         vec2 rel = p - lamp;
         float along = dot(rel, toCam);
         float perp = length(rel - toCam * along) + sin(along * 37.0 + p.x * 11.0) * 0.012;
-        mirrored += exp(-perp * perp / 0.004) * exp(-pow(along - 0.4, 2.0) / 0.1) * step(axis == 0 ? dx : dz, 1.2);
+        float ahead = along - 0.4;
+        mirrored += exp(-perp * perp / 0.004) * exp(-ahead * ahead / 0.1) * step(axis == 0 ? dx : dz, 1.2);
       }
       gEmit += lampColor * mirrored * (0.12 + 0.4 * wet) * uStreet;
       gRough = mix(gRough, 0.06, wet * 0.75);

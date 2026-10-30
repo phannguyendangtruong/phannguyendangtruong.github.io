@@ -25,13 +25,13 @@ const haloVertex = `varying vec2 vUv; varying vec3 vNormalV; varying vec3 vView;
 const haloShader = `uniform float uOn; varying vec2 vUv; varying vec3 vNormalV; varying vec3 vView;
   void main() {
     float facing = abs(dot(vNormalV, vView));
-    float k = pow(facing, 3.0) * pow(1.0 - vUv.y, 1.6) * 0.16 * uOn;
+    float k = pow(min(facing, 1.0), 3.0) * pow(max(1.0 - vUv.y, 0.0), 1.6) * 0.16 * uOn;
     gl_FragColor = vec4(vec3(1.0, 0.82, 0.6) * k, 1.0);
   }`;
 
 /** Cone of light under the canopy of a station, brightest at the canopy. */
 const coneShader = `uniform float uOn; varying vec2 vUv;
-  void main() { float k = pow(vUv.y, 1.5) * 0.12 * uOn; gl_FragColor = vec4(vec3(1.0, 0.8, 0.55) * k, 1.0); }`;
+  void main() { float k = pow(max(vUv.y, 0.0), 1.5) * 0.12 * uOn; gl_FragColor = vec4(vec3(1.0, 0.8, 0.55) * k, 1.0); }`;
 
 export type Atmosphere = { group: Group; update: (time: number) => void };
 
