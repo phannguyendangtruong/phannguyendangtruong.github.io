@@ -1,165 +1,204 @@
 import {
+  AdditiveBlending,
   BoxGeometry,
-  CapsuleGeometry,
+  Color,
   Group,
-  MathUtils,
+  Matrix4,
   Mesh,
+  MeshBasicMaterial,
+  MeshStandardMaterial,
   PlaneGeometry,
-  SphereGeometry,
-  Sprite,
   Vector3,
   type CurvePath,
-  type Material,
-  type SpriteMaterial,
-  type Texture,
 } from 'three';
-import { trackY } from './geometry';
-import type { SceneLine, SceneModel, XY } from './model';
-import { lamp, type Palette } from './tokens';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import type { Kit } from './assets';
+import { frameAt, newFrame } from './geometry';
+import { trackSide, type Metro } from './metro';
+import type { SceneModel } from './model';
+import { carWindowTexture } from './textures';
 
-const carLength = 0.44;
-const carGap = 0.06;
-/** Scene units a second. */
-const speed = 2.2;
-/** Seconds a train waits at the end, then fades out; it fades in again at the start of its line. */
-const dwell = 2.6;
-const fadeOut = 0.8;
-const fadeIn = 0.6;
-/** First arrival at the end: the train nearest the platform during the opening shot, the others after it. */
-const firstArrival = 3.2;
-const arrivalStep = 4.4;
+const car = { length: 1.15, gap: 0.05, count: 4 };
+const trainLength = car.count * car.length + (car.count - 1) * car.gap;
+/** Top speed in scene units a second, share of a run spent speeding up (and as much braking), seconds at a stop. */
+const topSpeed = 2.6;
+const ramp = 0.22;
+const dwell = 2.2;
 
-type Shapes = {
-  shell: CapsuleGeometry;
-  windows: BoxGeometry;
-  stripe: BoxGeometry;
-  lamp: SphereGeometry;
-  beam: PlaneGeometry;
-  under: PlaneGeometry;
+/** A run between two stops: when it starts in the cycle, how long it takes, and its lengths along the path. */
+type Leg = { start: number; duration: number; from: number; to: number };
+type Timetable = { legs: Leg[]; cycle: number };
+
+/** Beam an end car casts ahead on the deck; `sign` is 1 for the front car, -1 for the last. */
+type Head = { beam: Mesh<PlaneGeometry, MeshBasicMaterial>; sign: number };
+
+type Train = {
+  cars: Group[];
+  heads: Head[];
+  path: CurvePath<Vector3>;
+  table: Timetable;
+  side: number;
+  phase: number;
+  lamps: { front: MeshBasicMaterial; back: MeshBasicMaterial };
 };
 
-type Paints = {
-  shell: Material;
-  windows: Material;
-  stripe: Material;
-  lamp: Material;
-  head: SpriteMaterial;
-  beam: Material;
-  under: Material;
-};
+/** Share of a leg covered at `tau` (0 to 1 of its time): speeding up, running, braking. */
+function ease(tau: number): number {
+  if (tau < ramp) return (tau * tau) / (2 * ramp) / (1 - ramp);
+  if (tau > 1 - ramp) return 1 - ((1 - tau) * (1 - tau)) / (2 * ramp) / (1 - ramp);
+  return (tau - ramp / 2) / (1 - ramp);
+}
 
-type Train = { cars: Group[]; path: CurvePath<Vector3>; length: number; phase: number; materials: Material[] };
+/** Out of the portal at the start of the line, stopping at every stop, to the end and back the same way. */
+function timetable(stops: number[], end: number): Timetable {
+  const points = [-trainLength - 0.3, ...stops.filter((s) => s > 0.5 && s < end - 0.5), end - 0.25];
+  const back = [...points].reverse();
+  const runs = [
+    ...points.slice(1).map((s, index): [number, number] => [points[index], s]),
+    ...back.slice(1).map((s, index): [number, number] => [back[index], s]),
+  ];
+  const legs: Leg[] = [];
+  let time = 0;
+  runs.forEach(([from, to]) => {
+    const duration = Math.abs(to - from) / topSpeed / (1 - ramp) + 0.4;
+    legs.push({ start: time, duration, from, to });
+    time += duration + dwell;
+  });
+  return { legs, cycle: time };
+}
+
+/** Length along the path of the head of a train at `time`, and its direction: 1 towards the end, -1 back. */
+function where({ legs, cycle }: Timetable, time: number): { s: number; dir: number } {
+  const local = ((time % cycle) + cycle) % cycle;
+  for (const leg of legs) {
+    const dir = Math.sign(leg.to - leg.from);
+    if (local < leg.start) return { s: leg.from, dir };
+    if (local <= leg.start + leg.duration) {
+      return { s: leg.from + (leg.to - leg.from) * ease((local - leg.start) / leg.duration), dir };
+    }
+  }
+  const last = legs[legs.length - 1];
+  return { s: last.to, dir: Math.sign(last.to - last.from) };
+}
 
 export type Trains = { group: Group; update: (time: number) => void };
 
 /**
- * A car: rounded metal shell, a band of lit windows, a stripe in the line colour, its light on the ground; the front
- * car also has two headlamps with a small glow and a faint beam ahead on the ground.
+ * Two trains a line, one on each track, shuttling between the portal at the start of the line and the end, stopping
+ * at every station and hub: silver cars with a band of warm lit windows and a stripe of the line colour (paint of that
+ * colour by day); white lamps at the end that leads, red at the end that trails, a soft beam on the deck ahead by
+ * night. Cars still behind the portal are hidden, so a train slides out of the ring of light car by car.
  */
-function car(shapes: Shapes, paints: Paints, front: boolean): Group {
+export function buildTrains(model: SceneModel, metro: Metro, kit: Kit): Trains {
   const group = new Group();
-  const shell = new Mesh(shapes.shell, paints.shell);
-  shell.rotation.x = Math.PI / 2;
-  shell.scale.set(1.05, 1, 0.85);
-  shell.position.y = 0.13;
-  const windows = new Mesh(shapes.windows, paints.windows);
-  windows.position.y = 0.155;
-  const stripe = new Mesh(shapes.stripe, paints.stripe);
-  stripe.position.y = 0.095;
-  const under = new Mesh(shapes.under, paints.under);
-  under.rotation.x = -Math.PI / 2;
-  under.position.y = 0.02;
-  group.add(shell, windows, stripe, under);
-  if (!front) return group;
-  [-0.05, 0.05].forEach((x) => {
-    const headlamp = new Mesh(shapes.lamp, paints.lamp);
-    headlamp.position.set(x, 0.1, carLength / 2 + 0.005);
-    group.add(headlamp);
+  const body = new MeshStandardMaterial({ color: 0xc9cdd3, roughness: 0.3, metalness: 0.7, envMapIntensity: 0.8 });
+  const glass = new MeshStandardMaterial({
+    color: 0x050608,
+    emissive: 0xffffff,
+    emissiveMap: kit.own(carWindowTexture()),
+    emissiveIntensity: 0.95,
+    roughness: 0.1,
+    metalness: 0.4,
   });
-  const head = new Sprite(paints.head);
-  head.scale.set(0.38, 0.38, 1);
-  head.position.set(0, 0.11, carLength / 2 + 0.04);
-  const beam = new Mesh(shapes.beam, paints.beam);
-  beam.rotation.x = -Math.PI / 2;
-  beam.position.set(0, 0.03, carLength / 2 + 0.7);
-  group.add(head, beam);
-  return group;
-}
+  const shell = new RoundedBoxGeometry(0.3, 0.3, car.length, 3, 0.07);
+  const band = new BoxGeometry(0.304, 0.085, car.length - 0.16);
+  const stripeShape = new BoxGeometry(0.306, 0.022, car.length - 0.1);
+  const lampShape = new BoxGeometry(0.05, 0.03, 0.01);
+  const beamShape = new PlaneGeometry(0.42, 2.2);
+  const head = new Color();
+  const tail = new Color();
+  const beams: Mesh[] = [];
+  const trains: Train[] = [];
 
-function distance([x, y]: XY, [ex, ey]: XY): number {
-  return Math.hypot(x - ex, y - ey);
-}
-
-/**
- * One train of three cars a line, running from the start of its line to the shared end, braking into it, waiting,
- * fading out and starting again. The lines run out of step: the one that ends nearest the middle of the end bars
- * comes in during the opening shot.
- */
-export function buildTrains(
-  model: SceneModel,
-  paths: Map<number, CurvePath<Vector3>>,
-  palette: Palette,
-  glow: Texture,
-): Trains {
-  const group = new Group();
-  const shapes: Shapes = {
-    shell: new CapsuleGeometry(0.1, carLength - 0.2, 6, 16),
-    windows: new BoxGeometry(0.212, 0.045, carLength - 0.16),
-    stripe: new BoxGeometry(0.214, 0.022, carLength - 0.1),
-    lamp: new SphereGeometry(0.018, 10, 8),
-    beam: new PlaneGeometry(0.55, 1.5),
-    under: new PlaneGeometry(0.6, carLength + 0.3),
-  };
-  const last = (line: SceneLine) => line.track[line.track.length - 1];
-  const order = [...model.lines].sort(
-    (a, b) => distance(last(a), model.end.xy) - distance(last(b), model.end.xy) || a.number - b.number,
-  );
-
-  const trains = order.flatMap((line, index): Train[] => {
-    const path = paths.get(line.number);
-    if (!path) return [];
-    const paints: Paints = {
-      shell: palette.standard(['--text', '--muted'], { roughness: 0.28, metalness: 0.45, transparent: true }),
-      windows: palette.standard(lamp.window, { emissive: 2.2, transparent: true }),
-      stripe: palette.standard(line.token, { emissive: 2.6, transparent: true }),
-      lamp: palette.standard('--packet', { emissive: 4, transparent: true }),
-      head: palette.sprite(lamp.warm, 0.6, glow),
-      beam: palette.halo(lamp.warm, 0.12, glow),
-      under: palette.halo(line.token, 0.18, glow),
-    };
-    const cars = [0, 1, 2].map((position) => car(shapes, paints, position === 0));
-    group.add(...cars);
-    const length = path.getLength();
-    const arrival = firstArrival + arrivalStep * index;
-    return [{ cars, path, length, phase: length / speed - arrival, materials: Object.values(paints) }];
+  model.lines.forEach((line, index) => {
+    const path = metro.paths.get(line.number);
+    const end = metro.ends.get(line.number);
+    if (!path || end === undefined) return;
+    const table = timetable(metro.stops.get(line.number) ?? [], end);
+    const color = kit.colors.of(line.number);
+    const stripe = new MeshStandardMaterial({ color: 0x000000, emissive: color, emissiveIntensity: 2.2 });
+    kit.theme.on((day) => {
+      stripe.color.set(day ? color : 0x000000);
+      stripe.emissive.copy(color);
+      stripe.emissiveIntensity = day ? 0.15 : 2.2;
+    });
+    [-1, 1].forEach((side, k) => {
+      const lamps = { front: new MeshBasicMaterial(), back: new MeshBasicMaterial() };
+      const heads: Head[] = [];
+      const cars = Array.from({ length: car.count }, (_, position) => {
+        const carGroup = new Group();
+        const shellMesh = new Mesh(shell, body);
+        shellMesh.position.y = 0.21;
+        const bandMesh = new Mesh(band, glass);
+        bandMesh.position.y = 0.245;
+        const stripeMesh = new Mesh(stripeShape, stripe);
+        stripeMesh.position.y = 0.15;
+        carGroup.add(shellMesh, bandMesh, stripeMesh);
+        if (position === 0 || position === car.count - 1) {
+          const sign = position === 0 ? 1 : -1;
+          [-0.08, 0.08].forEach((x) => {
+            const light = new Mesh(lampShape, position === 0 ? lamps.front : lamps.back);
+            light.position.set(x, 0.12, sign * (car.length / 2 + 0.002));
+            carGroup.add(light);
+          });
+          const beam = new Mesh(
+            beamShape,
+            new MeshBasicMaterial({
+              map: kit.assets.glow,
+              color: 0xfff1d6,
+              transparent: true,
+              opacity: 0,
+              blending: AdditiveBlending,
+              depthWrite: false,
+            }),
+          );
+          beam.rotation.x = -Math.PI / 2;
+          beam.position.set(0, 0.07, sign * (car.length / 2 + 1.0));
+          carGroup.add(beam);
+          beams.push(beam);
+          heads.push({ beam, sign });
+        }
+        group.add(carGroup);
+        return carGroup;
+      });
+      const phase = k * table.cycle * 0.5 + index * 3.1;
+      trains.push({ cars, heads, path, table, side: side * trackSide, phase, lamps });
+    });
+  });
+  kit.theme.on((day) => {
+    glass.emissiveIntensity = day ? 0.05 : 0.95;
+    glass.color.set(day ? 0x22303e : 0x050608);
+    head.setRGB(1.0, 0.95, 0.85).multiplyScalar(day ? 1.6 : 5);
+    tail.setRGB(1.0, 0.05, 0.02).multiplyScalar(day ? 1.2 : 5);
+    beams.forEach((beam) => {
+      beam.visible = !day;
+    });
   });
 
-  const point = new Vector3();
-  const tangent = new Vector3();
-
-  const place = (train: Train, time: number) => {
-    const travel = train.length / speed;
-    const cycle = travel + dwell + fadeOut;
-    const local = (((time + train.phase) % cycle) + cycle) % cycle;
-    let u = 1;
-    if (local < travel) {
-      const x = local / travel;
-      // Constant speed, then a steady brake over the last fifth of the run into the end.
-      u = Math.min(1, x < 0.8 ? x / 0.9 : (0.8 + (x - 0.8) - (x - 0.8) ** 2 / 0.4) / 0.9);
-    }
-    const fade = local > travel + dwell ? 1 - (local - travel - dwell) / fadeOut : Math.min(1, local / fadeIn);
-    train.materials.forEach((material) => {
-      material.opacity = palette.opacity(material) * fade;
-    });
-    train.cars.forEach((group, position) => {
-      const at = MathUtils.clamp(u - (position * (carLength + carGap)) / train.length, 0, 1);
-      train.path.getPointAt(at, point);
-      train.path.getTangentAt(Math.min(at, 0.9999), tangent);
-      group.position.set(point.x, trackY - 0.05, point.z);
-      group.rotation.y = Math.atan2(tangent.x, tangent.z);
-      group.visible = fade > 0.02;
+  const frame = newFrame();
+  const basis = new Matrix4();
+  const up = new Vector3(0, 1, 0);
+  const across = new Vector3();
+  const update = (time: number) => {
+    trains.forEach((train) => {
+      const { s, dir } = where(train.table, time + train.phase);
+      const length = train.path.getLength();
+      // Car 0 leads on the way to the end, the last car on the way back.
+      train.lamps.front.color.copy(dir >= 0 ? head : tail);
+      train.lamps.back.color.copy(dir >= 0 ? tail : head);
+      train.cars.forEach((carGroup, position) => {
+        const at = s - (position * (car.length + car.gap) + car.length / 2);
+        carGroup.visible = at > 0.05 && at < length;
+        if (!carGroup.visible) return;
+        frameAt(train.path, at / length, train.side, frame);
+        basis.makeBasis(across.copy(frame.side).negate(), up, frame.tangent);
+        carGroup.quaternion.setFromRotationMatrix(basis);
+        carGroup.position.copy(frame.point).setY(frame.point.y + 0.03);
+      });
+      train.heads.forEach(({ beam, sign }) => {
+        beam.material.opacity = sign * dir > 0 ? 0.32 : 0;
+      });
     });
   };
-
-  return { group, update: (time) => trains.forEach((train) => place(train, time)) };
+  return { group, update };
 }

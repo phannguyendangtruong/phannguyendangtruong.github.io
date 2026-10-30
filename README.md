@@ -57,6 +57,10 @@ In PowerShell: `$env:SITE_URL="https://<your-domain>"; npm run images`.
 - The script needs Chrome, Chromium or Edge. If it is not found, set `CHROME_PATH` to the browser executable.
 - The image paths are `shareImages` in `src/data/profile.ts`; set them to `null` to drop the `og:image` tags.
 
+## 3D scene assets
+
+The night city behind the home page (`src/scripts/station3d/`) uses textures and an HDRI from [Poly Haven](https://polyhaven.com), all CC0 (public domain), resized to 512px JPEG and kept in `public/scene/city/`: the textures `bitumen`, `concrete_tile_facade`, `asphalt_02`, `concrete_pavement`, `aerial_grass_rock` and `concrete_wall_008`, and the HDRI `modern_buildings_night` (512×256, its brightest points clamped, as `night.hdr`). They are fetched only when the scene runs; with reduced motion, Save-Data or no WebGL 2 the page keeps its SVG map and fetches none of them.
+
 ## Deploying
 
 The site is plain static files in `dist/`.

@@ -1,0 +1,101 @@
+---
+/**
+ * The home page over the 3D station at the full level on a window under 1024px wide (html[data-scene3d='full'], set by
+ * Station3D.astro before the page is drawn). Styles only: the blocks of the page keep their own markup and styles.
+ */
+---
+
+<style>
+  /* Narrow layout of the full level: the scene stays behind the whole page, as on a wide window. Every block after the
+     hero is a glass card across the page container, 16px from the window edges, with 46vh of open scene above it; the
+     scene holds the shot of such a block while the middle of that gap is in the middle of the window
+     (src/scripts/station3d/camera.ts). */
+  @media screen and (max-width: 1023px) {
+    :global(html[data-scene3d='full'] main > section.section) {
+      margin-top: 46vh;
+      padding: 0;
+    }
+
+    :global(html[data-scene3d='full'] main > section.section > .container),
+    :global(html[data-scene3d='full'] #experience .section-head),
+    :global(html[data-scene3d='full'] #experience .leg),
+    :global(html[data-scene3d='full'] #experience .origin) {
+      position: relative;
+      z-index: 1;
+      padding: 22px 20px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--bg) 82%, transparent);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+    }
+
+    :global(html[data-scene3d='full'] main > section.section > .container) {
+      width: auto;
+      margin: 0 16px;
+    }
+
+    /* Experience: the block itself has no surface, so the labels of the scene in its gaps stay within reach. Its head
+       is a card; each company of the route is a card with 40vh of open scene above it (its own margin-top, read by
+       the camera on the element that names the shot), and holds the shot of its line while the middle of that gap is
+       in the middle of the window; the education station is the last card, 40vh under the last company. The track of
+       a company runs down its own card, the ring of the education station sits in its card. */
+    :global(html[data-scene3d='full'] main > section#experience > .container) {
+      position: static;
+      z-index: auto;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    :global(html[data-scene3d='full'] #experience .leg),
+    :global(html[data-scene3d='full'] #experience .origin) {
+      margin-top: 40vh;
+      padding-left: calc(20px + var(--pad));
+    }
+
+    :global(html[data-scene3d='full'] #experience .leg::before) {
+      top: 22px;
+      bottom: 22px;
+      left: calc(20px + var(--rail) - 3px);
+    }
+
+    :global(html[data-scene3d='full'] #experience .leg.current::before) {
+      top: 32px;
+    }
+
+    :global(html[data-scene3d='full'] #experience .origin::before) {
+      top: 26px;
+      left: calc(20px + var(--rail) - 9px);
+    }
+
+    /* The hero: its name block over a backdrop of the page background at 90%, from above the top of the hero down to
+       the foot of the block, fading out over the 96px under it and soft at its edges, so the text keeps 4.5:1 or more
+       over the lit city in both themes. The map box under the block (beside it from 640px) is left open to the scene:
+       its drawing fades out once the scene is drawn, and its pause button stays over the scene (Station3D.astro). */
+    :global(html[data-scene3d='full'] .hero-text) {
+      position: relative;
+      z-index: 1;
+    }
+
+    :global(html[data-scene3d='full'] .hero-text::before) {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      top: -64px;
+      right: -20px;
+      bottom: -96px;
+      left: -72px;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--bg) 90%, transparent) calc(100% - 96px),
+        transparent
+      );
+      filter: blur(12px);
+    }
+  }
+</style>

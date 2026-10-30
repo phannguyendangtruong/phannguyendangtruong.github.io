@@ -109,6 +109,7 @@ export const ui = {
     vi: 'Ga đổi tuyến: lọc Kinh nghiệm theo công nghệ',
   },
   mapHere: { en: 'You are here', vi: 'Bạn đang ở đây' },
+  mapLineSince: { en: 'Line {n} · since {year}', vi: 'Tuyến {n} · từ {year}' },
   cmdkOpen: { en: 'Open command palette', vi: 'Mở bảng lệnh' },
   cmdkTitle: { en: 'Command palette', vi: 'Bảng lệnh' },
   cmdkPlaceholder: { en: 'Type a command or section…', vi: 'Nhập lệnh hoặc tên mục…' },

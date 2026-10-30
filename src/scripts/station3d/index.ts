@@ -1,4 +1,4 @@
-import { detectLevel, watchLevel, type Level, type Queries } from './level';
+import { detectLevel, isNarrow, markSlow, watchLevel, type Layout, type Queries } from './level';
 import type { SceneModel } from './model';
 import type { Stage } from './stage';
 
@@ -15,7 +15,8 @@ function afterLoad(task: () => void): void {
 /**
  * Starts the 3D station of the home page at the level the device allows (see level.ts), once the page has loaded:
  * three.js comes as a chunk of its own, fetched only then. At the off level nothing is fetched and the page stays as
- * it is. The level follows the window (resized across 1024px, reduced motion turned on) and the page leaving.
+ * it is. The level and its layout follow the window (resized across 1024px, reduced motion turned on) and the page
+ * leaving; a full level that still runs too slowly at its lowest pixel ratio gives way to the lite level.
  */
 export function boot(): void {
   const host = document.querySelector<HTMLElement>('[data-s3d]');
@@ -24,16 +25,16 @@ export function boot(): void {
   if (!host || !labels || !data) return;
   const root = document.documentElement;
   const model = JSON.parse(data) as SceneModel;
-  const queries: Queries = { off: host.dataset.offQuery ?? '', full: host.dataset.fullQuery ?? '' };
+  const queries: Queries = { off: host.dataset.offQuery ?? '', narrow: host.dataset.narrowQuery ?? '' };
   const netmap = document.querySelector<HTMLElement>('[data-netmap]');
   const pause = netmap?.querySelector<HTMLElement>('[data-netmap-pause]') ?? null;
   // Place of the two layers in the page; the lite level moves them into the hero map, under its pause button.
   const home = { parent: host.parentElement, before: labels.nextSibling };
-  let level: Level | null = null;
+  let current: Layout | 'off' | null = null;
   let stage: Stage | null = null;
   let run = 0;
 
-  const place = (next: Level) => {
+  const place = (next: Layout | 'off') => {
     if (next === 'lite' && netmap) {
       netmap.insertBefore(host, pause);
       netmap.insertBefore(labels, pause);
@@ -52,32 +53,39 @@ export function boot(): void {
   // Back to the page as it is: the SVG map, no layout change.
   const off = () => {
     stop();
-    level = 'off';
+    current = 'off';
     delete root.dataset.scene3d;
     place('off');
   };
 
   const apply = () => {
     const detected = detectLevel(queries);
-    const next: Level = detected === 'lite' && !netmap ? 'off' : detected;
-    if (next === level) return;
+    const level = detected === 'lite' && !netmap ? 'off' : detected;
+    const next: Layout | 'off' = level === 'full' ? (isNarrow(queries) ? 'narrow' : 'wide') : level;
+    if (next === current) return;
     if (next === 'off') {
       off();
       return;
     }
     stop();
-    level = next;
-    root.dataset.scene3d = next;
+    current = next;
+    root.dataset.scene3d = next === 'lite' ? 'lite' : 'full';
     place(next);
     const ticket = run;
     import('./stage')
       .then(({ startStage }) => {
         if (ticket !== run) return;
-        stage = startStage({ level: next, host, labels, model, netmap, pause, onLost: off });
+        stage = startStage({ layout: next, host, labels, model, netmap, pause, onLost: off, onSlow: slow });
       })
       .catch(() => {
         if (ticket === run) off();
       });
+  };
+
+  // The full level is still too slow at its lowest pixel ratio: the lite level for the rest of the session.
+  const slow = () => {
+    markSlow();
+    apply();
   };
 
   afterLoad(() => {
@@ -87,7 +95,7 @@ export function boot(): void {
   // Leaving the page frees the GPU; coming back from the back/forward cache starts again.
   addEventListener('pagehide', () => {
     stop();
-    level = null;
+    current = null;
   });
   addEventListener('pageshow', (event) => {
     if (event.persisted) apply();

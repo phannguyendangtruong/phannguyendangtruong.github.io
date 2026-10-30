@@ -1,4 +1,5 @@
 ---
+import Station3DNarrow from './Station3DNarrow.astro';
 import { buildSceneModel } from '../../scripts/station3d/model';
 import { tr, type Lang } from '../../i18n/ui';
 
@@ -7,14 +8,16 @@ interface Props {
 }
 
 const { lang } = Astro.props;
-/** The network of the hero map as a 3D station, from the same data (src/scripts/station3d/). */
+/** The network of the hero map as a night city in 3D, from the same data (src/scripts/station3d/). */
 const model = buildSceneModel(lang);
 /**
- * Media queries of the run levels (src/scripts/station3d/level.ts): off under reduced motion; full from 1024px wide
- * with a mouse; lite otherwise. Save-Data and a missing WebGL 2 also mean off; the scripts test those.
+ * Media queries of the run levels (src/scripts/station3d/level.ts): off under reduced motion. The full level runs on
+ * any window: platform panels from 1024px wide, cards stacked over the scene under that (the narrow query). Save-Data,
+ * a missing WebGL 2, a weak device and a full level that already ran too slowly in this session are tested by the
+ * scripts.
  */
 const offQuery = '(prefers-reduced-motion: reduce)';
-const fullQuery = '(min-width: 1024px) and (hover: hover) and (pointer: fine)';
+const narrowQuery = '(max-width: 1023px)';
 ---
 
 <div
@@ -22,23 +25,32 @@ const fullQuery = '(min-width: 1024px) and (hover: hover) and (pointer: fine)';
   data-s3d
   data-model={JSON.stringify(model)}
   data-off-query={offQuery}
-  data-full-query={fullQuery}
+  data-narrow-query={narrowQuery}
   aria-hidden="true"
   hidden
 >
 </div>
 <div class="s3d-labels no-print" data-s3d-labels role="group" aria-label={tr('mapLinks', lang)} hidden></div>
+<Station3DNarrow />
 
 <script is:inline>
-  // Run before the blocks under the hero are drawn: the full level sets them out as platform panels, so the layout
-  // is fixed now and does not shift when the scene comes in after the page has loaded. The module script tests WebGL 2
-  // for real and drops the level when it is missing.
+  // Run before the blocks under the hero are drawn: the full level sets them out over the scene (platform panels on a
+  // wide window, stacked cards on a narrow one), so the layout is fixed now and does not shift when the scene comes in
+  // after the page has loaded. The same tests as level.ts: less than 4 GB of memory or fewer than 4 cores, or a full
+  // level that already ran too slowly in this session, take the lite level. The module script tests WebGL 2 for real
+  // and drops the level when it is missing.
   (() => {
     const host = document.querySelector('[data-s3d]');
     const connection = navigator.connection;
     if (!host || !('WebGL2RenderingContext' in window) || (connection && connection.saveData)) return;
     if (matchMedia(host.dataset.offQuery).matches) return;
-    document.documentElement.dataset.scene3d = matchMedia(host.dataset.fullQuery).matches ? 'full' : 'lite';
+    const memory = navigator.deviceMemory;
+    const cores = navigator.hardwareConcurrency;
+    let lite = (memory > 0 && memory < 4) || (cores > 0 && cores < 4);
+    try {
+      lite = lite || sessionStorage.getItem('s3d-lite') === '1';
+    } catch (_) {}
+    document.documentElement.dataset.scene3d = lite ? 'lite' : 'full';
   })();
 </script>
 
@@ -79,8 +91,17 @@ const fullQuery = '(min-width: 1024px) and (hover: hover) and (pointer: fine)';
     z-index: 0;
   }
 
-  /* Lite level: both layers fill the hero map box, under its pause button; the edge of the canvas fades into the
-     page, so the scene has no hard frame. */
+  /* Under 1024px the canvas keeps the height of the window with the browser bars folded away (100vh), so a phone does
+     not draw it again at another size each time it shows or hides them while the page scrolls. */
+  @media (max-width: 1023px) {
+    :global(html[data-scene3d='full']) .s3d {
+      bottom: auto;
+      height: 100vh;
+    }
+  }
+
+  /* Lite level: both layers fill the hero map box, under its pause button. The canvas sits in a frame of 16px
+     corners and a 1px rule; the labels layer lies inside the rule, over the canvas. */
   .s3d[data-level='lite'],
   .s3d-labels[data-level='lite'] {
     position: absolute;
@@ -88,16 +109,16 @@ const fullQuery = '(min-width: 1024px) and (hover: hover) and (pointer: fine)';
   }
 
   .s3d[data-level='lite'] {
-    -webkit-mask-image: radial-gradient(closest-side, black 72%, transparent);
-    mask-image: radial-gradient(closest-side, black 72%, transparent);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 16px;
   }
 
-  /* The lite level shows only the main labels, the line starts without their year (src/scripts/station3d/labels.ts). */
-  .s3d-labels[data-level='lite'] :global(.s3d-year) {
-    display: none;
+  .s3d-labels[data-level='lite'] {
+    inset: 1px;
   }
 
-  /* Under 1024px the lite level makes the hero map box square, for its close shot of the trunk and the platform
+  /* Under 1024px the lite level makes the hero map box square, for its shot of the trunk and the end
      (src/scripts/station3d/camera.ts); the wide map from 1024px keeps its own shape. */
   :global(html[data-scene3d='lite'] .netmap) {
     aspect-ratio: 1;
@@ -109,54 +130,49 @@ const fullQuery = '(min-width: 1024px) and (hover: hover) and (pointer: fine)';
     }
   }
 
-  /* Labels are data, in the mono face as on the SVG map, over a halo of the page background so they stay legible
-     over the lit tracks. Company names and route numerals keep the sign face. */
+  /* Labels: small glass chips pinned in the scene, the data in the mono face as on the SVG map. The chip keeps its
+     text at 4.5:1 or more whatever lights up behind it, in both themes. */
   .s3d-labels :global(.s3d-tag) {
+    padding: 4px 8px;
+    border: 1px solid color-mix(in srgb, var(--text) 28%, transparent);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--text) 16%, transparent);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
     font: 500 12px/1.2 var(--mono);
     color: var(--text);
     white-space: nowrap;
-    text-shadow: 0 1px 2px var(--bg), 0 0 6px var(--bg);
   }
 
-  .s3d-labels :global(.s3d-start) {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font: 700 15px/1 var(--font-display);
-  }
-
-  .s3d-labels :global(.s3d-bullet) {
-    display: inline-grid;
-    place-items: center;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: var(--line);
-    color: var(--on-line);
-    font: 700 12px/1 var(--font-display);
-    text-shadow: none;
-  }
-
-  .s3d-labels :global(.s3d-year) {
-    font: 500 12px/1 var(--mono);
-    color: var(--muted);
+  /* A project station: the chip edged and lit in the colour of its line (--tag, set by the script). */
+  .s3d-labels :global(.s3d-station) {
+    border-color: color-mix(in srgb, var(--tag) 70%, var(--text));
+    box-shadow: 0 0 18px color-mix(in srgb, var(--tag) 45%, transparent);
   }
 
   .s3d-labels :global(.s3d-now) {
+    padding: 7px 12px;
     font: 700 18px/1 var(--mono);
+    letter-spacing: 0.12em;
+    box-shadow: 0 0 28px color-mix(in srgb, var(--text) 26%, transparent);
   }
 
+  /* "You are here" stands without a chip, over a halo of the page background. */
   .s3d-labels :global(.s3d-here) {
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
     font-weight: 600;
+    text-shadow: 0 1px 2px var(--bg), 0 0 6px var(--bg);
   }
 
-  /* Interchange label as a filter button, as on the SVG map: a box fills on hover, takes the focus ring and inverts
-     while its filter is on; an invisible margin brings it to a 44px target. */
+  /* Interchange label as a filter button, as on the SVG map: the chip fills on hover, takes the focus ring and
+     inverts while its filter is on; an invisible margin brings it to a 44px target. */
   .s3d-labels :global(.s3d-link) {
-    padding: 3px 6px;
-    border: 0;
-    border-radius: 4px;
-    background: transparent;
     pointer-events: auto;
     cursor: pointer;
     transition: background-color var(--t-hover), color var(--t-hover);
@@ -175,7 +191,6 @@ const fullQuery = '(min-width: 1024px) and (hover: hover) and (pointer: fine)';
   .s3d-labels :global(.s3d-link[aria-pressed='true']) {
     background: var(--text);
     color: var(--bg);
-    text-shadow: none;
   }
 
   .s3d-labels :global(.s3d-hub) {
@@ -185,7 +200,7 @@ const fullQuery = '(min-width: 1024px) and (hover: hover) and (pointer: fine)';
 
   /* The hero map under the scene (NetworkMap.astro), once the first frame is drawn: its drawing fades out but stays
      for screen readers, its link labels and packets give way to the scene, and its pause button stays above the
-     scene, where it now stops the trains. */
+     scene, where it now stops the trains and every other motion. */
   :global(.netmap .nm-view) {
     transition: opacity 600ms var(--ease);
   }
@@ -207,11 +222,42 @@ const fullQuery = '(min-width: 1024px) and (hover: hover) and (pointer: fine)';
     z-index: 1;
   }
 
-  /* Full level (html[data-scene3d='full'], set before these blocks are drawn): each home block after the hero is a
-     platform panel over one half of the window, on the left or, for a block marked data-panel="right", on the right.
-     The other half is left to the scene, which frames each shot there (src/scripts/station3d/panels.ts). The footer
-     covers the scene. */
+  /* Full level (html[data-scene3d='full'], set before these blocks are drawn): the footer covers the scene. From
+     1024px wide each home block after the hero is a platform panel over one half of the window, on the left or, for a
+     block marked data-panel="right", on the right. The other half is left to the scene, which frames each shot there
+     (src/scripts/station3d/panels.ts). Under 1024px the blocks are cards stacked over the scene
+     (Station3DNarrow.astro). */
   @media screen {
+    :global(html[data-scene3d='full'] .site-footer) {
+      position: relative;
+      z-index: 1;
+      background: var(--bg);
+    }
+  }
+
+  @media screen and (min-width: 1024px) {
+    /* The hero stays open over the city: a soft patch of the page background lies behind its name block, blurred so
+       it fades out on every side without an edge and is gone before the foot of the hero. Its body reaches 72px or
+       more past the text all round, so the text, the link line under the buttons included, keeps 4.5:1 or more over
+       the lit city in both themes. The block is 400px wide, 24px in from the start of the page container, and its
+       text runs from 56px to about 485px under the top of the hero (HeroSection.astro). */
+    :global(html[data-scene3d='full'] .hero) {
+      position: relative;
+    }
+
+    :global(html[data-scene3d='full'] .hero::before) {
+      content: '';
+      position: absolute;
+      top: -16px;
+      left: calc(max(0px, (100% - var(--max)) / 2) + 24px - 72px);
+      width: 544px;
+      height: 576px;
+      border-radius: 80px;
+      pointer-events: none;
+      background: color-mix(in srgb, var(--bg) 86%, transparent);
+      filter: blur(32px);
+    }
+
     /* 34vh of open scene between two panels: this margin and the 56px paddings of both sections (.section). */
     :global(html[data-scene3d='full'] main > section.section) {
       margin-top: max(16px, 34vh - 112px);
@@ -238,12 +284,6 @@ const fullQuery = '(min-width: 1024px) and (hover: hover) and (pointer: fine)';
 
     :global(html[data-scene3d='full'] main > section.section[data-panel='right'] > .container) {
       margin: 0 var(--panel-edge) 0 auto;
-    }
-
-    :global(html[data-scene3d='full'] .site-footer) {
-      position: relative;
-      z-index: 1;
-      background: var(--bg);
     }
   }
 </style>

@@ -1,29 +1,20 @@
 import {
-  BoxGeometry,
-  CapsuleGeometry,
+  BufferGeometry,
   CurvePath,
-  CylinderGeometry,
-  Group,
+  Float32BufferAttribute,
   LineCurve3,
-  Mesh,
   QuadraticBezierCurve3,
-  TorusGeometry,
-  TubeGeometry,
   Vector3,
 } from 'three';
 import type { SceneModel, XY } from './model';
-import type { Palette } from './tokens';
 
-/** 40 map units make one scene unit; the map y runs along the scene z. */
-export const unit = 1 / 40;
-
-/** Height of the tracks above the ground. */
-export const trackY = 0.18;
+/** 10 map units make one scene unit; the map y runs along the scene z. */
+export const unit = 1 / 10;
 
 /** Point of the desktop map in the scene, at `height` above the ground. */
 export type ToWorld = (xy: XY, height?: number) => Vector3;
 
-/** Map to scene, the middle of the map on the origin. */
+/** Map to scene, the middle of the desktop map on the origin. */
 export function mapToWorld(model: SceneModel): ToWorld {
   const cx = model.width / 2;
   const cy = model.height / 2;
@@ -31,7 +22,7 @@ export function mapToWorld(model: SceneModel): ToWorld {
 }
 
 /** Path through `points` with every bend rounded off (`radius` in scene units), as the map draws its tracks. */
-export function roundedPath(points: Vector3[], radius = 0.32): CurvePath<Vector3> {
+export function roundedPath(points: Vector3[], radius = 1.2): CurvePath<Vector3> {
   const path = new CurvePath<Vector3>();
   let from = points[0].clone();
   for (let index = 1; index < points.length - 1; index += 1) {
@@ -47,98 +38,82 @@ export function roundedPath(points: Vector3[], radius = 0.32): CurvePath<Vector3
   return path;
 }
 
-export type Network = {
-  group: Group;
-  /** Track of each line by route number, from its start to the shared end: the trains run on it. */
-  paths: Map<number, CurvePath<Vector3>>;
-};
+/** A point of a path, the direction of the path there, and the level unit vector across it. */
+export type Frame = { point: Vector3; tangent: Vector3; side: Vector3 };
+
+const up = new Vector3(0, 1, 0);
+
+export function newFrame(): Frame {
+  return { point: new Vector3(), tangent: new Vector3(), side: new Vector3() };
+}
+
+/** Frame of `path` at `u` (0 to 1 of its length), its point moved `side` units across; written into `out`. */
+export function frameAt(path: CurvePath<Vector3>, u: number, side = 0, out: Frame = newFrame()): Frame {
+  path.getPointAt(Math.min(Math.max(u, 0), 1), out.point);
+  path.getTangentAt(Math.min(Math.max(u, 0.0001), 0.9999), out.tangent);
+  out.side.crossVectors(out.tangent, up).normalize();
+  out.point.addScaledVector(out.side, side);
+  return out;
+}
+
+/** Length along `path` of its point nearest to `target`, measured on the ground plan (x and z). */
+export function distanceAlong(path: CurvePath<Vector3>, target: Vector3): number {
+  const steps = 600;
+  const point = new Vector3();
+  let best = 0;
+  let least = Infinity;
+  for (let index = 0; index <= steps; index += 1) {
+    path.getPointAt(index / steps, point);
+    const distance = (point.x - target.x) ** 2 + (point.z - target.z) ** 2;
+    if (distance < least) {
+      least = distance;
+      best = index / steps;
+    }
+  }
+  return best * path.getLength();
+}
+
+/** Section of a swept box: left, right, bottom and top, in units across and up from the path. */
+export type Section = [number, number, number, number];
 
 /**
- * The network of the map in the scene: each track a glowing tube over a dark bed with its colour spilled on the
- * ground; stations as rings on a disc of the page background; interchanges as light capsules with an ink edge (a
- * round stop at a crossing); a bar across the start of each line and one across the shared end.
+ * A box section swept along a path, each face a strip of its own so the edges stay hard; `step` is the length of a
+ * slice. The u coordinate runs along the path in scene units, so a texture repeats once a unit.
  */
-export function buildNetwork(model: SceneModel, at: ToWorld, palette: Palette): Network {
-  const group = new Group();
-  const paths = new Map<number, CurvePath<Vector3>>();
-  const fill = palette.standard('--interchange-fill', { emissive: 0.6, roughness: 0.4 });
-  const ink = palette.standard('--interchange-stroke', { roughness: 0.6 });
-  const disc = palette.standard('--bg', { roughness: 0.6 });
-  const bed = palette.standard('--surface-2', { roughness: 0.7, metalness: 0.2 });
-  const discShape = new CylinderGeometry(0.15, 0.15, 0.1, 32);
-  const ringShape = new TorusGeometry(0.15, 0.045, 12, 40);
-  const barShape = new BoxGeometry(0.5, 0.12, 0.09);
-
-  model.lines.forEach((line) => {
-    const path = roundedPath(line.track.map((xy) => at(xy, trackY)));
-    paths.set(line.number, path);
-    const segments = Math.ceil(path.getLength() * 24);
-    const lit = palette.standard(line.token, { emissive: 1.9, roughness: 0.3 });
-    const lamp = palette.standard(line.token, { emissive: 1.4 });
-    const core = new Mesh(new TubeGeometry(path, segments, 0.055, 10, false), lit);
-    const base = new Mesh(new TubeGeometry(path, segments, 0.13, 8, false), bed);
-    base.scale.y = 0.45;
-    const glow = palette.halo(line.token, 0.05);
-    const spill = new Mesh(new TubeGeometry(path, Math.ceil(segments / 2), 0.32, 6, false), glow);
-    spill.scale.y = 0.02;
-    group.add(base, core, spill);
-
-    const first = at(line.track[0], trackY);
-    const along = at(line.track[1], trackY).sub(first);
-    const bar = new Mesh(barShape, lamp);
-    bar.position.copy(first);
-    bar.rotation.y = Math.atan2(along.x, along.z);
-    group.add(bar);
-
-    model.stations
-      .filter((station) => station.line === line.number)
-      .forEach((station) => {
-        const point = at(station.xy, trackY);
-        const stop = new Mesh(discShape, disc);
-        stop.position.copy(point);
-        const ring = new Mesh(ringShape, lamp);
-        ring.rotation.x = Math.PI / 2;
-        ring.position.copy(point).setY(trackY + 0.05);
-        group.add(stop, ring);
+export function sweepBox(path: CurvePath<Vector3>, section: Section, step = 0.25): BufferGeometry {
+  const [left, right, bottom, top] = section;
+  const corners: [number, number][] = [
+    [left, top],
+    [right, top],
+    [right, bottom],
+    [left, bottom],
+  ];
+  const length = path.getLength();
+  const count = Math.max(2, Math.ceil(length / step));
+  const frames = Array.from({ length: count + 1 }, (_, index) => frameAt(path, index / count));
+  const at = (frame: Frame, [across, rise]: [number, number]) =>
+    frame.point.clone().addScaledVector(frame.side, across).addScaledVector(up, rise);
+  const positions: number[] = [];
+  const normals: number[] = [];
+  const uvs: number[] = [];
+  const normal = new Vector3();
+  const other = new Vector3();
+  for (let face = 0; face < 4; face += 1) {
+    const [a, c] = [corners[face], corners[(face + 1) % 4]];
+    for (let index = 0; index < count; index += 1) {
+      const [from, to] = [frames[index], frames[index + 1]];
+      const quad = [at(from, a), at(from, c), at(to, c), at(to, a)];
+      normal.subVectors(quad[1], quad[0]).cross(other.subVectors(quad[3], quad[0])).normalize();
+      [0, 1, 2, 0, 2, 3].forEach((k) => {
+        positions.push(quad[k].x, quad[k].y, quad[k].z);
+        normals.push(normal.x, normal.y, normal.z);
+        uvs.push(((k === 2 || k === 3 ? index + 1 : index) / count) * length, k === 1 || k === 2 ? 1 : 0);
       });
-  });
-
-  // Capsules span the parallel tracks they join, side by side along x as on the map.
-  const capsules = new Map<number, [CapsuleGeometry, CapsuleGeometry]>();
-  const crossShape = new CylinderGeometry(0.17, 0.17, 0.14, 32);
-  model.interchanges.forEach((item) => {
-    if (item.crossing) {
-      const stop = new Mesh(crossShape, fill);
-      stop.position.copy(at(item.xy, trackY + 0.04));
-      group.add(stop);
-      return;
     }
-    const length = (item.tracks - 1) * model.gap * unit;
-    const shapes: [CapsuleGeometry, CapsuleGeometry] = capsules.get(length) ?? [
-      new CapsuleGeometry(0.13, length, 8, 20),
-      new CapsuleGeometry(0.16, length, 8, 20),
-    ];
-    capsules.set(length, shapes);
-    const cap = new Mesh(shapes[0], fill);
-    const edge = new Mesh(shapes[1], ink);
-    cap.rotation.z = Math.PI / 2;
-    edge.rotation.z = Math.PI / 2;
-    cap.scale.set(1, 1, 0.7);
-    edge.scale.set(1, 1, 0.6);
-    cap.position.copy(at(item.xy, trackY + 0.12));
-    edge.position.copy(at(item.xy, trackY + 0.06));
-    group.add(edge, cap);
-  });
-
-  // One light bar across the ends of all the lines, the stop of the shared end.
-  const ends = model.lines.map((line) => line.track[line.track.length - 1]);
-  const xs = ends.map(([x]) => x);
-  const left = Math.min(...xs);
-  const right = Math.max(...xs);
-  const y = ends.reduce((sum, [, endY]) => sum + endY, 0) / ends.length;
-  const endBar = new Mesh(new BoxGeometry((right - left + model.radius * 2) * unit, 0.14, 0.1), fill);
-  endBar.position.copy(at([(left + right) / 2, y], trackY));
-  group.add(endBar);
-
-  return { group, paths };
+  }
+  const geometry = new BufferGeometry();
+  geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
+  geometry.setAttribute('uv', new Float32BufferAttribute(uvs, 2));
+  return geometry;
 }

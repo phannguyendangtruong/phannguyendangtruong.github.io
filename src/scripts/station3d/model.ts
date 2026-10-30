@@ -1,29 +1,26 @@
 import { interchanges, lines, type Line } from '../../data/network';
-import { capsuleRadius, placeMap, trackGap, wideMap, type LabelAt, type XY } from '../../data/network-layout';
+import { placeMap, trackGap, wideMap, type LabelAt, type XY } from '../../data/network-layout';
 import { isCurrentJob } from '../../data/profile';
 import { projectCountForSkill } from '../../data/skill-keys';
 import { tr, trCount, type Lang } from '../../i18n/ui';
 
 export type { XY };
 
-/** Where a label is written on the desktop map, and which side of its text sits on that point. */
-export type SceneLabel = { at: XY; anchor: LabelAt[2] };
+/** Side of its point a label is written on, on the desktop map: 'start' on the right, 'end' on the left. */
+export type Side = LabelAt[2];
 
 export type SceneLine = {
   number: number;
-  /** CSS custom properties of the line colour ("--line-1") and of the text set on it ("--on-line-1"). */
+  /** CSS custom property of the line colour ("--line-1"). */
   token: string;
-  onToken: string;
   /** Track from the start of the line to the shared end, in map units. */
   track: XY[];
-  company: string;
-  /** Start year of the job. */
-  year: string;
-  /** Centre of the route bullet at the start of the line. */
-  bullet: XY;
+  /** Hologram over the start of the line: the company in capitals, then "LINE 1 · SINCE 2023" under it. */
+  title: string;
+  subtitle: string;
 };
 
-export type SceneStation = { line: number; xy: XY; name: string; label: SceneLabel };
+export type SceneStation = { line: number; xy: XY; name: string; side: Side };
 
 export type SceneInterchange = {
   /** Technology key, the same as the filter controls of the page (data-skill). */
@@ -31,39 +28,38 @@ export type SceneInterchange = {
   /** Full name, read by the filter; `text` is the label written on the map, shorter when the full one is long. */
   name: string;
   text: string;
-  /** Parallel tracks the capsule joins; 1 for a crossing. */
+  /** Parallel tracks the interchange spans; 1 for a crossing. */
   tracks: number;
   crossing: boolean;
   /** Every line goes through it. */
   hub: boolean;
   xy: XY;
-  label: SceneLabel;
+  side: Side;
   /** Accessible name of its filter button. */
   aria: string;
 };
 
-/** Everything the 3D station draws, taken from the network and the desktop map when the site is built. */
+/** Everything the 3D city draws, taken from the network and the desktop map when the site is built. */
 export type SceneModel = {
   /** Size of the desktop map; the scene is centred on its middle. */
   width: number;
   height: number;
-  /** Distance between parallel tracks and half the thickness of a capsule, in map units. */
+  /** Distance between parallel tracks, in map units. */
   gap: number;
-  radius: number;
   /** Route number of the line of the current job. */
   current: number;
   lines: SceneLine[];
   stations: SceneStation[];
   interchanges: SceneInterchange[];
-  end: { xy: XY; label: SceneLabel };
+  end: { xy: XY };
   text: { now: string; here: string };
 };
 
 const file = 'src/data/network-layout.ts › wideMap';
 
-function labelOf(key: string, label: LabelAt | undefined): SceneLabel {
+function sideOf(key: string, label: LabelAt | undefined): Side {
   if (!label) throw new Error(`Cảnh 3D: ${file} chưa có vị trí nhãn cho ga ${key}.`);
-  return { at: [label[0], label[1]], anchor: label[2] };
+  return label[2];
 }
 
 /** "--line-1" from "var(--line-1)". */
@@ -89,15 +85,16 @@ export function buildSceneModel(lang: Lang): SceneModel {
   const sceneLines = points.flatMap((point): SceneLine[] => {
     const line = point.kind === 'start' ? lineOf.get(point.key) : undefined;
     if (!line) return [];
+    const since = tr('mapLineSince', lang)
+      .replace('{n}', String(line.number))
+      .replace('{year}', line.job.start.split('/')[1]);
     return [
       {
         number: line.number,
         token: tokenOf(line.color),
-        onToken: tokenOf(line.textColor),
         track: wideMap.tracks[line.number],
-        company: line.job.company[lang],
-        year: line.job.start.split('/')[1],
-        bullet: point.at.bullet ?? point.at.xy,
+        title: line.job.company[lang].toLocaleUpperCase(lang),
+        subtitle: since.toLocaleUpperCase(lang),
       },
     ];
   });
@@ -106,7 +103,7 @@ export function buildSceneModel(lang: Lang): SceneModel {
     const station = point.kind === 'station' ? stationOf.get(point.key) : undefined;
     if (!station) return [];
     const name = (station.project.mapLabel ?? station.name)[lang];
-    return [{ line: station.line, xy: point.at.xy, name, label: labelOf(point.key, point.at.label) }];
+    return [{ line: station.line, xy: point.at.xy, name, side: sideOf(point.key, point.at.label) }];
   });
 
   const junctions = points.flatMap((point): SceneInterchange[] => {
@@ -123,7 +120,7 @@ export function buildSceneModel(lang: Lang): SceneModel {
         crossing,
         hub: item.lines.length === lines.length,
         xy: point.at.xy,
-        label: labelOf(point.key, point.at.label),
+        side: sideOf(point.key, point.at.label),
         aria: trCount('skillFilterOne', 'skillFilterMany', count, lang).replace('{name}', item.name),
       },
     ];
@@ -133,12 +130,11 @@ export function buildSceneModel(lang: Lang): SceneModel {
     width: wideMap.width,
     height: wideMap.height,
     gap: trackGap,
-    radius: capsuleRadius,
     current: currentLine().number,
     lines: sceneLines,
     stations,
     interchanges: junctions,
-    end: { xy: end.at.xy, label: labelOf(end.key, end.at.label) },
+    end: { xy: end.at.xy },
     text: { now: tr('mapNow', lang).toLocaleUpperCase(lang), here: tr('mapHere', lang) },
   };
 }
